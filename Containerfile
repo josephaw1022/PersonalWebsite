@@ -1,4 +1,6 @@
-FROM nginx:1.27-alpine
-COPY index.html /usr/share/nginx/html/index.html
+FROM nginx:alpine
 
-COPY default.conf /etc/nginx/conf.d/default.conf
+COPY site/pages/ /usr/share/nginx/html/
+COPY site/default.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
