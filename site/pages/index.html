@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Joseph Whiteaker – Cloud-Native Engineer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light dark;
+    }
+
+    html {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
+    .tile {
+      box-shadow: 0 10px 28px rgba(2, 6, 23, 0.08);
+    }
+
+    .tile:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(2, 6, 23, 0.16);
+    }
+
+    .brand-img {
+      width: 56px;
+      height: 56px;
+    }
+
+    @media (min-width: 640px) {
+      .brand-img {
+        width: 64px;
+        height: 64px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .brand-img {
+        width: 72px;
+        height: 72px;
+      }
+    }
+
+    .invert-on-dark {
+      filter: none
+    }
+
+    .dark .invert-on-dark {
+      filter: invert(1) hue-rotate(180deg) brightness(1.6) saturate(1.2)
+    }
+  </style>
+</head>
+
+<body class="bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+  <header class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="h-9 w-9 rounded-xl bg-indigo-600 dark:bg-indigo-500 grid place-items-center text-white font-black">JW
+      </div>
+      <span class="font-semibold tracking-tight">Joseph Whiteaker</span>
+    </div>
+  </header>
+
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-16">
+    <div class="text-center max-w-3xl mx-auto">
+      <h1 class="text-4xl sm:text-5xl leading-tight font-extrabold tracking-tight">
+        Building with the open-source cloud-native stack that runs everywhere
+      </h1>
+      <p class="mt-5 text-lg text-slate-600 dark:text-slate-300">
+        Currently, I am Devops Engineer specializing in Kubernetes and application developer self service. I build secure, automated platforms across AWS and Azure with GitOps, policy, and developer experience at the core, leveraging over 4 years of hands-on Kubernetes experience.
+      </p>
+      <div class="mt-7 flex items-center justify-center gap-4">
+        <a href="https://www.linkedin.com/in/joseph-whiteaker-iii-02482a198/" target="_blank" rel="noopener noreferrer"
+          class="px-6 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 shadow-sm hover:shadow-md">LinkedIn</a>
+        <a href="https://github.com/josephaw1022" target="_blank" rel="noopener noreferrer"
+          class="px-6 py-3 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white font-medium hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all duration-200 shadow-sm hover:shadow-md">GitHub</a>
+      </div>
+    </div>
+
+    <div class="mt-14 grid grid-cols-3 sm:grid-cols-6 gap-5 place-items-center">
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="Argo CD" class="brand-img" src="https://cdn.simpleicons.org/argo" />
+      </div>
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="Helm" class="brand-img" src="https://cdn.simpleicons.org/helm" />
+      </div>
+
+      <div
+        class="col-span-3 sm:col-span-3 lg:col-span-2 tile bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-100 dark:border-slate-800 flex items-center justify-center">
+        <img alt="Kubernetes" class="w-28 h-28 sm:w-32 sm:h-32" src="https://cdn.simpleicons.org/kubernetes" />
+      </div>
+
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="Podman" class="brand-img" src="https://cdn.simpleicons.org/podman" />
+      </div>
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="CentOS" class="brand-img"
+          src="https://d7umqicpi7263.cloudfront.net/img/product/bf98a07a-9aa9-45f8-b79b-953878714ee4.png" />
+      </div>
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="Rancher" class="brand-img"
+          src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rancher/rancher-original.svg" />
+      </div>
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="Kyverno" class="brand-img"
+          src="https://raw.githubusercontent.com/kyverno/kyverno/main/img/logo.png" />
+      </div>
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="Keycloak" class="brand-img"
+          src="https://upload.wikimedia.org/wikipedia/commons/2/29/Keycloak_Logo.png" />
+      </div>
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="Nginx" class="brand-img" src="https://cdn.simpleicons.org/nginx" />
+      </div>
+
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="AWS" class="brand-img"
+          src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" />
+      </div>
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="Azure" class="brand-img"
+          src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-original.svg" />
+      </div>
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="PostgreSQL" class="brand-img" src="https://cdn.simpleicons.org/postgresql" />
+      </div>
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="Valkey" class="brand-img invert-on-dark" src="https://valkey.io/img/valkey-logo-og.png" />
+      </div>
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="Headlamp" class="brand-img invert-on-dark" src="https://headlamp.dev/img/logo.svg" />
+      </div>
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="Terraform" class="brand-img" src="https://cdn.simpleicons.org/terraform" />
+      </div>
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="Ansible" class="brand-img" src="https://cdn.simpleicons.org/ansible" />
+      </div>
+      <div class="tile bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <img alt="NetBird" class="brand-img"
+          src="https://play-lh.googleusercontent.com/gwsB0q8e3BMAGF0_iBsj8WfxfGyGHTG27krDWKhyfdy0H6ttcRYjBkOlP0nSyZxe6g" />
+      </div>
+    </div>
+  </section>
+
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="tile rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-8">
+        <h3 class="text-xl font-semibold">Opinionated, automation-first</h3>
+        <p class="mt-3 text-slate-600 dark:text-slate-300">Leveraging Ansible playbooks, Kyverno policies, GitHub
+          Actions, Kro, ACK and ASO, plus a wide variety of existing tools to enable self-service automation for
+          developers.</p>
+      </div>
+      <div class="tile rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-8">
+        <h3 class="text-xl font-semibold">DX that teams actually enjoy</h3>
+        <p class="mt-3 text-slate-600 dark:text-slate-300">Everything I build focuses on giving developers autonomy,
+          security, and a consistent paved road from idea to production.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="border-t border-slate-100 dark:border-slate-800 py-10 text-center text-sm text-slate-500">
+    © <span id="y"></span> Joseph Whiteaker • Cloud-Native Engineer
+  </footer>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+
+</html>
