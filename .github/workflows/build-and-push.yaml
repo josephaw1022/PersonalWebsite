@@ -19,7 +19,7 @@ jobs:
 
       - name: Build image
         run: |
-          IMAGE="ghcr.io/${{ github.repository_owner }}/${{ github.repository }}"
+          IMAGE="ghcr.io/${{ github.repository_owner,, }}/${{ github.repository,, }}"
           TAG="${{ github.sha }}"
           docker build -f Containerfile -t "${IMAGE}:${TAG}" .
           if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
