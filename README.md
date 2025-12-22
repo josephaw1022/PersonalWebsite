@@ -6,53 +6,32 @@ A simple static website served by **NGINX**, containerized and hosted on a **hom
 
 ---
 
-## Architecture Overview
+## Deploying To My Homelab OpenShift Cluster & Making It Publicly Accessible
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              INTERNET                                       │
-│                                                                             │
-│   User Browser ──────► jwhiteaker22.com (Cloudflare DNS)                   │
-│                              │                                              │
-│                              ▼                                              │
-│                    ┌─────────────────┐                                      │
-│                    │   Cloudflare    │                                      │
-│                    │   Edge Network  │  ◄── SSL/TLS termination            │
-│                    │   (Free Tier)   │      DDoS protection                │
-│                    └────────┬────────┘      CDN caching                    │
-│                             │                                               │
-└─────────────────────────────┼───────────────────────────────────────────────┘
-                              │ Encrypted tunnel (no public IP needed)
-                              ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         HOMELAB OPENSHIFT CLUSTER                           │
-│                                                                             │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  namespace: cloudflare-connector                                      │  │
-│  │  ┌────────────────────────────────────────────────────────────────┐  │  │
-│  │  │  cloudflared (3 replicas)                                      │  │  │
-│  │  │  - Establishes outbound tunnel to Cloudflare                   │  │  │
-│  │  │  - Routes traffic to internal services                         │  │  │
-│  │  └────────────────────────────────────────────────────────────────┘  │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                              │                                              │
-│                              │ NetworkPolicy: allow-cloudflare-and-dns     │
-│                              ▼                                              │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  namespace: personal-site                                             │  │
-│  │  ┌────────────────────────────────────────────────────────────────┐  │  │
-│  │  │  personal-site Deployment (3 replicas)                         │  │  │
-│  │  │  - NGINX serving static HTML                                   │  │  │
-│  │  │  - Image: ghcr.io/josephaw1022/personalwebsite                 │  │  │
-│  │  └────────────────────────────────────────────────────────────────┘  │  │
-│  │                              │                                        │  │
-│  │  ┌────────────────────────────────────────────────────────────────┐  │  │
-│  │  │  Service: personal-site (ClusterIP)                            │  │  │
-│  │  │  - Port 80 → containerPort 80                                  │  │  │
-│  │  └────────────────────────────────────────────────────────────────┘  │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph INTERNET["☁️ INTERNET"]
+        USER["🌐 User Browser"]
+        CF["Cloudflare Edge Network<br/>(Free Tier)<br/>━━━━━━━━━━━━━━<br/>✓ SSL/TLS termination<br/>✓ DDoS protection<br/>✓ CDN caching"]
+    end
+
+    subgraph CLUSTER["🏠 HOMELAB OPENSHIFT CLUSTER"]
+        subgraph NS_CF["namespace: cloudflare-connector"]
+            CFLD["cloudflared<br/>(3 replicas)<br/>━━━━━━━━━━━━━━<br/>• Outbound tunnel to Cloudflare<br/>• Routes traffic to services"]
+        end
+
+        subgraph NS_SITE["namespace: personal-site"]
+            NP["NetworkPolicy:<br/>allow-cloudflare-and-dns"]
+            DEPLOY["personal-site Deployment<br/>(3 replicas)<br/>━━━━━━━━━━━━━━<br/>• NGINX serving static HTML<br/>• ghcr.io/josephaw1022/personalwebsite"]
+            SVC["Service: personal-site<br/>(ClusterIP)<br/>━━━━━━━━━━━━━━<br/>Port 80 → containerPort 80"]
+        end
+    end
+
+    USER -->|"jwhiteaker22.com"| CF
+    CF <-->|"Encrypted tunnel<br/>(no public IP needed)"| CFLD
+    CFLD -->|"Allowed by NetworkPolicy"| NP
+    NP --> SVC
+    SVC --> DEPLOY
 ```
 
 ## How It Works
