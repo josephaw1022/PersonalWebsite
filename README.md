@@ -12,26 +12,28 @@ A simple static website served by **NGINX**, containerized and hosted on a **hom
 flowchart TB
     subgraph INTERNET["☁️ INTERNET"]
         USER["🌐 User Browser"]
-        CF["Cloudflare Edge Network<br/>(Free Tier)<br/>━━━━━━━━━━━━━━<br/>✓ SSL/TLS termination<br/>✓ DDoS protection<br/>✓ CDN caching"]
+        CF["Cloudflare Edge Network"]
     end
 
-    subgraph CLUSTER["🏠 HOMELAB OPENSHIFT CLUSTER"]
+    subgraph CLUSTER["HOMELAB OPENSHIFT CLUSTER"]
         subgraph NS_CF["namespace: cloudflare-connector"]
-            CFLD["cloudflared<br/>(3 replicas)<br/>━━━━━━━━━━━━━━<br/>• Outbound tunnel to Cloudflare<br/>• Routes traffic to services"]
+            CFLD["cloudflared (3 replicas)"]
         end
 
         subgraph NS_SITE["namespace: personal-site"]
-            NP["NetworkPolicy:<br/>allow-cloudflare-and-dns"]
-            DEPLOY["personal-site Deployment<br/>(3 replicas)<br/>━━━━━━━━━━━━━━<br/>• NGINX serving static HTML<br/>• ghcr.io/josephaw1022/personalwebsite"]
-            SVC["Service: personal-site<br/>(ClusterIP)<br/>━━━━━━━━━━━━━━<br/>Port 80 → containerPort 80"]
+            NP["NetworkPolicy"]
+            SVC["Service: personal-site"]
+            DEPLOY["personal-site Deployment"]
+            PODS["Pods (3 replicas)"]
         end
     end
 
     USER -->|"jwhiteaker22.com"| CF
-    CF <-->|"Encrypted tunnel<br/>(no public IP needed)"| CFLD
-    CFLD -->|"Allowed by NetworkPolicy"| NP
+    CF <-->|"Encrypted tunnel"| CFLD
+    CFLD --> NP
     NP --> SVC
-    SVC --> DEPLOY
+    SVC --> PODS
+    DEPLOY --> PODS
 ```
 
 ## How It Works
