@@ -30,21 +30,42 @@ spec:
       - name: personalwebsite
         image: ghcr.io/josephaw1022/personalwebsite:be71a9e8cef6d7bfd392a630f242c50f7cbf3663
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         volumeMounts:
         - name: cache-vol
           mountPath: /var/cache/nginx
         - name: run-vol
           mountPath: /var/run
-        - name: conf-vol
+        - name: nginx-conf
           mountPath: /etc/nginx/conf.d
       volumes:
       - name: cache-vol
         emptyDir: {}
       - name: run-vol
         emptyDir: {}
-      - name: conf-vol
-        emptyDir: {}
+      - name: nginx-conf
+        configMap:
+          name: nginx-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: personal-site
+data:
+  default.conf: |
+    server {
+      listen 8080;
+      server_name _;
+
+      root /usr/share/nginx/html;
+
+      index index.html;
+
+      location / {
+        try_files \$uri /index.html =404;
+      }
+    }
 ---
 apiVersion: v1
 kind: Service
@@ -59,44 +80,7 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 80
+      targetPort: 8080
   type: ClusterIP
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-cloudflare-and-dns
-  namespace: personal-site
-spec:
-  podSelector: {}
-  policyTypes:
-    - Ingress
-    - Egress
-  ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: cloudflare-connector
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: cloudflared
-  egress:
-    # Allow traffic back to the cloudflared pods
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: cloudflare-connector
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: cloudflared
-    # Allow DNS resolution (required for the cluster to function)
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: openshift-dns
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
+
 EOF
