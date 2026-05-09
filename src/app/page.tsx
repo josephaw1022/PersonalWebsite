@@ -24,13 +24,13 @@ export default function Home() {
             href="/skills" 
             className="px-6 py-3 bg-zinc-900 text-zinc-50 font-semibold hover:bg-zinc-800 transition-colors flex items-center justify-center rounded-sm"
           >
-            ./view_stack.sh
+            ./view_skills.sh
           </Link>
           <Link 
             href="/about" 
             className="px-6 py-3 border border-zinc-300 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 transition-colors flex items-center justify-center rounded-sm"
           >
-            cat principles.md
+            cat about.md
           </Link>
         </div>
       </div>

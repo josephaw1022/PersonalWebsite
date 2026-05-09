@@ -31,7 +31,7 @@ export default function Stack() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 animate-fade-in">
       <div className="mb-16">
         <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-900 mb-4">
-          Core Infrastructure Stack
+          Technical Skills
         </h1>
         <p className="text-xl text-zinc-600 max-w-2xl">
           The primary technologies I utilize to engineer secure, scalable, and observable environments.

@@ -3,7 +3,7 @@ export default function About() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 animate-fade-in">
       <div className="mb-16">
         <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-900 mb-4">
-          Engineering Principles
+          About My Approach
         </h1>
         <p className="text-xl text-zinc-600">
           Working backwards from organizational objectives to architect developer-centric platforms.

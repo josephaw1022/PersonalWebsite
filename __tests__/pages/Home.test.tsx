@@ -12,7 +12,7 @@ describe('Home Page', () => {
 
   it('renders call to action links', () => {
     render(<Home />);
-    expect(screen.getByRole('link', { name: /\.\/view_stack\.sh/i })).toHaveAttribute('href', '/skills');
-    expect(screen.getByRole('link', { name: /cat principles\.md/i })).toHaveAttribute('href', '/about');
+    expect(screen.getByRole('link', { name: /\.\/view_skills\.sh/i })).toHaveAttribute('href', '/skills');
+    expect(screen.getByRole('link', { name: /cat about\.md/i })).toHaveAttribute('href', '/about');
   });
 });

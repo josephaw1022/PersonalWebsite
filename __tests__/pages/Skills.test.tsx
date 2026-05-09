@@ -5,7 +5,7 @@ describe('Skills Page', () => {
   it('renders the main heading', () => {
     render(<Skills />);
     const heading = screen.getByRole('heading', { level: 1 });
-    expect(heading).toHaveTextContent(/Core Infrastructure Stack/i);
+    expect(heading).toHaveTextContent(/Technical Skills/i);
   });
 
   it('renders a list of skills', () => {

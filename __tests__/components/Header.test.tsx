@@ -12,8 +12,8 @@ describe('Header', () => {
   it('renders navigation links', () => {
     render(<Header />);
     expect(screen.getByRole('link', { name: 'Overview' })).toHaveAttribute('href', '/');
-    expect(screen.getByRole('link', { name: 'Principles' })).toHaveAttribute('href', '/about');
-    expect(screen.getByRole('link', { name: 'Stack' })).toHaveAttribute('href', '/skills');
+    expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute('href', '/about');
+    expect(screen.getByRole('link', { name: 'Skills' })).toHaveAttribute('href', '/skills');
   });
 
   it('renders the source code link', () => {

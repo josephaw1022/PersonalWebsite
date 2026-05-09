@@ -5,7 +5,7 @@ describe('About Page', () => {
   it('renders the main heading', () => {
     render(<About />);
     const heading = screen.getByRole('heading', { level: 1 });
-    expect(heading).toHaveTextContent(/Engineering Principles/i);
+    expect(heading).toHaveTextContent(/About My Approach/i);
   });
 
   it('renders the focus areas and approach sections', () => {
