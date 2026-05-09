@@ -15,7 +15,7 @@ export default function Home() {
           Cloud Infrastructure.
         </h1>
         
-        <p className="text-lg text-zinc-400 max-w-2xl leading-relaxed mb-10">
+        <p className="text-xl text-zinc-300 max-w-2xl leading-relaxed mb-10">
           I design and build secure, scalable developer platforms. With over 4 years of expertise across AWS, Azure, and on-premise ecosystems, I specialize in Kubernetes architecture, automated deployment lifecycles, and enforcing supply chain security.
         </p>
         
@@ -28,7 +28,7 @@ export default function Home() {
           </Link>
           <Link 
             href="/about" 
-            className="px-6 py-3 border border-zinc-800 text-zinc-300 hover:bg-zinc-900 transition-colors flex items-center justify-center"
+            className="px-6 py-3 border border-zinc-600 text-zinc-100 hover:bg-zinc-800 transition-colors flex items-center justify-center"
           >
             cat principles.md
           </Link>
@@ -38,15 +38,15 @@ export default function Home() {
       <div className="mt-auto pt-24 grid sm:grid-cols-3 gap-8 border-t border-zinc-800/50 animate-fade-in delay-200">
         <div>
           <h3 className="font-semibold text-zinc-100 mb-2">Kubernetes Ecosystem</h3>
-          <p className="text-sm text-zinc-500">Expertise in cluster lifecycle management, custom operators, and multi-cluster orchestration.</p>
+          <p className="text-base text-zinc-400">Expertise in cluster lifecycle management, custom operators, and multi-cluster orchestration.</p>
         </div>
         <div>
           <h3 className="font-semibold text-zinc-100 mb-2">GitOps & Automation</h3>
-          <p className="text-sm text-zinc-500">Declarative infrastructure via Argo CD, Flux, and Terraform, ensuring verifiable state.</p>
+          <p className="text-base text-zinc-400">Declarative infrastructure via Argo CD, Flux, and Terraform, ensuring verifiable state.</p>
         </div>
         <div>
           <h3 className="font-semibold text-zinc-100 mb-2">Platform Security</h3>
-          <p className="text-sm text-zinc-500">Zero-trust principles, OPA Gatekeeper, Kyverno, and hardened container supply chains.</p>
+          <p className="text-base text-zinc-400">Zero-trust principles, OPA Gatekeeper, Kyverno, and hardened container supply chains.</p>
         </div>
       </div>
     </div>

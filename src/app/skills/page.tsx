@@ -33,7 +33,7 @@ export default function Stack() {
         <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-100 mb-4">
           Core Infrastructure Stack
         </h1>
-        <p className="text-lg text-zinc-400 max-w-2xl">
+        <p className="text-xl text-zinc-300 max-w-2xl">
           The primary technologies I utilize to engineer secure, scalable, and observable environments.
         </p>
       </div>
@@ -55,7 +55,7 @@ export default function Stack() {
                 loading="lazy"
               />
             </div>
-            <span className="text-xs font-mono text-zinc-500 group-hover:text-emerald-400 transition-colors duration-300">
+            <span className="text-sm font-mono text-zinc-300 group-hover:text-emerald-400 transition-colors duration-300">
               {skill.name}
             </span>
           </div>

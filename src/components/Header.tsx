@@ -30,8 +30,8 @@ export default function Header() {
                 href={link.href}
                 className={`text-sm font-medium transition-colors ${
                   isActive
-                    ? "text-zinc-100"
-                    : "text-zinc-500 hover:text-zinc-300"
+                    ? "text-zinc-50"
+                    : "text-zinc-300 hover:text-zinc-100"
                 }`}
               >
                 {link.name}
@@ -45,7 +45,7 @@ export default function Header() {
             href="https://github.com/josephaw1022/PersonalWebsite"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm font-mono text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="flex items-center gap-2 text-sm font-mono text-zinc-300 hover:text-zinc-100 transition-colors"
           >
             <span>[src]</span>
           </a>

@@ -5,7 +5,7 @@ export default function About() {
         <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-100 mb-4">
           Engineering Principles
         </h1>
-        <p className="text-lg text-zinc-400">
+        <p className="text-xl text-zinc-300">
           Working backwards from organizational objectives to architect developer-centric platforms.
         </p>
       </div>
@@ -17,10 +17,10 @@ export default function About() {
             <h2 className="text-xl font-semibold text-zinc-100">Autonomy Through Guardrails</h2>
           </div>
           <div className="pl-9">
-            <p className="text-zinc-400 leading-relaxed">
+            <p className="text-lg text-zinc-300 leading-relaxed">
               Effective platform engineering doesn't mean gatekeeping deployment. It means providing developers with self-service capabilities bounded by automated, policy-driven guardrails. By enforcing compliance at the admission controller level (e.g., Kyverno or OPA Gatekeeper), teams can deploy rapidly without compromising the security posture.
             </p>
-            <blockquote className="mt-4 border-l-2 border-zinc-700 pl-4 text-zinc-500 italic">
+            <blockquote className="mt-4 border-l-4 border-emerald-700 pl-4 text-zinc-400 italic font-medium">
               "Make the right path the easiest path. Make the wrong path impossible."
             </blockquote>
           </div>
@@ -32,7 +32,7 @@ export default function About() {
             <h2 className="text-xl font-semibold text-zinc-100">Declarative Source of Truth</h2>
           </div>
           <div className="pl-9">
-            <p className="text-zinc-400 leading-relaxed">
+            <p className="text-lg text-zinc-300 leading-relaxed">
               Infrastructure and application state must reside in version control. Embracing a strict GitOps methodology ensures that disaster recovery, auditability, and environment replication are inherent features of the deployment pipeline rather than operational burdens.
             </p>
           </div>
@@ -44,7 +44,7 @@ export default function About() {
             <h2 className="text-xl font-semibold text-zinc-100">Abstracting Complexity</h2>
           </div>
           <div className="pl-9">
-            <p className="text-zinc-400 leading-relaxed">
+            <p className="text-lg text-zinc-300 leading-relaxed">
               Kubernetes is an infrastructure framework, not a developer product. My focus is abstracting the underlying complexity of container orchestration via tailored APIs, Helm charts, and custom Kubernetes Operators, allowing product teams to focus purely on shipping business logic.
             </p>
           </div>
