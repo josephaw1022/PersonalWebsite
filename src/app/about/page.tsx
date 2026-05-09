@@ -18,10 +18,10 @@ export default function About() {
           </div>
           <div className="pl-9">
             <p className="text-lg text-zinc-600 leading-relaxed">
-              Effective platform engineering doesn't mean gatekeeping deployment. It means providing developers with self-service capabilities bounded by automated, policy-driven guardrails. By enforcing compliance at the admission controller level (e.g., Kyverno or OPA Gatekeeper), teams can deploy rapidly without compromising the security posture.
+              Effective platform engineering doesn&apos;t mean gatekeeping deployment. It means providing developers with self-service capabilities bounded by automated, policy-driven guardrails. By enforcing compliance at the admission controller level (e.g., Kyverno or OPA Gatekeeper), teams can deploy rapidly without compromising the security posture.
             </p>
             <blockquote className="mt-4 border-l-4 border-emerald-600 bg-zinc-100 p-4 text-zinc-700 italic font-medium rounded-r-md">
-              "Make the right path the easiest path. Make the wrong path impossible."
+              &quot;Make the right path the easiest path. Make the wrong path impossible.&quot;
             </blockquote>
           </div>
         </section>

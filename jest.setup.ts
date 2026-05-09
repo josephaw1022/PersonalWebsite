@@ -31,8 +31,8 @@ import React from 'react';
 // Mock Next.js Image component to avoid errors during test rendering
 jest.mock('next/image', () => ({
   __esModule: true,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   default: (props: any) => {
-    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
     return React.createElement('img', props);
   },
 }));

@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 type Skill = {
   name: string;
   url: string;
