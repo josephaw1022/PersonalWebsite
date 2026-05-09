@@ -14,7 +14,7 @@ metadata:
   labels:
     app: personal-site
     app.kubernetes.io/part-of: personal-website-app
-    app.openshift.io/runtime: nginx
+    app.openshift.io/runtime: nodejs
 spec:
   replicas: 3
   selector:
@@ -28,44 +28,13 @@ spec:
     spec:
       containers:
       - name: personalwebsite
-        image: ghcr.io/josephaw1022/personalwebsite:be71a9e8cef6d7bfd392a630f242c50f7cbf3663
+        image: ghcr.io/josephaw1022/personalwebsite:latest
+        imagePullPolicy: Always
         ports:
-        - containerPort: 8080
-        volumeMounts:
-        - name: cache-vol
-          mountPath: /var/cache/nginx
-        - name: run-vol
-          mountPath: /var/run
-        - name: nginx-conf
-          mountPath: /etc/nginx/conf.d
-      volumes:
-      - name: cache-vol
-        emptyDir: {}
-      - name: run-vol
-        emptyDir: {}
-      - name: nginx-conf
-        configMap:
-          name: nginx-config
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: nginx-config
-  namespace: personal-site
-data:
-  default.conf: |
-    server {
-      listen 8080;
-      server_name _;
-
-      root /usr/share/nginx/html;
-
-      index index.html;
-
-      location / {
-        try_files \$uri /index.html =404;
-      }
-    }
+        - containerPort: 3000
+        env:
+        - name: PORT
+          value: "3000"
 ---
 apiVersion: v1
 kind: Service
@@ -80,7 +49,7 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8080
+      targetPort: 3000
   type: ClusterIP
 
 EOF
