@@ -19,8 +19,8 @@ const skills: Skill[] = [
   { name: "AWS", url: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" },
   { name: "Azure", url: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-original.svg" },
   { name: "PostgreSQL", url: "https://cdn.simpleicons.org/postgresql" },
-  { name: "Valkey", url: "https://valkey.io/img/valkey-logo-og.png", darkInvert: true },
-  { name: "Headlamp", url: "https://headlamp.dev/img/logo.svg", darkInvert: true },
+  { name: "Valkey", url: "https://valkey.io/img/valkey-logo-og.png" },
+  { name: "Headlamp", url: "https://headlamp.dev/img/logo.svg" },
   { name: "Terraform", url: "https://cdn.simpleicons.org/terraform" },
   { name: "Ansible", url: "https://cdn.simpleicons.org/ansible" },
   { name: "NetBird", url: "https://play-lh.googleusercontent.com/gwsB0q8e3BMAGF0_iBsj8WfxfGyGHTG27krDWKhyfdy0H6ttcRYjBkOlP0nSyZxe6g" },
@@ -30,10 +30,10 @@ export default function Stack() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 animate-fade-in">
       <div className="mb-16">
-        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-100 mb-4">
+        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-900 mb-4">
           Core Infrastructure Stack
         </h1>
-        <p className="text-xl text-zinc-300 max-w-2xl">
+        <p className="text-xl text-zinc-600 max-w-2xl">
           The primary technologies I utilize to engineer secure, scalable, and observable environments.
         </p>
       </div>
@@ -51,11 +51,11 @@ export default function Stack() {
               <img 
                 src={skill.url} 
                 alt={skill.name} 
-                className={`w-full h-full object-contain grayscale-hover ${skill.darkInvert ? 'invert' : ''}`}
+                className={`w-full h-full object-contain grayscale-hover`}
                 loading="lazy"
               />
             </div>
-            <span className="text-sm font-mono text-zinc-300 group-hover:text-emerald-400 transition-colors duration-300">
+            <span className="text-sm font-mono text-zinc-600 group-hover:text-emerald-600 transition-colors duration-300">
               {skill.name}
             </span>
           </div>

@@ -8,8 +8,8 @@
 }
 
 :root {
-  --background: #09090b; /* Zinc 950 */
-  --foreground: #fafafa; /* Zinc 50 */
+  --background: #fafafa; /* Zinc 50 */
+  --foreground: #09090b; /* Zinc 950 */
 }
 
 body {
@@ -17,7 +17,6 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
   scroll-behavior: smooth;
-  /* Eliminate default outlines for a cleaner look, use custom focus rings */
 }
 
 /* Typography styles */
@@ -27,26 +26,27 @@ body {
 
 /* Minimalist components */
 .card-minimal {
-  background: rgba(24, 24, 27, 0.4); /* Zinc 900 slightly transparent */
-  border: 1px solid rgba(63, 63, 70, 0.3); /* Zinc 700 */
+  background: rgba(255, 255, 255, 0.7); /* White slightly transparent */
+  border: 1px solid rgba(228, 228, 231, 1); /* Zinc 200 */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card-minimal:hover {
-  border-color: rgba(16, 185, 129, 0.4); /* Subtle Emerald 500 border on hover */
+  border-color: rgba(16, 185, 129, 0.6); /* Subtle Emerald 500 border on hover */
   transform: translateY(-2px);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
 }
 
 /* Subtle accent text */
 .text-accent {
-  color: #10b981; /* Emerald 500 */
+  color: #059669; /* Emerald 600 */
 }
 
 /* Desaturated images by default, colored on hover */
 .grayscale-hover {
-  filter: grayscale(100%) opacity(0.7);
+  filter: grayscale(100%) opacity(0.6);
   transition: filter 0.3s ease, opacity 0.3s ease;
 }
 

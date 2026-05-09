@@ -13,10 +13,10 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-zinc-950/80 border-b border-zinc-800/50 backdrop-blur-md">
+    <header className="sticky top-0 z-50 bg-white/80 border-b border-zinc-200 backdrop-blur-md">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
-          <span className="font-mono font-semibold tracking-tight text-zinc-100 group-hover:text-emerald-400 transition-colors">
+          <span className="font-mono font-semibold tracking-tight text-zinc-900 group-hover:text-emerald-600 transition-colors">
             joseph.whiteaker
           </span>
         </Link>
@@ -30,8 +30,8 @@ export default function Header() {
                 href={link.href}
                 className={`text-sm font-medium transition-colors ${
                   isActive
-                    ? "text-zinc-50"
-                    : "text-zinc-300 hover:text-zinc-100"
+                    ? "text-zinc-900"
+                    : "text-zinc-500 hover:text-zinc-900"
                 }`}
               >
                 {link.name}
@@ -45,7 +45,7 @@ export default function Header() {
             href="https://github.com/josephaw1022/PersonalWebsite"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm font-mono text-zinc-300 hover:text-zinc-100 transition-colors"
+            className="flex items-center gap-2 text-sm font-mono text-zinc-500 hover:text-zinc-900 transition-colors"
           >
             <span>[src]</span>
           </a>
