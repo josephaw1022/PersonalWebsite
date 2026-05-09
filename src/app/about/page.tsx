@@ -1,51 +1,54 @@
-import { ShieldCheck, Zap } from "lucide-react";
-
 export default function About() {
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 animate-fade-in-up">
-      <div className="text-center mb-16">
-        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-6">
-          My <span className="text-gradient">Philosophy</span>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 animate-fade-in">
+      <div className="mb-16">
+        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-100 mb-4">
+          Engineering Principles
         </h1>
-        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          Working backwards from business outcomes to create platforms that developers actually want to use.
+        <p className="text-lg text-zinc-400">
+          Working backwards from organizational objectives to architect developer-centric platforms.
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="glass rounded-3xl p-8 md:p-10 hover-lift relative overflow-hidden group border border-slate-200/50 dark:border-slate-800/50">
-          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Zap className="w-24 h-24 text-indigo-500" />
+      <div className="space-y-12">
+        <section>
+          <div className="flex items-center gap-4 mb-6">
+            <span className="font-mono text-emerald-400 text-sm">01.</span>
+            <h2 className="text-xl font-semibold text-zinc-100">Autonomy Through Guardrails</h2>
           </div>
-          <div className="relative z-10">
-            <div className="w-14 h-14 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mb-6 border border-indigo-200 dark:border-indigo-800">
-              <Zap className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
-            </div>
-            <h2 className="text-2xl font-bold mb-4">My Focus Areas</h2>
-            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-              Automation that makes developers' lives easier. Whether it's declarative GitOps or imperative pipeline-based automation, policy guardrails with Kyverno or OPA Gatekeeper, multi-cluster management with tools like OCM or Azure Fleet, or streamlined developer experiences with tools such as Helm Charts and Operators. I focus on business outcomes and team velocity and work backwards from there.
+          <div className="pl-9">
+            <p className="text-zinc-400 leading-relaxed">
+              Effective platform engineering doesn't mean gatekeeping deployment. It means providing developers with self-service capabilities bounded by automated, policy-driven guardrails. By enforcing compliance at the admission controller level (e.g., Kyverno or OPA Gatekeeper), teams can deploy rapidly without compromising the security posture.
             </p>
+            <blockquote className="mt-4 border-l-2 border-zinc-700 pl-4 text-zinc-500 italic">
+              "Make the right path the easiest path. Make the wrong path impossible."
+            </blockquote>
           </div>
-        </div>
+        </section>
 
-        <div className="glass rounded-3xl p-8 md:p-10 hover-lift relative overflow-hidden group border border-slate-200/50 dark:border-slate-800/50">
-          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-            <ShieldCheck className="w-24 h-24 text-purple-500" />
+        <section>
+          <div className="flex items-center gap-4 mb-6">
+            <span className="font-mono text-emerald-400 text-sm">02.</span>
+            <h2 className="text-xl font-semibold text-zinc-100">Declarative Source of Truth</h2>
           </div>
-          <div className="relative z-10">
-            <div className="w-14 h-14 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-6 border border-purple-200 dark:border-purple-800">
-              <ShieldCheck className="w-7 h-7 text-purple-600 dark:text-purple-400" />
-            </div>
-            <h2 className="text-2xl font-bold mb-4">How I Approach Platform Work</h2>
-            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-lg">
-              I believe in giving developers autonomy with guardrails: 
-              <br /><br />
-              <span className="font-semibold text-slate-900 dark:text-slate-100 italic border-l-4 border-indigo-500 pl-4 block">
-                "Making it easy to do the right thing and hard to do the wrong thing."
-              </span>
+          <div className="pl-9">
+            <p className="text-zinc-400 leading-relaxed">
+              Infrastructure and application state must reside in version control. Embracing a strict GitOps methodology ensures that disaster recovery, auditability, and environment replication are inherent features of the deployment pipeline rather than operational burdens.
             </p>
           </div>
-        </div>
+        </section>
+
+        <section>
+          <div className="flex items-center gap-4 mb-6">
+            <span className="font-mono text-emerald-400 text-sm">03.</span>
+            <h2 className="text-xl font-semibold text-zinc-100">Abstracting Complexity</h2>
+          </div>
+          <div className="pl-9">
+            <p className="text-zinc-400 leading-relaxed">
+              Kubernetes is an infrastructure framework, not a developer product. My focus is abstracting the underlying complexity of container orchestration via tailored APIs, Helm charts, and custom Kubernetes Operators, allowing product teams to focus purely on shipping business logic.
+            </p>
+          </div>
+        </section>
       </div>
     </div>
   );

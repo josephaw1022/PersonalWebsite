@@ -6,20 +6,19 @@ import Header from '@/components/Header';
 describe('Header', () => {
   it('renders the branding logo and name', () => {
     render(<Header />);
-    expect(screen.getByText('JW')).toBeInTheDocument();
-    expect(screen.getByText('Joseph Whiteaker')).toBeInTheDocument();
+    expect(screen.getByText('joseph.whiteaker')).toBeInTheDocument();
   });
 
   it('renders navigation links', () => {
     render(<Header />);
-    expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/');
-    expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute('href', '/about');
-    expect(screen.getByRole('link', { name: 'Skills' })).toHaveAttribute('href', '/skills');
+    expect(screen.getByRole('link', { name: 'Overview' })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: 'Principles' })).toHaveAttribute('href', '/about');
+    expect(screen.getByRole('link', { name: 'Stack' })).toHaveAttribute('href', '/skills');
   });
 
   it('renders the source code link', () => {
     render(<Header />);
-    const sourceLink = screen.getByRole('link', { name: /source/i });
+    const sourceLink = screen.getByRole('link', { name: /\[src\]/i });
     expect(sourceLink).toHaveAttribute('href', 'https://github.com/josephaw1022/PersonalWebsite');
   });
 });
