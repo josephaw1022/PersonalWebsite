@@ -14,5 +14,6 @@ For local development in this repository, use `task` (Taskfile).
 - `task default`: Lists all available tasks.
 
 ### Requirements
+
 - You must have `task` (go-task) installed.
 - You must use `podman` as the container runtime, as specified in the Taskfile.
