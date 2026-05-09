@@ -1,15 +1,15 @@
 "use client";
 
-import * as React from "react";
+import { useState, useEffect } from "react";
 import { Moon, Sun, Laptop } from "lucide-react";
 import { useTheme } from "next-themes";
 
 export function ThemeToggle() {
   const { setTheme, theme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
+  const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch
-  React.useEffect(() => {
+  useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);

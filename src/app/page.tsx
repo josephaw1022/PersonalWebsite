@@ -9,44 +9,62 @@ export default function Home() {
           <Terminal className="w-4 h-4" />
           <span>$ whoami --role=&quot;Senior Cloud Engineer&quot;</span>
         </div>
-        
+
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-zinc-900 mb-6 leading-tight">
           Engineering Resilient <br className="hidden sm:block" />
           Cloud Infrastructure.
         </h1>
-        
+
         <p className="text-xl text-zinc-600 max-w-2xl leading-relaxed mb-10">
-          I design and build secure, scalable developer platforms. With over 4 years of expertise across AWS, Azure, and on-premise ecosystems, I specialize in Kubernetes architecture, automated deployment lifecycles, and enforcing supply chain security.
+          I design and build secure, scalable developer platforms. With over 4
+          years of expertise across AWS, Azure, and on-premise ecosystems, I
+          specialize in Kubernetes architecture, automated deployment
+          lifecycles, and enforcing supply chain security.
         </p>
-        
+
         <div className="flex flex-col sm:flex-row items-start gap-4 font-mono text-sm">
-          <Link 
-            href="/skills" 
+          <Link
+            href="/skills"
             className="px-6 py-3 bg-zinc-900 text-zinc-50 font-semibold hover:bg-zinc-800 transition-colors flex items-center justify-center rounded-sm"
           >
             ./view_skills.sh
           </Link>
-          <Link 
-            href="/about" 
+          <Link
+            href="/about"
             className="px-6 py-3 border border-zinc-300 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 transition-colors flex items-center justify-center rounded-sm"
           >
             cat about.md
           </Link>
         </div>
       </div>
-      
+
       <div className="mt-auto pt-24 grid sm:grid-cols-3 gap-8 border-t border-zinc-200 animate-fade-in delay-200">
         <div>
-          <h3 className="font-semibold text-zinc-900 mb-2">Kubernetes Ecosystem</h3>
-          <p className="text-base text-zinc-600">Expertise in cluster lifecycle management, custom operators, and multi-cluster orchestration.</p>
+          <h3 className="font-semibold text-zinc-900 mb-2">
+            Kubernetes Ecosystem
+          </h3>
+          <p className="text-base text-zinc-600">
+            Expertise in cluster lifecycle management, custom operators, and
+            multi-cluster orchestration.
+          </p>
         </div>
         <div>
-          <h3 className="font-semibold text-zinc-900 mb-2">GitOps & Automation</h3>
-          <p className="text-base text-zinc-600">Declarative infrastructure via Argo CD, Flux, and Terraform, ensuring verifiable state.</p>
+          <h3 className="font-semibold text-zinc-900 mb-2">
+            GitOps & Automation
+          </h3>
+          <p className="text-base text-zinc-600">
+            Declarative infrastructure via Argo CD, Flux, and Terraform,
+            ensuring verifiable state.
+          </p>
         </div>
         <div>
-          <h3 className="font-semibold text-zinc-900 mb-2">Platform Security</h3>
-          <p className="text-base text-zinc-600">Zero-trust principles, OPA Gatekeeper, Kyverno, and hardened container supply chains.</p>
+          <h3 className="font-semibold text-zinc-900 mb-2">
+            Platform Security
+          </h3>
+          <p className="text-base text-zinc-600">
+            Zero-trust principles, OPA Gatekeeper, Kyverno, and hardened
+            container supply chains.
+          </p>
         </div>
       </div>
     </div>

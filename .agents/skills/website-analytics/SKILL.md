@@ -12,6 +12,7 @@ This repository tracks website analytics using **Datadog RUM (Real User Monitori
 The Datadog RUM browser agent is injected directly into the HTML. You can find the script in the `<head>` section of `site/pages/index.html`.
 
 It tracks:
+
 - Session sample rate: 100%
 - Session replay sample rate: 20%
 - User interactions

@@ -8,5 +8,6 @@ Secure external access is provided via a Cloudflare Tunnel.
 The site is deployed via `./infra/okd-setup.sh` and uses a NetworkPolicy to restrict traffic to the cloudflared connector.
 
 **Development**:
+
 - Local Development: `task dev`
 - Build Container Image: `task build-container`

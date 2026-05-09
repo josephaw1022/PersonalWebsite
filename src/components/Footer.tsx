@@ -8,9 +8,30 @@ export default function Footer() {
           {year} © Joseph Whiteaker
         </p>
         <div className="flex gap-6 font-mono text-sm text-zinc-600">
-          <a href="https://www.linkedin.com/in/joseph-whiteaker-iii-02482a198/" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors">LinkedIn</a>
-          <a href="https://github.com/josephaw1022" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors">GitHub</a>
-          <a href="https://medium.com/@josephsims1" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors">Medium</a>
+          <a
+            href="https://www.linkedin.com/in/joseph-whiteaker-iii-02482a198/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-emerald-600 transition-colors"
+          >
+            LinkedIn
+          </a>
+          <a
+            href="https://github.com/josephaw1022"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-emerald-600 transition-colors"
+          >
+            GitHub
+          </a>
+          <a
+            href="https://medium.com/@josephsims1"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-emerald-600 transition-colors"
+          >
+            Medium
+          </a>
         </div>
       </div>
     </footer>
