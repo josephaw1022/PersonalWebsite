@@ -108,6 +108,7 @@ helm upgrade --install personal-site-runner \
   oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
   --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
   --set githubConfigSecret="${SECRET_NAME}" \
+  --set minRunners=1 \
   --set template.spec.serviceAccountName="${SA_NAME}"
 
 echo "==> ARC Setup Complete!"
