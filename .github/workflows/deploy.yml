@@ -9,6 +9,12 @@ on:
       - main
       - master
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Container image tag to deploy"
+        required: false
+        default: "latest"
+        type: string
 
 jobs:
   deploy:
@@ -24,8 +30,12 @@ jobs:
         with:
           version: "latest"
 
-      - name: Reroll deployment
+      - name: Update deployment and reroll
         run: |
+          TAG="${{ inputs.tag || 'latest' }}"
+          echo "Updating deployment image to ghcr.io/josephaw1022/personalwebsite:$TAG..."
+          kubectl set image deployment/personal-site personalwebsite=ghcr.io/josephaw1022/personalwebsite:$TAG -n personal-site
+
           echo "Triggering rollout restart for personal-site deployment..."
           kubectl rollout restart deployment/personal-site -n personal-site
 
