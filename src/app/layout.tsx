@@ -33,7 +33,7 @@ export default function RootLayout({
       className={`${inter.variable} ${firaCode.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 selection:bg-emerald-500/30">
+      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-white selection:bg-emerald-500/30">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
