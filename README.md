@@ -81,6 +81,7 @@ Deploy to OpenShift with a single command:
 ```
 
 This script creates:
+
 - The `personal-site` namespace/project
 - A 3-replica NGINX Deployment
 - A ClusterIP Service
