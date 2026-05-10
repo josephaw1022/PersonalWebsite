@@ -1,6 +1,13 @@
 name: Deploy Personal Site
 
 on:
+  workflow_run:
+    workflows: ["Container Build & Push"]
+    types:
+      - completed
+    branches:
+      - main
+      - master
   workflow_dispatch:
     inputs:
       tag:
@@ -13,6 +20,7 @@ jobs:
   deploy:
     runs-on: personal-site-runner
     environment: production
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
