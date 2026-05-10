@@ -33,10 +33,15 @@ SA_NAME="personal-site-runner-sa"
 SECRET_NAME="personal-site-runner-secret"
 GH_ENV_NAME="production"
 
-echo "==> Creating GitHub environment '${GH_ENV_NAME}'..."
-gh api -X PUT "/repos/josephaw1022/PersonalWebsite/environments/${GH_ENV_NAME}" >/dev/null || {
-  echo "Warning: Failed to create GitHub environment. Ensure you have 'gh' CLI authenticated with appropriate scopes."
-}
+echo "==> Checking if GitHub environment '${GH_ENV_NAME}' exists..."
+if gh api -X GET "/repos/josephaw1022/PersonalWebsite/environments/${GH_ENV_NAME}" >/dev/null 2>&1; then
+  echo "GitHub environment '${GH_ENV_NAME}' already exists. Skipping creation."
+else
+  echo "==> Creating GitHub environment '${GH_ENV_NAME}'..."
+  gh api -X PUT "/repos/josephaw1022/PersonalWebsite/environments/${GH_ENV_NAME}" >/dev/null || {
+    echo "Warning: Failed to create GitHub environment. Ensure you have 'gh' CLI authenticated with appropriate scopes."
+  }
+fi
 
 echo "==> Creating namespaces..."
 kubectl apply -f - <<EOF
