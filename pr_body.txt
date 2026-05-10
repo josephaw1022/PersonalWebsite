@@ -1,0 +1,47 @@
+## Description
+
+Adds a standard devcontainer configuration to provide a consistent development environment for contributors.
+
+---
+
+## Type of Change
+
+- [ ] Bug fix
+- [ ] New feature / enhancement
+- [x] Infrastructure change
+- [ ] Refactor / cleanup
+- [ ] Documentation update
+- [ ] CI/CD pipeline change
+- [ ] Dependency update
+
+---
+
+## Changes Made
+
+- Added `.devcontainer/devcontainer.json`
+- Configured Node 22 base image
+- Added VSCode extensions for ESLint, Prettier, and TailwindCSS
+- Enabled GitHub CLI feature
+- Configured `npm install` post-create command and forwarded port 3000
+
+---
+
+## Testing
+
+- [ ] Terraform `validate` and `fmt` passed (if applicable)
+- [x] Tested in **dev** environment
+- [ ] Tested in **prod** environment (if applicable)
+- [ ] Relevant workflows passed in CI
+
+---
+
+## Checklist
+
+- [x] My changes follow the coding conventions and style of this project
+- [x] I have updated relevant documentation
+- [x] I have not committed any secrets or sensitive values
+- [x] I have reviewed my own diff before requesting review
+
+---
+
+## Screenshots / Logs
