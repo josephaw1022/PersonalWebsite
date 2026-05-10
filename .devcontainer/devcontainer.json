@@ -1,18 +1,18 @@
 {
-	"name": "PersonalWebsite",
-	"image": "mcr.microsoft.com/devcontainers/typescript-node:22",
-	"features": {
-		"ghcr.io/devcontainers/features/github-cli:1": {}
-	},
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"dbaeumer.vscode-eslint",
-				"esbenp.prettier-vscode",
-				"bradlc.vscode-tailwindcss"
-			]
-		}
-	},
-	"postCreateCommand": "npm install",
-	"forwardPorts": [3000]
+  "name": "PersonalWebsite",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  },
+  "postCreateCommand": "npm install",
+  "forwardPorts": [3000]
 }
