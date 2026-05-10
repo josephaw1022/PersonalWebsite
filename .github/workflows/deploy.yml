@@ -1,0 +1,24 @@
+name: Deploy Personal Site
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: personal-site-runner
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Reroll deployment
+        run: |
+          echo "Triggering rollout restart for personal-site deployment..."
+          kubectl rollout restart deployment/personal-site -n personal-site
+          
+          echo "Waiting for rollout to complete..."
+          kubectl rollout status deployment/personal-site -n personal-site
