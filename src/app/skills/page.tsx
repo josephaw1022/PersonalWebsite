@@ -49,10 +49,10 @@ export default function Stack() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 animate-fade-in">
       <div className="mb-16">
-        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 mb-4">
+        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-900 dark:text-white mb-4">
           Technical Skills
         </h1>
-        <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl">
+        <p className="text-xl text-zinc-600 dark:text-zinc-200 max-w-2xl">
           The primary technologies I utilize to engineer secure, scalable, and
           observable environments.
         </p>
@@ -75,7 +75,7 @@ export default function Stack() {
                 loading="lazy"
               />
             </div>
-            <span className="text-sm font-mono text-zinc-600 dark:text-zinc-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300">
+            <span className="text-sm font-mono text-zinc-600 dark:text-zinc-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300">
               {skill.name}
             </span>
           </div>

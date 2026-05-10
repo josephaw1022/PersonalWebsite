@@ -31,8 +31,8 @@ export default function Header() {
                 href={link.href}
                 className={`text-sm font-medium transition-colors ${
                   isActive
-                    ? "text-zinc-900 dark:text-zinc-100"
-                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                    ? "text-zinc-900 dark:text-white"
+                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white"
                 }`}
               >
                 {link.name}
@@ -47,7 +47,7 @@ export default function Header() {
               href="https://github.com/josephaw1022/PersonalWebsite"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors"
+              className="flex items-center gap-2 text-sm font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white transition-colors"
             >
               <span>[src]</span>
             </a>
