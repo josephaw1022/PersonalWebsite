@@ -114,7 +114,7 @@ template:
   metadata:
     labels:
       app.kubernetes.io/part-of: personal-website-app
-      app.openshift.io/runtime: git
+      app.openshift.io/runtime: github
   spec:
     serviceAccountName: "${SA_NAME}"
 EOF
