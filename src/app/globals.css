@@ -81,7 +81,8 @@ body {
     opacity 0.3s ease;
 }
 
-.grayscale-hover:hover {
+.grayscale-hover:hover,
+.group:hover .grayscale-hover {
   filter: grayscale(0%) opacity(1);
 }
 
