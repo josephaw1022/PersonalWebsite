@@ -8,10 +8,12 @@
             "name": "format-repo",
             "type": "command",
             "command": "./.gemini/hooks/format.sh",
-            "timeout": 15000
+            "timeout": 30000,
+            "description": "Automatically runs prettier --write after file modifications."
           }
         ]
       }
     ]
   }
 }
+
