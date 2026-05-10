@@ -17,7 +17,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-950/80 border-b border-zinc-200 dark:border-zinc-800 backdrop-blur-md">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
-          <span className="font-mono font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+          <span className="font-mono font-semibold tracking-tight text-zinc-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
             joseph.whiteaker
           </span>
         </Link>
@@ -32,7 +32,7 @@ export default function Header() {
                 className={`text-sm font-medium transition-colors ${
                   isActive
                     ? "text-zinc-900 dark:text-white"
-                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white"
+                    : "text-zinc-500 hover:text-zinc-900 dark:text-white dark:hover:text-white"
                 }`}
               >
                 {link.name}
@@ -47,7 +47,7 @@ export default function Header() {
               href="https://github.com/josephaw1022/PersonalWebsite"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white transition-colors"
+              className="flex items-center gap-2 text-sm font-mono text-zinc-500 hover:text-zinc-900 dark:text-white dark:hover:text-white transition-colors"
             >
               <span>[src]</span>
             </a>

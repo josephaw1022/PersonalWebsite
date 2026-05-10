@@ -13,8 +13,8 @@
 }
 
 .dark {
-  --background: #09090b; /* Zinc 950 */
-  --foreground: #ffffff; /* White */
+  --background: #000000; /* Pure Black */
+  --foreground: #ffffff; /* Pure White */
 }
 
 body {
@@ -75,10 +75,9 @@ body {
 
 /* Desaturated images by default, colored on hover */
 .grayscale-hover {
-  filter: grayscale(100%) opacity(0.9);
+  filter: grayscale(100%);
   transition:
-    filter 0.3s ease,
-    opacity 0.3s ease;
+    filter 0.3s ease;
 }
 
 .grayscale-hover:hover,

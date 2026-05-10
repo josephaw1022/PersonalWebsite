@@ -15,7 +15,7 @@ export default function Home() {
           Cloud Infrastructure.
         </h1>
 
-        <p className="text-xl text-zinc-600 dark:text-zinc-200 max-w-2xl leading-relaxed mb-10">
+        <p className="text-xl text-zinc-600 dark:text-white max-w-2xl leading-relaxed mb-10">
           I design and build secure, scalable developer platforms. With over 4
           years of expertise across AWS, Azure, and on-premise ecosystems, I
           specialize in Kubernetes architecture, automated deployment
@@ -31,7 +31,7 @@ export default function Home() {
           </Link>
           <Link
             href="/about"
-            className="px-6 py-3 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center justify-center rounded-sm"
+            className="px-6 py-3 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center justify-center rounded-sm"
           >
             cat about.md
           </Link>
@@ -40,28 +40,28 @@ export default function Home() {
 
       <div className="mt-auto pt-24 grid sm:grid-cols-3 gap-8 border-t border-zinc-200 dark:border-zinc-800 animate-fade-in delay-200">
         <div>
-          <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+          <h3 className="font-semibold text-zinc-900 dark:text-white mb-2">
             Kubernetes Ecosystem
           </h3>
-          <p className="text-base text-zinc-600 dark:text-zinc-200">
+          <p className="text-base text-zinc-600 dark:text-white">
             Expertise in cluster lifecycle management, custom operators, and
             multi-cluster orchestration.
           </p>
         </div>
         <div>
-          <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+          <h3 className="font-semibold text-zinc-900 dark:text-white mb-2">
             GitOps & Automation
           </h3>
-          <p className="text-base text-zinc-600 dark:text-zinc-200">
+          <p className="text-base text-zinc-600 dark:text-white">
             Declarative infrastructure via Argo CD, Flux, and Terraform,
             ensuring verifiable state.
           </p>
         </div>
         <div>
-          <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+          <h3 className="font-semibold text-zinc-900 dark:text-white mb-2">
             Platform Security
           </h3>
-          <p className="text-base text-zinc-600 dark:text-zinc-200">
+          <p className="text-base text-zinc-600 dark:text-white">
             Zero-trust principles, OPA Gatekeeper, Kyverno, and hardened
             container supply chains.
           </p>
