@@ -31,6 +31,12 @@ RUNNER_NS="personal-site-pipelines"
 TARGET_NS="personal-site"
 SA_NAME="personal-site-runner-sa"
 SECRET_NAME="personal-site-runner-secret"
+GH_ENV_NAME="production"
+
+echo "==> Creating GitHub environment '${GH_ENV_NAME}'..."
+gh api -X PUT "/repos/josephaw1022/PersonalWebsite/environments/${GH_ENV_NAME}" >/dev/null || {
+  echo "Warning: Failed to create GitHub environment. Ensure you have 'gh' CLI authenticated with appropriate scopes."
+}
 
 echo "==> Creating namespaces..."
 kubectl apply -f - <<EOF
