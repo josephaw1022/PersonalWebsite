@@ -36,7 +36,7 @@ export function ThemeToggle() {
             className={`p-1.5 rounded-full transition-all duration-200 ${
               isActive
                 ? "bg-white dark:bg-zinc-600 text-emerald-600 dark:text-emerald-400 shadow-sm"
-                : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                : "text-zinc-500 hover:text-foreground dark:hover:text-white"
             }`}
             title={`Switch to ${t.label} mode`}
             aria-label={`Switch to ${t.label} mode`}
