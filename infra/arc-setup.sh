@@ -106,9 +106,17 @@ echo "==> Installing/Upgrading gha-runner-scale-set..."
 helm upgrade --install personal-site-runner \
   --namespace "${RUNNER_NS}" \
   oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
-  --set githubConfigUrl="${GITHUB_CONFIG_URL}" \
-  --set githubConfigSecret="${SECRET_NAME}" \
-  --set minRunners=1 \
-  --set template.spec.serviceAccountName="${SA_NAME}"
+  -f - <<EOF
+githubConfigUrl: "${GITHUB_CONFIG_URL}"
+githubConfigSecret: "${SECRET_NAME}"
+minRunners: 1
+template:
+  metadata:
+    labels:
+      app.kubernetes.io/part-of: personal-website-app
+      app.openshift.io/runtime: git
+  spec:
+    serviceAccountName: "${SA_NAME}"
+EOF
 
 echo "==> ARC Setup Complete!"
