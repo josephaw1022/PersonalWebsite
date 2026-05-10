@@ -11,8 +11,8 @@ export default function Home() {
         </div>
 
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-foreground mb-6 leading-tight">
-          Engineering Resilient <br className="hidden sm:block" />
-          Cloud Infrastructure.
+          Building reliable <br className="hidden sm:block" />
+          cloud infrastructure.
         </h1>
 
         <p className="text-xl text-foreground max-w-2xl leading-relaxed mb-10">

@@ -6,8 +6,8 @@ describe("Home Page", () => {
     render(<Home />);
 
     const heading = screen.getByRole("heading", { level: 1 });
-    expect(heading).toHaveTextContent(/Engineering Resilient/i);
-    expect(heading).toHaveTextContent(/Cloud Infrastructure/i);
+    expect(heading).toHaveTextContent(/Building reliable/i);
+    expect(heading).toHaveTextContent(/cloud infrastructure/i);
   });
 
   it("renders call to action links", () => {
