@@ -28,7 +28,7 @@ export default function About() {
               Kyverno or OPA Gatekeeper), teams can deploy rapidly without
               compromising the security posture.
             </p>
-            <blockquote className="mt-4 border-l-4 border-emerald-600 bg-zinc-100 dark:bg-zinc-900/50 p-4 text-black italic font-medium rounded-r-md">
+            <blockquote className="mt-4 border-l-4 border-emerald-600 bg-zinc-50 dark:bg-zinc-900/50 p-4 text-zinc-800 dark:text-zinc-200 italic font-medium rounded-r-md shadow-sm">
               &quot;Make the right path the easiest path. Make the wrong path
               impossible.&quot;
             </blockquote>
