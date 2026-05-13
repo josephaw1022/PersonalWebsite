@@ -30,9 +30,7 @@ export default function Header() {
                 key={link.name}
                 href={link.href}
                 className={`text-sm font-medium transition-colors ${
-                  isActive
-                    ? "text-white"
-                    : "text-zinc-400 hover:text-white"
+                  isActive ? "text-white" : "text-zinc-400 hover:text-white"
                 }`}
               >
                 {link.name}
