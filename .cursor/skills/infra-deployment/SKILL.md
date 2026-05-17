@@ -1,6 +1,8 @@
 ---
 name: infra-deployment
 description: Infrastructure deployment rules and scripts.
+paths:
+  - "infra/**"
 ---
 
 # Infrastructure Deployment

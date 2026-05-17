@@ -1,6 +1,12 @@
 ---
 name: testing-standards
 description: Update and run unit and E2E tests after making changes to the site.
+paths:
+  - "src/**"
+  - "e2e/**"
+  - "__tests__/**"
+  - "**/*.test.ts"
+  - "**/*.spec.ts"
 ---
 
 # Testing Standards
