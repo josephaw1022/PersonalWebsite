@@ -1,7 +1,8 @@
 ---
+name: prettier-formatting
 description: Ensure codebase is formatted with Prettier before submitting a PR.
-globs: **/*.{js,jsx,ts,tsx,json,css,md}
-alwaysApply: false
+paths:
+  - "**/*.{js,jsx,ts,tsx,json,css,md}"
 ---
 
 # Prettier Formatting

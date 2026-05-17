@@ -1,7 +1,8 @@
 ---
+name: site-development
 description: Personal site development and content.
-globs: site/**
-alwaysApply: false
+paths:
+  - "src/**"
 ---
 
 # Site Development
