@@ -1,7 +1,6 @@
 ---
+name: infra-deployment
 description: Infrastructure deployment rules and scripts.
-globs: infra/**
-alwaysApply: false
 ---
 
 # Infrastructure Deployment

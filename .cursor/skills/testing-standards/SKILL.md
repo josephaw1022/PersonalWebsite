@@ -1,7 +1,6 @@
 ---
+name: testing-standards
 description: Update and run unit and E2E tests after making changes to the site.
-globs: site/**, e2e/**, **/*.test.ts, **/*.spec.ts
-alwaysApply: false
 ---
 
 # Testing Standards
