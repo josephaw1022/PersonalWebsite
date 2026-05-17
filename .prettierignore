@@ -1,4 +1,8 @@
 node_modules
+
+# Prettier mangles YAML frontmatter in SKILL.md (e.g. ** globs in `paths`)
+.agents/skills/**/SKILL.md
+
 .next
 out
 build
