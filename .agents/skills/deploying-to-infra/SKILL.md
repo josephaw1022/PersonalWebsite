@@ -1,11 +1,15 @@
 ---
 name: deploying-to-infra
-description: Use this skill to understand how to deploy the PersonalWebsite application to infrastructure using OKD/OpenShift.
+description: Deploy PersonalWebsite to OKD/OpenShift and work with infra scripts (okd-setup, ARC). Use when deploying, editing files under infra/, or configuring CI runners on the cluster.
+paths:
+  - "infra/**"
 ---
 
 ## Deploying to Infrastructure
 
 The application is deployed to an OpenShift/OKD cluster using a setup script.
+
+`infra/aca-setup.sh` exists historically but is **not used**; the site is no longer hosted on Azure.
 
 ### Implementation
 
