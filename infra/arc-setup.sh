@@ -27,7 +27,7 @@ fi
 
 GITHUB_CONFIG_URL="https://github.com/josephaw1022/PersonalWebsite"
 CONTROLLER_NS="github-arc"
-RUNNER_NS="personal-site-pipelines"
+RUNNER_NS="personal-site"
 TARGET_NS="personal-site"
 SA_NAME="personal-site-runner-sa"
 SECRET_NAME="personal-site-runner-secret"
