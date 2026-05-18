@@ -118,27 +118,10 @@ minRunners: 1
 controllerServiceAccount:
   namespace: "${CONTROLLER_NS}"
   name: "${CONTROLLER_SA_NAME}"
-# Propagate OpenShift Dev Console labels to EphemeralRunner* objects (chart reserves app.kubernetes.io/part-of on AutoscalingRunnerSet only).
-resourceMeta:
-  ephemeralRunnerSet:
-    labels:
-      app.kubernetes.io/part-of: personal-website-app
-      app.kubernetes.io/name: github-actions-runner
-      app.kubernetes.io/component: ci
-      app.openshift.io/runtime: github
-  ephemeralRunner:
-    labels:
-      app.kubernetes.io/part-of: personal-website-app
-      app.kubernetes.io/name: github-actions-runner
-      app.kubernetes.io/component: ci
-      app.openshift.io/runtime: github
 template:
   metadata:
     labels:
       app.kubernetes.io/part-of: personal-website-app
-      app.kubernetes.io/name: github-actions-runner
-      app.kubernetes.io/component: ci
-      app.kubernetes.io/instance: ${RUNNER_RELEASE}
       app.openshift.io/runtime: github
     annotations:
       app.openshift.io/vcs-uri: "${GITHUB_CONFIG_URL}"
