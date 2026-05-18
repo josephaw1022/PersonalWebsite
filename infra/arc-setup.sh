@@ -114,12 +114,22 @@ helm upgrade --install "${RUNNER_RELEASE}" \
 githubConfigUrl: "${GITHUB_CONFIG_URL}"
 githubConfigSecret: "${SECRET_NAME}"
 minRunners: 1
+# Applies to chart-managed resources wherever the Helm template allows OpenShift-safe extras (part-of/name/instance stay chart-owned on AutoscalingRunnerSet).
+annotations:
+  app.openshift.io/vcs-uri: "${GITHUB_CONFIG_URL}"
+  app.openshift.io/vcs-ref: main
+labels:
+  app.openshift.io/runtime: github
 # Scale set chart searches for the controller in-cluster; set explicitly when controller runs in another namespace.
 controllerServiceAccount:
   namespace: "${CONTROLLER_NS}"
   name: "${CONTROLLER_SA_NAME}"
-# Propagate OpenShift Dev Console labels to EphemeralRunner* objects (chart reserves app.kubernetes.io/part-of on AutoscalingRunnerSet only).
 resourceMeta:
+  autoscalingRunnerSet:
+    annotations:
+      app.openshift.io/vcs-uri: "${GITHUB_CONFIG_URL}"
+      app.openshift.io/vcs-ref: main
+# Propagate OpenShift Dev Console labels to EphemeralRunner* objects (chart reserves app.kubernetes.io/part-of on AutoscalingRunnerSet only).
   ephemeralRunnerSet:
     labels:
       app.kubernetes.io/part-of: personal-website-app
@@ -145,6 +155,39 @@ template:
       app.openshift.io/vcs-ref: main
   spec:
     serviceAccountName: "${SA_NAME}"
+EOF
+
+# Developer Topology renders standard Services reliably; ARC AutoscalingRunnerSet CRDs are not workload nodes there.
+# A headless Service matching runner pod labels gives `app.openshift.io/connects-to: '["personal-site-runner"]'` a visible target keyed by app.kubernetes.io/instance.
+echo "==> Applying headless Service so OpenShift Topology can represent the ARC runner scale set as a grouped component..."
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${RUNNER_RELEASE}-topology
+  namespace: ${RUNNER_NS}
+  labels:
+    app.kubernetes.io/part-of: personal-website-app
+    app.kubernetes.io/name: github-actions-runner
+    app.kubernetes.io/component: ci
+    app.kubernetes.io/instance: ${RUNNER_RELEASE}
+    app.openshift.io/runtime: github
+  annotations:
+    app.openshift.io/vcs-uri: "${GITHUB_CONFIG_URL}"
+    app.openshift.io/vcs-ref: main
+spec:
+  clusterIP: None
+  sessionAffinity: None
+  ports:
+    - name: noop
+      port: 9443
+      protocol: TCP
+      targetPort: 9443
+  selector:
+    app.kubernetes.io/part-of: personal-website-app
+    app.kubernetes.io/name: github-actions-runner
+    app.kubernetes.io/component: ci
+    app.kubernetes.io/instance: ${RUNNER_RELEASE}
 EOF
 
 echo "==> ARC Setup Complete!"

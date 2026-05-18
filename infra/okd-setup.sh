@@ -14,9 +14,14 @@ metadata:
   labels:
     app: personal-site
     app.kubernetes.io/part-of: personal-website-app
+    app.kubernetes.io/name: personal-site
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/instance: personal-site
     app.openshift.io/runtime: nodejs
   annotations:
-    # Links this workload to the ARC runner scale set component (app.kubernetes.io/instance=personal-site-runner) in Topology.
+    app.openshift.io/vcs-uri: "https://github.com/josephaw1022/PersonalWebsite"
+    app.openshift.io/vcs-ref: main
+    # Targets the Topology Service created by infra/arc-setup.sh (app.kubernetes.io/instance=personal-site-runner).
     app.openshift.io/connects-to: '["personal-site-runner"]'
 spec:
   replicas: 3
@@ -28,6 +33,10 @@ spec:
       labels:
         app: personal-site
         app.kubernetes.io/part-of: personal-website-app
+        app.kubernetes.io/name: personal-site
+        app.kubernetes.io/component: frontend
+        app.kubernetes.io/instance: personal-site
+        app.openshift.io/runtime: nodejs
     spec:
       containers:
       - name: personalwebsite
