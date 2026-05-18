@@ -118,11 +118,6 @@ minRunners: 1
 controllerServiceAccount:
   namespace: "${CONTROLLER_NS}"
   name: "${CONTROLLER_SA_NAME}"
-# OpenShift Topology (see OCP 4.20 "Labels and annotations used for the Topology view"):
-# - app grouping: app.kubernetes.io/part-of
-# - source link: app.openshift.io/vcs-uri / vcs-ref
-# - node icon: app.openshift.io/runtime (optional; must match a console-known runtime to get a branded icon)
-# Do not override app.kubernetes.io/name|instance|component here; the chart already sets them from the scale set name.
 template:
   metadata:
     labels:
