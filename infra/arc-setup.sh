@@ -27,8 +27,12 @@ fi
 
 GITHUB_CONFIG_URL="https://github.com/josephaw1022/PersonalWebsite"
 CONTROLLER_NS="github-arc"
+# Must match the Helm release name for gha-runner-scale-set-controller (see helm upgrade --install below).
+CONTROLLER_RELEASE="arc"
+CONTROLLER_SA_NAME="${CONTROLLER_RELEASE}-gha-rs-controller"
 RUNNER_NS="personal-site"
 TARGET_NS="personal-site"
+RUNNER_RELEASE="personal-site-runner"
 SA_NAME="personal-site-runner-sa"
 SECRET_NAME="personal-site-runner-secret"
 GH_ENV_NAME="production"
@@ -64,7 +68,7 @@ helm repo add actions-runner-controller https://actions-runner-controller.github
 # and oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
 
 echo "==> Installing/Upgrading gha-runner-scale-set-controller..."
-helm upgrade --install arc \
+helm upgrade --install "${CONTROLLER_RELEASE}" \
   --namespace "${CONTROLLER_NS}" \
   oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
 
@@ -103,18 +107,42 @@ kubectl create secret generic "${SECRET_NAME}" \
   --dry-run=client -o yaml | kubectl apply -f -
 
 echo "==> Installing/Upgrading gha-runner-scale-set..."
-helm upgrade --install personal-site-runner \
+helm upgrade --install "${RUNNER_RELEASE}" \
   --namespace "${RUNNER_NS}" \
   oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
   -f - <<EOF
 githubConfigUrl: "${GITHUB_CONFIG_URL}"
 githubConfigSecret: "${SECRET_NAME}"
 minRunners: 1
+# Scale set chart searches for the controller in-cluster; set explicitly when controller runs in another namespace.
+controllerServiceAccount:
+  namespace: "${CONTROLLER_NS}"
+  name: "${CONTROLLER_SA_NAME}"
+# Propagate OpenShift Dev Console labels to EphemeralRunner* objects (chart reserves app.kubernetes.io/part-of on AutoscalingRunnerSet only).
+resourceMeta:
+  ephemeralRunnerSet:
+    labels:
+      app.kubernetes.io/part-of: personal-website-app
+      app.kubernetes.io/name: github-actions-runner
+      app.kubernetes.io/component: ci
+      app.openshift.io/runtime: github
+  ephemeralRunner:
+    labels:
+      app.kubernetes.io/part-of: personal-website-app
+      app.kubernetes.io/name: github-actions-runner
+      app.kubernetes.io/component: ci
+      app.openshift.io/runtime: github
 template:
   metadata:
     labels:
       app.kubernetes.io/part-of: personal-website-app
+      app.kubernetes.io/name: github-actions-runner
+      app.kubernetes.io/component: ci
+      app.kubernetes.io/instance: ${RUNNER_RELEASE}
       app.openshift.io/runtime: github
+    annotations:
+      app.openshift.io/vcs-uri: "${GITHUB_CONFIG_URL}"
+      app.openshift.io/vcs-ref: main
   spec:
     serviceAccountName: "${SA_NAME}"
 EOF
