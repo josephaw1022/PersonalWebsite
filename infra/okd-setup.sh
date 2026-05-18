@@ -15,6 +15,9 @@ metadata:
     app: personal-site
     app.kubernetes.io/part-of: personal-website-app
     app.openshift.io/runtime: nodejs
+  annotations:
+    # Links this workload to the ARC runner scale set component (app.kubernetes.io/instance=personal-site-runner) in Topology.
+    app.openshift.io/connects-to: '["personal-site-runner"]'
 spec:
   replicas: 3
   selector:
