@@ -119,6 +119,8 @@ controllerServiceAccount:
   namespace: "${CONTROLLER_NS}"
   name: "${CONTROLLER_SA_NAME}"
 # Propagate OpenShift Dev Console labels to EphemeralRunner* objects (chart reserves app.kubernetes.io/part-of on AutoscalingRunnerSet only).
+# Non-empty annotations are required on these blocks: ARC 0.14.x mergeAnnotations(nil, ...) panics ("assignment to entry in nil map")
+# when metadata exists with labels only (Helm omits annotations:), breaking createEphemeralRunnerSet.
 resourceMeta:
   ephemeralRunnerSet:
     labels:
@@ -126,12 +128,16 @@ resourceMeta:
       app.kubernetes.io/name: github-actions-runner
       app.kubernetes.io/component: ci
       app.openshift.io/runtime: github
+    annotations:
+      personal-website.io/arc-managed: "true"
   ephemeralRunner:
     labels:
       app.kubernetes.io/part-of: personal-website-app
       app.kubernetes.io/name: github-actions-runner
       app.kubernetes.io/component: ci
       app.openshift.io/runtime: github
+    annotations:
+      personal-website.io/arc-managed: "true"
 template:
   metadata:
     labels:
