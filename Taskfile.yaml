@@ -24,6 +24,7 @@ tasks:
   build-container:
     desc: Build the Next.js production container image using Podman
     cmds:
+      - npm run build
       - podman build -t "{{.IMAGE_NAME}}" -f Containerfile .
 
   run-container:
