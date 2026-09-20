@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+VERSION="${1:-latest}"
+
 # Create the namespace/project if it doesn't exist
 oc new-project personal-site 2>/dev/null || oc project personal-site
 
@@ -13,6 +15,9 @@ metadata:
   namespace: personal-site
   labels:
     app: personal-site
+    version: ${VERSION}
+    app.kubernetes.io/name: personal-site
+    app.kubernetes.io/version: ${VERSION}
     app.kubernetes.io/part-of: personal-website-app
     app.openshift.io/runtime: nodejs
   annotations:
@@ -27,11 +32,14 @@ spec:
     metadata:
       labels:
         app: personal-site
+        version: ${VERSION}
+        app.kubernetes.io/name: personal-site
+        app.kubernetes.io/version: ${VERSION}
         app.kubernetes.io/part-of: personal-website-app
     spec:
       containers:
       - name: personalwebsite
-        image: ghcr.io/josephaw1022/personalwebsite:latest
+        image: ghcr.io/josephaw1022/personalwebsite:${VERSION}
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
@@ -45,6 +53,8 @@ metadata:
   name: personal-site
   namespace: personal-site
   labels:
+    app: personal-site
+    app.kubernetes.io/name: personal-site
     app.kubernetes.io/part-of: personal-website-app
 spec:
   selector:
