@@ -10,7 +10,7 @@ Container image builds are fully automated using a **GitHub Actions workflow**.
 ### Implementation
 
 - **Location:** `.github/workflows/build-and-push.yaml`
-- **Triggers:** Pushes to `main` or `master` branches, pull requests, or manually via `workflow_dispatch`.
+- **Triggers:** Pushes to `main` or `master` branches, or manually via `workflow_dispatch`.
 - **Runs on:** `personal-site-runner` (local Actions Runner Controller scale set)
 - **Process:**
   1. Authenticates to Quay container registry (`quay.kubesoar.com`) using `QUAY_USERNAME` and `QUAY_PASSWORD` secrets.
