@@ -12,32 +12,39 @@ test.describe("Skills Page Interactions", () => {
 
     // Verify key category cards
     await expect(
-      page.getByRole("heading", { name: "Cloud & Platforms" }),
+      page.getByRole("heading", { name: "Cloud & Hybrid Infrastructure" }),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Containers & Orchestration" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "GitOps, CI/CD & IaC" }),
+      page.getByRole("heading", {
+        name: "Platform Engineering, GitOps & CI/CD",
+      }),
     ).toBeVisible();
 
     // Verify key skill tags
     await expect(page.getByText("Kubernetes", { exact: true })).toBeVisible();
-    await expect(page.getByText("Argo CD", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Argo CD (HA & App of Apps)", { exact: true }),
+    ).toBeVisible();
     await expect(page.getByText("Terraform", { exact: true })).toBeVisible();
   });
 
   test("filtering by domain shows only matching category card", async ({
     page,
   }) => {
-    // Click on Cloud & Platforms filter tab
+    // Click on Cloud & Hybrid Infrastructure filter tab
     await page
-      .getByRole("button", { name: "Cloud & Platforms", exact: true })
+      .getByRole("button", {
+        name: "Cloud & Hybrid Infrastructure",
+        exact: true,
+      })
       .click();
 
     // Cloud card should be visible
     await expect(
-      page.getByRole("heading", { name: "Cloud & Platforms" }),
+      page.getByRole("heading", { name: "Cloud & Hybrid Infrastructure" }),
     ).toBeVisible();
 
     // Other categories should not be visible
@@ -45,7 +52,9 @@ test.describe("Skills Page Interactions", () => {
       page.getByRole("heading", { name: "Containers & Orchestration" }),
     ).not.toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "GitOps, CI/CD & IaC" }),
+      page.getByRole("heading", {
+        name: "Platform Engineering, GitOps & CI/CD",
+      }),
     ).not.toBeVisible();
 
     // Reset filter to All Domains
@@ -58,7 +67,9 @@ test.describe("Skills Page Interactions", () => {
       page.getByRole("heading", { name: "Containers & Orchestration" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "GitOps, CI/CD & IaC" }),
+      page.getByRole("heading", {
+        name: "Platform Engineering, GitOps & CI/CD",
+      }),
     ).toBeVisible();
   });
 });

@@ -6,8 +6,8 @@ import {
   Boxes,
   GitBranch,
   ShieldCheck,
-  Network,
   Activity,
+  Network,
   Terminal,
   type LucideIcon,
 } from "lucide-react";
@@ -23,79 +23,108 @@ type SkillCategory = {
 const skillCategories: SkillCategory[] = [
   {
     id: "cloud",
-    name: "Cloud & Platforms",
+    name: "Cloud & Hybrid Infrastructure",
     description:
-      "Enterprise cloud providers, hybrid environments, and Linux operating systems.",
+      "Enterprise public cloud, hybrid infrastructure, managed Kubernetes, and Linux operating systems.",
     icon: Cloud,
     skills: [
       "Amazon Web Services (AWS)",
       "Microsoft Azure",
       "Red Hat OpenShift / OKD",
       "Linux (CentOS Stream / RHEL)",
+      "AWS EKS & Azure AKS",
+      "Karpenter Node Autoscaling",
     ],
   },
   {
     id: "kubernetes",
     name: "Containers & Orchestration",
     description:
-      "Cluster lifecycle management, container runtimes, and application packaging.",
+      "Cluster lifecycle management, container runtimes, custom operators, and local development clusters.",
     icon: Boxes,
     skills: [
       "Kubernetes",
-      "Podman",
-      "Docker / Containerfile",
-      "Helm",
+      "Podman & Docker",
+      "Helm Charts",
       "Rancher",
-      "Headlamp",
+      "Kind & SuperKind",
+      "Headlamp & K9s",
+      "ACK & ASO Operators",
     ],
   },
   {
     id: "gitops",
-    name: "GitOps, CI/CD & IaC",
+    name: "Platform Engineering, GitOps & CI/CD",
     description:
-      "Declarative infrastructure as code, automated pipelines, and continuous delivery.",
+      "Declarative infrastructure as code, multi-cluster continuous delivery, and runner automation.",
     icon: GitBranch,
     skills: [
-      "Argo CD",
+      "Argo CD (HA & App of Apps)",
       "GitHub Actions & ARC",
+      "Azure DevOps (ADO)",
       "Terraform",
-      "Ansible",
-      "Taskfile / Automation",
+      "Red Hat Ansible",
+      "Dependabot & Renovate",
+      "Taskfile & Make",
     ],
   },
   {
     id: "security",
-    name: "Security & Governance",
+    name: "Security, Policy & Identity",
     description:
-      "Zero-trust architecture, identity management, and automated policy enforcement.",
+      "Zero-trust boundaries, automated admission policies, supply chain security, and secrets management.",
     icon: ShieldCheck,
     skills: [
-      "Kyverno",
-      "Keycloak",
-      "Zero Trust & RBAC",
-      "Supply Chain Security",
-      "OPA Gatekeeper",
+      "Kyverno Policy Engine",
+      "External Secrets Operator (ESO)",
+      "HashiCorp Vault & Key Vault",
+      "Cosign Image Signing",
+      "Syft & Grype (SBOM & CVE)",
+      "Azure Workload Identity",
+      "Keycloak & Entra ID (OIDC)",
+    ],
+  },
+  {
+    id: "observability",
+    name: "Observability & Telemetry",
+    description:
+      "Full-stack application telemetry, distributed tracing, metrics collection, and alerting.",
+    icon: Activity,
+    skills: [
+      "Datadog (Certified, APM, RUM)",
+      "Datadog Operator & Scanner",
+      "Prometheus & Grafana",
+      "Loki Log Aggregation",
+      "OpenTelemetry",
     ],
   },
   {
     id: "networking",
-    name: "Networking & Edge Ingress",
+    name: "Networking & Edge Routing",
     description:
-      "Edge routing, encrypted mesh overlay networks, and reverse proxies.",
+      "Secure edge ingress, encrypted mesh overlay networks, service meshes, and reverse proxies.",
     icon: Network,
-    skills: ["Cloudflare Tunnels", "Nginx", "NetBird", "CoreDNS"],
+    skills: [
+      "Cloudflare Tunnels & DNS",
+      "NetBird Overlay VPN",
+      "Istio Service Mesh",
+      "Nginx Reverse Proxy",
+      "AWS Route 53",
+    ],
   },
   {
-    id: "observability",
-    name: "Data & Observability",
+    id: "languages",
+    name: "Languages & Frameworks",
     description:
-      "State persistence, in-memory caching, application telemetry, and monitoring.",
-    icon: Activity,
+      "Languages, scripts, and application frameworks used for platform automation and internal tooling.",
+    icon: Terminal,
     skills: [
-      "PostgreSQL",
-      "Valkey / Redis",
-      "Datadog RUM & APM",
-      "Prometheus & Grafana",
+      "Go (Golang)",
+      "Bash & PowerShell",
+      "C# / .NET",
+      "TypeScript / JavaScript",
+      "React & Next.js",
+      "Python",
     ],
   },
 ];
@@ -120,8 +149,8 @@ export default function Skills() {
           Technical Skills
         </h1>
         <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
-          The core platforms, orchestration engines, automation pipelines, and
-          tooling I utilize to engineer reliable environments.
+          The core platforms, orchestrators, automation pipelines, and developer
+          tools I utilize to engineer reliable environments.
         </p>
       </div>
 

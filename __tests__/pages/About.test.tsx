@@ -7,7 +7,11 @@ describe("About Page", () => {
     const heading = screen.getByRole("heading", { level: 1 });
     expect(heading).toHaveTextContent(/About Me/i);
     expect(
-      screen.getByText(/Senior Cloud and Platform Engineer/i),
+      screen.getByText(/Team Architect and Platform Engineer/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Columbia, SC")).toBeInTheDocument();
+    expect(
+      screen.getByText(/BS in Mathematics, Univ\. of South Carolina/i),
     ).toBeInTheDocument();
   });
 
@@ -20,13 +24,15 @@ describe("About Page", () => {
       screen.getByRole("heading", { name: /Core Focus Areas/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /Platform Engineering/i }),
+      screen.getByRole("heading", { name: /Control Plane & Kubernetes/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: /Declarative GitOps & CI\/CD/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /Zero Trust & Security/i }),
+      screen.getByRole("heading", {
+        name: /Supply Chain Security & Identity/i,
+      }),
     ).toBeInTheDocument();
   });
 
@@ -36,13 +42,18 @@ describe("About Page", () => {
       screen.getByRole("heading", { name: /Homelab Infrastructure/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /Community & Open Source/i }),
+      screen.getByRole("heading", { name: /Open Source & Community/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /github\.com\/josephaw1022/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /medium\.com\/@josephsims1/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: /Elastic Community Talk: OperatorHub/i,
+      }),
     ).toBeInTheDocument();
   });
 });
