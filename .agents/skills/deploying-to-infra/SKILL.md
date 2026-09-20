@@ -20,10 +20,8 @@ The application is deployed to an OpenShift/OKD cluster using a setup script.
 
 1. Creates or switches to the `personal-site` namespace/project using `oc new-project` / `oc project`.
 2. Applies Kubernetes manifests defined in the script, including:
-   - A Deployment (`personal-site`) with 3 replicas running the GHCR image.
-   - A ConfigMap (`nginx-config`) containing the custom `default.conf` NGINX configuration.
-   - A ClusterIP Service (`personal-site`) exposing port 80 (targetPort 8080).
-3. The deployment uses specific volume mounts (`/var/cache/nginx`, `/var/run`) to allow running as non-root, which is required by OpenShift SCCs.
+   - A Deployment (`personal-site`) with 3 replicas running the GHCR image (accepts an optional image tag / version parameter, defaults to `latest`), with Istio/Kiali telemetry labels (`app`, `version`, `app.kubernetes.io/version`).
+   - A ClusterIP Service (`personal-site`) exposing port 80 (targetPort 3000).
 
 #### ARC Setup Process (`arc-setup.sh`):
 

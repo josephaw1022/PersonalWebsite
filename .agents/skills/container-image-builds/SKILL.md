@@ -14,7 +14,7 @@ Container image builds are fully automated using a **GitHub Actions workflow**.
 - **Process:**
   1. Authenticates to GitHub Container Registry (GHCR) using `GITHUB_TOKEN`.
   2. Builds the container image using the repository's `Containerfile`.
-  3. Tags the image with the git commit SHA.
+  3. Tags the image with both the 7-character short git SHA and the full commit SHA.
   4. If running on `main` or `master`, it also tags the image as `latest`.
   5. Pushes the built image(s) to `ghcr.io/<owner>/<repo>`.
 

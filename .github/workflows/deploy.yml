@@ -11,9 +11,8 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Container image tag to deploy"
+        description: "Container image tag to deploy (defaults to git commit SHA)"
         required: false
-        default: "latest"
         type: string
 
 jobs:
@@ -32,9 +31,22 @@ jobs:
 
       - name: Update deployment and reroll
         run: |
-          TAG="${{ inputs.tag || 'latest' }}"
+          INPUT_TAG="${{ inputs.tag }}"
+          if [ -n "${INPUT_TAG}" ]; then
+            TAG="${INPUT_TAG}"
+          elif [ "${{ github.event_name }}" = "workflow_run" ]; then
+            SHA="${{ github.event.workflow_run.head_sha }}"
+            TAG="${SHA:0:7}"
+          else
+            SHA="${{ github.sha }}"
+            TAG="${SHA:0:7}"
+          fi
+
           echo "Updating deployment image to ghcr.io/josephaw1022/personalwebsite:$TAG..."
           kubectl set image deployment/personal-site personalwebsite=ghcr.io/josephaw1022/personalwebsite:$TAG -n personal-site
+
+          echo "Updating version label to $TAG..."
+          kubectl patch deployment personal-site -n personal-site --type='strategic' -p "{\"metadata\":{\"labels\":{\"version\":\"$TAG\",\"app.kubernetes.io/version\":\"$TAG\"}},\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"version\":\"$TAG\",\"app.kubernetes.io/version\":\"$TAG\"}}}}}"
 
           echo "Triggering rollout restart for personal-site deployment..."
           kubectl rollout restart deployment/personal-site -n personal-site
