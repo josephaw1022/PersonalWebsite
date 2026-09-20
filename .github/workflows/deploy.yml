@@ -44,12 +44,21 @@ jobs:
 
           REGISTRY_USER="${{ secrets.QUAY_USERNAME || 'admin' }}"
           IMAGE="quay.kubesoar.com/${REGISTRY_USER}/personalwebsite"
+          PULL_SECRET="quay-pull-secret"
 
           echo "Updating deployment image to ${IMAGE}:$TAG..."
           kubectl set image deployment/personal-site personalwebsite=${IMAGE}:$TAG -n personal-site
 
-          echo "Updating version label and ensuring imagePullSecrets on deployment..."
-          kubectl patch deployment personal-site -n personal-site --type='strategic' -p "{\"metadata\":{\"labels\":{\"version\":\"$TAG\",\"app.kubernetes.io/version\":\"$TAG\"}},\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"version\":\"$TAG\",\"app.kubernetes.io/version\":\"$TAG\"}},\"spec\":{\"imagePullSecrets\":[{\"name\":\"quay-pull-secret\"}]}}}}"
+          echo "Checking if image pull secret '${PULL_SECRET}' is configured on deployment..."
+          if ! kubectl get deployment personal-site -n personal-site -o jsonpath='{.spec.template.spec.imagePullSecrets[*].name}' 2>/dev/null | grep -qw "${PULL_SECRET}"; then
+            echo "Adding image pull secret '${PULL_SECRET}' to deployment..."
+            kubectl patch deployment personal-site -n personal-site --type='strategic' -p "{\"spec\":{\"template\":{\"spec\":{\"imagePullSecrets\":[{\"name\":\"${PULL_SECRET}\"}]}}}}"
+          else
+            echo "Image pull secret '${PULL_SECRET}' is already configured on deployment."
+          fi
+
+          echo "Updating version label to $TAG..."
+          kubectl patch deployment personal-site -n personal-site --type='strategic' -p "{\"metadata\":{\"labels\":{\"version\":\"$TAG\",\"app.kubernetes.io/version\":\"$TAG\"}},\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"version\":\"$TAG\",\"app.kubernetes.io/version\":\"$TAG\"}}}}}"
 
           echo "Triggering rollout restart for personal-site deployment..."
           kubectl rollout restart deployment/personal-site -n personal-site
