@@ -21,6 +21,45 @@ tasks:
     cmds:
       - npm run test
 
+  test:e2e:
+    desc: Run Playwright end-to-end tests
+    cmds:
+      - npm run test:e2e
+
+  test:all:
+    desc: Run all unit and E2E tests
+    cmds:
+      - npm run test
+      - npm run test:e2e
+
+  screenshots:
+    desc: Capture UI screenshots across light and dark modes for visual inspection
+    cmds:
+      - npm run screenshots
+
+  lint:
+    desc: Run ESLint
+    cmds:
+      - npm run lint
+
+  format:
+    desc: Format codebase with Prettier
+    cmds:
+      - npm run format
+
+  format:check:
+    desc: Check formatting with Prettier
+    cmds:
+      - npm run format:check
+
+  check:
+    desc: Run all quality checks (formatting check, lint, unit tests, and E2E tests)
+    cmds:
+      - npm run format:check
+      - npm run lint
+      - npm run test
+      - npm run test:e2e
+
   build-container:
     desc: Build the Next.js production container image using Podman
     cmds:
