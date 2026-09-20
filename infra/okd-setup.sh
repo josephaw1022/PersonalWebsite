@@ -37,6 +37,8 @@ spec:
         app.kubernetes.io/version: ${VERSION}
         app.kubernetes.io/part-of: personal-website-app
     spec:
+      imagePullSecrets:
+      - name: quay-pull-secret
       containers:
       - name: personalwebsite
         image: quay.kubesoar.com/admin/personalwebsite:${VERSION}

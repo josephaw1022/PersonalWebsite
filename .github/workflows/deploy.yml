@@ -48,8 +48,8 @@ jobs:
           echo "Updating deployment image to ${IMAGE}:$TAG..."
           kubectl set image deployment/personal-site personalwebsite=${IMAGE}:$TAG -n personal-site
 
-          echo "Updating version label to $TAG..."
-          kubectl patch deployment personal-site -n personal-site --type='strategic' -p "{\"metadata\":{\"labels\":{\"version\":\"$TAG\",\"app.kubernetes.io/version\":\"$TAG\"}},\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"version\":\"$TAG\",\"app.kubernetes.io/version\":\"$TAG\"}}}}}"
+          echo "Updating version label and ensuring imagePullSecrets on deployment..."
+          kubectl patch deployment personal-site -n personal-site --type='strategic' -p "{\"metadata\":{\"labels\":{\"version\":\"$TAG\",\"app.kubernetes.io/version\":\"$TAG\"}},\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"version\":\"$TAG\",\"app.kubernetes.io/version\":\"$TAG\"}},\"spec\":{\"imagePullSecrets\":[{\"name\":\"quay-pull-secret\"}]}}}}"
 
           echo "Triggering rollout restart for personal-site deployment..."
           kubectl rollout restart deployment/personal-site -n personal-site
