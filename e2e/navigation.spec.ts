@@ -12,7 +12,7 @@ test.describe("Site Navigation", () => {
     // Click on About navigation link
     await page.click("nav >> text=About");
     await expect(page).toHaveURL(/.*\/about/);
-    await expect(page.locator("h1")).toContainText("About My Approach");
+    await expect(page.locator("h1")).toContainText("About Me");
 
     // Click on Skills navigation link
     await page.click("nav >> text=Skills");

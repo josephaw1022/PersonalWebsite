@@ -32,26 +32,20 @@ test.describe("Theme Toggle and Coloring", () => {
     await expect(header).toHaveClass(/dark:border-zinc-800/);
   });
 
-  test("all skill images on skills page load successfully", async ({
+  test("all skill cards and category icons on skills page load successfully", async ({
     page,
   }) => {
     await page.goto("/skills");
     await page.waitForLoadState("networkidle");
 
-    const images = page.locator(".card-minimal img");
-    const count = await images.count();
+    const cards = page.locator(".card-minimal");
+    const count = await cards.count();
     expect(count).toBeGreaterThan(0);
 
     for (let i = 0; i < count; i++) {
-      const img = images.nth(i);
-      await expect(img).toBeVisible();
-      await img.scrollIntoViewIfNeeded();
-      await expect(async () => {
-        const isLoaded = await img.evaluate(
-          (node: HTMLImageElement) => node.complete && node.naturalWidth > 0,
-        );
-        expect(isLoaded).toBe(true);
-      }).toPass({ timeout: 5000 });
+      const card = cards.nth(i);
+      await expect(card).toBeVisible();
+      await expect(card.locator("svg").first()).toBeVisible();
     }
   });
 });

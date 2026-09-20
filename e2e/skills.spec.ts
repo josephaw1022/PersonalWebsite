@@ -5,68 +5,60 @@ test.describe("Skills Page Interactions", () => {
     await page.goto("/skills");
   });
 
-  test("hovering over a skill card transitions the icon from grayscale to color", async ({
+  test("renders all skill domain categories and key skills", async ({
     page,
   }) => {
-    // Find the Helm skill card - it contains the text "Helm"
-    const helmCard = page.locator(".card-minimal", { hasText: /^Helm$/ });
-    const helmIcon = helmCard.locator("img");
+    await expect(page.locator("h1")).toHaveText("Technical Skills");
 
-    // 1. Initial State: Icon should be grayscale
-    // We check the computed style of the filter
-    const initialFilter = await helmIcon.evaluate(
-      (el) => window.getComputedStyle(el).filter,
-    );
+    // Verify key category cards
+    await expect(
+      page.getByRole("heading", { name: "Cloud & Platforms" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Containers & Orchestration" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "GitOps, CI/CD & IaC" }),
+    ).toBeVisible();
 
-    // Most browsers will return 'grayscale(1)' or 'grayscale(100%)'
-    expect(initialFilter).toContain("grayscale");
-    expect(initialFilter).not.toContain("grayscale(0)");
-
-    // 2. Hover State: Hover over the CARD container
-    // This should trigger the group-hover effect on the icon
-    await helmCard.hover();
-
-    // 3. Verification: Icon should no longer be grayscale
-    // We use expect.toPass to account for the 0.3s CSS transition
-    await expect(async () => {
-      const hoveredFilter = await helmIcon.evaluate(
-        (el) => window.getComputedStyle(el).filter,
-      );
-      // It should either be 'none' or 'grayscale(0)' depending on the browser
-      const isColor =
-        hoveredFilter === "none" || hoveredFilter.includes("grayscale(0)");
-      expect(isColor).toBe(true);
-
-      const hoveredOpacity = await helmIcon.evaluate(
-        (el) => window.getComputedStyle(el).opacity,
-      );
-      expect(hoveredOpacity).toBe("1");
-    }).toPass({ timeout: 2000 });
+    // Verify key skill tags
+    await expect(page.getByText("Kubernetes", { exact: true })).toBeVisible();
+    await expect(page.getByText("Argo CD", { exact: true })).toBeVisible();
+    await expect(page.getByText("Terraform", { exact: true })).toBeVisible();
   });
 
-  test("icon returns to grayscale when hover is removed", async ({ page }) => {
-    const helmCard = page.locator(".card-minimal", { hasText: /^Helm$/ });
-    const helmIcon = helmCard.locator("img");
+  test("filtering by domain shows only matching category card", async ({
+    page,
+  }) => {
+    // Click on Cloud & Platforms filter tab
+    await page
+      .getByRole("button", { name: "Cloud & Platforms", exact: true })
+      .click();
 
-    // Hover and wait for color
-    await helmCard.hover();
-    await expect(async () => {
-      const filter = await helmIcon.evaluate(
-        (el) => window.getComputedStyle(el).filter,
-      );
-      expect(filter === "none" || filter.includes("grayscale(0)")).toBe(true);
-    }).toPass();
+    // Cloud card should be visible
+    await expect(
+      page.getByRole("heading", { name: "Cloud & Platforms" }),
+    ).toBeVisible();
 
-    // Move mouse away (e.g. to the heading)
-    await page.hover("h1");
+    // Other categories should not be visible
+    await expect(
+      page.getByRole("heading", { name: "Containers & Orchestration" }),
+    ).not.toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "GitOps, CI/CD & IaC" }),
+    ).not.toBeVisible();
 
-    // Should return to grayscale
-    await expect(async () => {
-      const filter = await helmIcon.evaluate(
-        (el) => window.getComputedStyle(el).filter,
-      );
-      expect(filter).toContain("grayscale");
-      expect(filter).not.toContain("grayscale(0)");
-    }).toPass();
+    // Reset filter to All Domains
+    await page
+      .getByRole("button", { name: "All Domains", exact: true })
+      .click();
+
+    // All should be visible again
+    await expect(
+      page.getByRole("heading", { name: "Containers & Orchestration" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "GitOps, CI/CD & IaC" }),
+    ).toBeVisible();
   });
 });
