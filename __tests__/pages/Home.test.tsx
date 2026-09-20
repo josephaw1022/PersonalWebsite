@@ -26,4 +26,17 @@ describe("Home Page", () => {
       screen.getByRole("link", { name: /cat about\.md/i }),
     ).toHaveAttribute("href", "/about");
   });
+
+  it("renders core overview pillars", () => {
+    render(<Home />);
+    expect(
+      screen.getByRole("heading", { name: /Kubernetes Ecosystem/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /GitOps & Automation/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /Platform Security/i }),
+    ).toBeInTheDocument();
+  });
 });
