@@ -232,8 +232,13 @@ jobs:
               app.kubernetes.io/part-of: personal-website-app
             annotations:
               kubernetes.io/ingress.class: istio
+              cert-manager.io/cluster-issuer: cloudflare-dns01
           spec:
             ingressClassName: istio
+            tls:
+            - hosts:
+              - ${DEV_DOMAIN}
+              secretName: personal-site-dev-tls
             rules:
             - host: ${DEV_DOMAIN}
               http:
