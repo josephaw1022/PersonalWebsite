@@ -83,30 +83,13 @@ else
   }
 fi
 
-echo "==> Creating namespaces..."
+echo "==> Ensuring runner namespace exists..."
 "${KUBECTL[@]}" apply -f - <<EOF
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: ${CONTROLLER_NS}
----
 apiVersion: v1
 kind: Namespace
 metadata:
   name: ${RUNNER_NS}
 EOF
-
-echo "==> Setting up Helm repository for Actions Runner Controller..."
-helm repo add actions-runner-controller https://actions-runner-controller.github.io/actions-runner-controller || true
-# Modern charts are actually in OCI registry, so we don't need the repo add for the new ones, 
-# but let's use the OCI registry directly.
-# Helm OCI charts for ARC: oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
-# and oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
-
-echo "==> Installing/Upgrading gha-runner-scale-set-controller..."
-"${HELM[@]}" upgrade --install "${CONTROLLER_RELEASE}" \
-  --namespace "${CONTROLLER_NS}" \
-  oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
 
 echo "==> Cleaning up existing runner scale set (forces fresh GitHub registration)..."
 if "${HELM[@]}" status "${RUNNER_RELEASE}" -n "${RUNNER_NS}" >/dev/null 2>&1; then
