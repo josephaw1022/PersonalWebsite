@@ -6,7 +6,9 @@ test.describe("Site Navigation", () => {
     await page.goto("/");
 
     // Verify Homepage
-    await expect(page).toHaveTitle(/Joseph Whiteaker \| Senior Cloud Engineer/);
+    await expect(page).toHaveTitle(
+      /Joseph Whiteaker \| Senior Platform Engineer/,
+    );
     await expect(page.locator("h1")).toContainText("Building reliable");
 
     // Click on About navigation link

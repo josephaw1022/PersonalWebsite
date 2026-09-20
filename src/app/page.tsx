@@ -7,7 +7,7 @@ export default function Home() {
       <div className="max-w-3xl animate-fade-in">
         <div className="inline-flex items-center gap-2 mb-8 font-mono text-sm text-emerald-600 dark:text-emerald-400">
           <Terminal className="w-4 h-4" />
-          <span>$ whoami --role=&quot;Senior Cloud Engineer&quot;</span>
+          <span>$ whoami --role=&quot;Senior Platform Engineer&quot;</span>
         </div>
 
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-foreground mb-6 leading-tight">
