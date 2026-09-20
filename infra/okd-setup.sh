@@ -37,9 +37,11 @@ spec:
         app.kubernetes.io/version: ${VERSION}
         app.kubernetes.io/part-of: personal-website-app
     spec:
+      imagePullSecrets:
+      - name: quay-pull-secret
       containers:
       - name: personalwebsite
-        image: ghcr.io/josephaw1022/personalwebsite:${VERSION}
+        image: quay.kubesoar.com/admin/personalwebsite:${VERSION}
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
