@@ -20,17 +20,22 @@ jobs:
       - name: Build image
         run: |
           IMAGE="ghcr.io/$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')"
-          TAG="${{ github.sha }}"
-          docker build -f Containerfile -t "${IMAGE}:${TAG}" .
+          SHA="${{ github.sha }}"
+          SHORT_SHA="${SHA:0:7}"
+          docker build -f Containerfile \
+            -t "${IMAGE}:${SHORT_SHA}" \
+            -t "${IMAGE}:${SHA}" .
           if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
-            docker tag "${IMAGE}:${TAG}" "${IMAGE}:latest"
+            docker tag "${IMAGE}:${SHORT_SHA}" "${IMAGE}:latest"
           fi
 
       - name: Push image
         run: |
           IMAGE="ghcr.io/$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')"
-          TAG="${{ github.sha }}"
-          docker push "${IMAGE}:${TAG}"
+          SHA="${{ github.sha }}"
+          SHORT_SHA="${SHA:0:7}"
+          docker push "${IMAGE}:${SHORT_SHA}"
+          docker push "${IMAGE}:${SHA}"
           if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
             docker push "${IMAGE}:latest"
           fi
