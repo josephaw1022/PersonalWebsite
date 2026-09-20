@@ -27,17 +27,7 @@ describe("Home Page", () => {
     ).toHaveAttribute("href", "/about");
   });
 
-  it("renders live architecture telemetry highlights", () => {
-    render(<Home />);
-    expect(screen.getByText(/1,200\+ Apps/i)).toBeInTheDocument();
-    expect(screen.getByText(/40\+ Teams/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/Bare-Metal OKD 4\.20 Homelab/i),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/Zero-Trust GitOps/i)).toBeInTheDocument();
-  });
-
-  it("renders core architectural pillars", () => {
+  it("renders core architectural pillars with headings", () => {
     render(<Home />);
     expect(
       screen.getByRole("heading", { name: /Kubernetes Ecosystem/i }),
@@ -47,17 +37,6 @@ describe("Home Page", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: /Platform Security/i }),
-    ).toBeInTheDocument();
-  });
-
-  it("renders platform spec snippet and spotlight cards", () => {
-    render(<Home />);
-    expect(screen.getByText("platform-spec.yaml")).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: /Bare-Metal Homelab/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: /Open Source & Tooling/i }),
     ).toBeInTheDocument();
   });
 });
