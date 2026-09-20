@@ -10,6 +10,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e": "playwright test",
+    "screenshots": "playwright test e2e/screenshots.spec.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

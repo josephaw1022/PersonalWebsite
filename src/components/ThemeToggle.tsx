@@ -25,7 +25,7 @@ export function ThemeToggle() {
   ];
 
   return (
-    <div className="flex items-center gap-1 bg-zinc-200/50 dark:bg-zinc-800/50 p-1 rounded-full border border-zinc-300 dark:border-zinc-700">
+    <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-full border border-zinc-200 dark:border-zinc-800">
       {themes.map((t) => {
         const Icon = t.icon;
         const isActive = theme === t.name;
@@ -35,8 +35,8 @@ export function ThemeToggle() {
             onClick={() => setTheme(t.name)}
             className={`p-1.5 rounded-full transition-all duration-200 ${
               isActive
-                ? "bg-white dark:bg-zinc-600 text-emerald-600 dark:text-emerald-400 shadow-sm"
-                : "text-zinc-500 hover:text-foreground dark:hover:text-white"
+                ? "bg-white dark:bg-zinc-800 text-emerald-600 dark:text-emerald-400 shadow-sm"
+                : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
             }`}
             title={`Switch to ${t.label} mode`}
             aria-label={`Switch to ${t.label} mode`}
