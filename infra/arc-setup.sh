@@ -68,6 +68,7 @@ CONTROLLER_RELEASE="arc"
 CONTROLLER_SA_NAME="${CONTROLLER_RELEASE}-gha-rs-controller"
 RUNNER_NS="personal-site"
 TARGET_NS="personal-site"
+DEV_NS="personal-site-dev-envs"
 RUNNER_RELEASE="personal-site-runner"
 SA_NAME="personal-site-runner-sa"
 SECRET_NAME="personal-site-runner-secret"
@@ -83,12 +84,17 @@ else
   }
 fi
 
-echo "==> Ensuring runner namespace exists..."
+echo "==> Ensuring runner and target namespaces exist..."
 "${KUBECTL[@]}" apply -f - <<EOF
 apiVersion: v1
 kind: Namespace
 metadata:
   name: ${RUNNER_NS}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ${DEV_NS}
 EOF
 
 echo "==> Cleaning up existing runner scale set (forces fresh GitHub registration)..."
@@ -112,13 +118,27 @@ metadata:
   namespace: ${RUNNER_NS}
 EOF
 
-echo "==> Creating RoleBinding for the runner ServiceAccount in the target namespace..."
+echo "==> Creating RoleBinding for the runner ServiceAccount in production and dev namespaces..."
 "${KUBECTL[@]}" apply -f - <<EOF
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: runner-admin-binding
   namespace: ${TARGET_NS}
+subjects:
+- kind: ServiceAccount
+  name: ${SA_NAME}
+  namespace: ${RUNNER_NS}
+roleRef:
+  kind: ClusterRole
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runner-admin-binding
+  namespace: ${DEV_NS}
 subjects:
 - kind: ServiceAccount
   name: ${SA_NAME}

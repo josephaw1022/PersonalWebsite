@@ -1,0 +1,38 @@
+name: Deploy Production Personal Site
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Container image tag to deploy (defaults to git commit SHA)"
+        required: false
+        type: string
+
+jobs:
+  deploy-prod:
+    name: Deploy to Production
+    runs-on: personal-site-runner
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Resolve Image Tag
+        id: resolve-tag
+        run: |
+          INPUT_TAG="${{ inputs.tag }}"
+          if [ -n "${INPUT_TAG}" ]; then
+            TAG="${INPUT_TAG}"
+          else
+            SHA="${{ github.sha }}"
+            TAG="${SHA:0:7}"
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to Production Environment
+        uses: ./.github/actions/deploy-workload
+        with:
+          namespace: personal-site
+          deployment-name: personal-site
+          tag: ${{ steps.resolve-tag.outputs.tag }}
+          registry-user: ${{ secrets.QUAY_USERNAME || 'admin' }}
