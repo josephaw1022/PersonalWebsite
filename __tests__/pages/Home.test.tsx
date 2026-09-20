@@ -10,6 +10,13 @@ describe("Home Page", () => {
     expect(heading).toHaveTextContent(/cloud infrastructure/i);
   });
 
+  it("renders the role as Senior Platform Engineer", () => {
+    render(<Home />);
+    expect(
+      screen.getByText(/whoami --role="Senior Platform Engineer"/i),
+    ).toBeInTheDocument();
+  });
+
   it("renders call to action links", () => {
     render(<Home />);
     expect(

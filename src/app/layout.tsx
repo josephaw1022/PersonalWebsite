@@ -17,9 +17,9 @@ const firaCode = Fira_Code({
 });
 
 export const metadata: Metadata = {
-  title: "Joseph Whiteaker | Senior Cloud Engineer",
+  title: "Joseph Whiteaker | Senior Platform Engineer",
   description:
-    "Portfolio of Joseph Whiteaker, a Senior Platform & Cloud Engineer specializing in Kubernetes, GitOps, and Enterprise Infrastructure.",
+    "Portfolio of Joseph Whiteaker, a Senior Platform Engineer specializing in Kubernetes, GitOps, and Enterprise Infrastructure.",
 };
 
 export default function RootLayout({

@@ -6,13 +6,15 @@ test.describe("Site Navigation", () => {
     await page.goto("/");
 
     // Verify Homepage
-    await expect(page).toHaveTitle(/Joseph Whiteaker \| Senior Cloud Engineer/);
+    await expect(page).toHaveTitle(
+      /Joseph Whiteaker \| Senior Platform Engineer/,
+    );
     await expect(page.locator("h1")).toContainText("Building reliable");
 
     // Click on About navigation link
     await page.click("nav >> text=About");
     await expect(page).toHaveURL(/.*\/about/);
-    await expect(page.locator("h1")).toContainText("About My Approach");
+    await expect(page.locator("h1")).toContainText("About Me");
 
     // Click on Skills navigation link
     await page.click("nav >> text=Skills");
