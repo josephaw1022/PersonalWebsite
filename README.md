@@ -74,18 +74,22 @@ No ingress controllers, load balancers, or public IPs are needed on the clusterâ
 
 ## Deployment
 
-Deploy to OpenShift with a single command:
+1. **Configure Cluster Runners:**
+
+Set up the GitHub Actions Runner Controller (ARC) runner scale set on your OpenShift cluster:
 
 ```bash
-./infra/okd-setup.sh
+./infra/arc-setup.sh
 ```
 
-This script creates:
+2. **Bootstrap Workloads:**
 
-- The `personal-site` namespace/project
-- A 3-replica Next.js Deployment
-- A ClusterIP Service
-- A NetworkPolicy restricting traffic to cloudflared only
+Trigger the **Bootstrap Cluster Infrastructure** workflow (`.github/workflows/bootstrap-cluster.yml`) via `workflow_dispatch` in GitHub Actions. This idempotent workflow runs on the in-cluster runners and creates:
+
+- The container image pull secret (`quay-pull-secret`) linked to the default service account
+- The 3-replica Next.js `Deployment` configured with telemetry labels
+- The `ClusterIP` Service exposing port 80 (target port 3000)
+- Verifies rollout completion
 
 ---
 
