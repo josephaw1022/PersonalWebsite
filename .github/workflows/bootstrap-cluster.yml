@@ -1,0 +1,126 @@
+name: Bootstrap Cluster Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Container image tag to deploy (defaults to latest)"
+        required: false
+        default: "latest"
+        type: string
+      namespace:
+        description: "Kubernetes namespace"
+        required: false
+        default: "personal-site"
+        type: string
+      secret_name:
+        description: "Name of the pull secret to create"
+        required: false
+        default: "quay-pull-secret"
+        type: string
+
+jobs:
+  bootstrap:
+    name: Bootstrap Cluster Workloads
+    runs-on: personal-site-runner
+    environment: production
+    steps:
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v5
+        with:
+          version: "latest"
+
+      - name: Create or Update Image Pull Secret
+        run: |
+          NAMESPACE="${{ inputs.namespace || 'personal-site' }}"
+          SECRET_NAME="${{ inputs.secret_name || 'quay-pull-secret' }}"
+          REGISTRY_SERVER="quay.kubesoar.com"
+
+          echo "Creating or updating secret '${SECRET_NAME}' in namespace '${NAMESPACE}'..."
+          kubectl create secret docker-registry "${SECRET_NAME}" \
+            --docker-server="${REGISTRY_SERVER}" \
+            --docker-username="${{ secrets.QUAY_USERNAME }}" \
+            --docker-password="${{ secrets.QUAY_PASSWORD }}" \
+            --namespace="${NAMESPACE}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          echo "Linking '${SECRET_NAME}' to default service account in '${NAMESPACE}'..."
+          kubectl patch serviceaccount default -n "${NAMESPACE}" -p "{\"imagePullSecrets\": [{\"name\": \"${SECRET_NAME}\"}]}" || true
+
+          echo "Image pull secret '${SECRET_NAME}' configured successfully."
+
+      - name: Deploy Workloads
+        run: |
+          NAMESPACE="${{ inputs.namespace || 'personal-site' }}"
+          SECRET_NAME="${{ inputs.secret_name || 'quay-pull-secret' }}"
+          VERSION="${{ inputs.tag || 'latest' }}"
+          REGISTRY_USER="${{ secrets.QUAY_USERNAME || 'admin' }}"
+          IMAGE="quay.kubesoar.com/${REGISTRY_USER}/personalwebsite"
+
+          echo "Applying Deployment and Service manifests to namespace '${NAMESPACE}' with tag '${VERSION}'..."
+          sed -E 's/^ {10}//' <<EOF | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: personal-site
+            namespace: ${NAMESPACE}
+            labels:
+              app: personal-site
+              version: ${VERSION}
+              app.kubernetes.io/name: personal-site
+              app.kubernetes.io/version: ${VERSION}
+              app.kubernetes.io/part-of: personal-website-app
+              app.openshift.io/runtime: nodejs
+            annotations:
+              # Links this workload to the ARC runner scale set component (app.kubernetes.io/instance=personal-site-runner) in Topology.
+              app.openshift.io/connects-to: '["personal-site-runner"]'
+          spec:
+            replicas: 3
+            selector:
+              matchLabels:
+                app: personal-site
+            template:
+              metadata:
+                labels:
+                  app: personal-site
+                  version: ${VERSION}
+                  app.kubernetes.io/name: personal-site
+                  app.kubernetes.io/version: ${VERSION}
+                  app.kubernetes.io/part-of: personal-website-app
+              spec:
+                imagePullSecrets:
+                - name: ${SECRET_NAME}
+                containers:
+                - name: personalwebsite
+                  image: ${IMAGE}:${VERSION}
+                  imagePullPolicy: Always
+                  ports:
+                  - containerPort: 3000
+                  env:
+                  - name: PORT
+                    value: "3000"
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: personal-site
+            namespace: ${NAMESPACE}
+            labels:
+              app: personal-site
+              app.kubernetes.io/name: personal-site
+              app.kubernetes.io/part-of: personal-website-app
+          spec:
+            selector:
+              app: personal-site
+            ports:
+              - protocol: TCP
+                port: 80
+                targetPort: 3000
+            type: ClusterIP
+          EOF
+
+      - name: Verify Rollout Status
+        run: |
+          NAMESPACE="${{ inputs.namespace || 'personal-site' }}"
+          echo "Waiting for personal-site deployment rollout to complete..."
+          kubectl rollout status deployment/personal-site -n "${NAMESPACE}" --timeout=180s
