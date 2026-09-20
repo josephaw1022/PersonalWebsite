@@ -3,15 +3,19 @@ name: Bootstrap Cluster Infrastructure
 on:
   workflow_dispatch:
     inputs:
+      target_env:
+        description: "Target environment to bootstrap (all, production, development)"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - production
+          - development
       tag:
         description: "Container image tag to deploy (defaults to latest)"
         required: false
         default: "latest"
-        type: string
-      namespace:
-        description: "Kubernetes namespace"
-        required: false
-        default: "personal-site"
         type: string
       secret_name:
         description: "Name of the pull secret to create"
@@ -30,34 +34,53 @@ jobs:
         with:
           version: "latest"
 
+      - name: Ensure Namespaces Exist
+        run: |
+          TARGET_ENV="${{ inputs.target_env || 'all' }}"
+          if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "production" ]; then
+            kubectl create namespace personal-site --dry-run=client -o yaml | kubectl apply -f -
+          fi
+          if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "development" ]; then
+            kubectl create namespace personal-site-dev-envs --dry-run=client -o yaml | kubectl apply -f -
+          fi
+
       - name: Create or Update Image Pull Secret
         run: |
-          NAMESPACE="${{ inputs.namespace || 'personal-site' }}"
+          TARGET_ENV="${{ inputs.target_env || 'all' }}"
           SECRET_NAME="${{ inputs.secret_name || 'quay-pull-secret' }}"
           REGISTRY_SERVER="quay.kubesoar.com"
 
-          echo "Creating or updating secret '${SECRET_NAME}' in namespace '${NAMESPACE}'..."
-          kubectl create secret docker-registry "${SECRET_NAME}" \
-            --docker-server="${REGISTRY_SERVER}" \
-            --docker-username="${{ secrets.QUAY_USERNAME }}" \
-            --docker-password="${{ secrets.QUAY_PASSWORD }}" \
-            --namespace="${NAMESPACE}" \
-            --dry-run=client -o yaml | kubectl apply -f -
+          NAMESPACES=()
+          if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "production" ]; then
+            NAMESPACES+=("personal-site")
+          fi
+          if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "development" ]; then
+            NAMESPACES+=("personal-site-dev-envs")
+          fi
 
-          echo "Linking '${SECRET_NAME}' to default service account in '${NAMESPACE}'..."
-          kubectl patch serviceaccount default -n "${NAMESPACE}" -p "{\"imagePullSecrets\": [{\"name\": \"${SECRET_NAME}\"}]}" || true
+          for NS in "${NAMESPACES[@]}"; do
+            echo "Creating or updating secret '${SECRET_NAME}' in namespace '${NS}'..."
+            kubectl create secret docker-registry "${SECRET_NAME}" \
+              --docker-server="${REGISTRY_SERVER}" \
+              --docker-username="${{ secrets.QUAY_USERNAME }}" \
+              --docker-password="${{ secrets.QUAY_PASSWORD }}" \
+              --namespace="${NS}" \
+              --dry-run=client -o yaml | kubectl apply -f -
 
-          echo "Image pull secret '${SECRET_NAME}' configured successfully."
+            echo "Linking '${SECRET_NAME}' to default service account in '${NS}'..."
+            kubectl patch serviceaccount default -n "${NS}" -p "{\"imagePullSecrets\": [{\"name\": \"${SECRET_NAME}\"}]}" || true
+          done
 
-      - name: Deploy Workloads
+      - name: Deploy Production Workloads
+        if: ${{ inputs.target_env == 'all' || inputs.target_env == 'production' }}
         run: |
-          NAMESPACE="${{ inputs.namespace || 'personal-site' }}"
+          NAMESPACE="personal-site"
           SECRET_NAME="${{ inputs.secret_name || 'quay-pull-secret' }}"
           VERSION="${{ inputs.tag || 'latest' }}"
           REGISTRY_USER="${{ secrets.QUAY_USERNAME || 'admin' }}"
           IMAGE="quay.kubesoar.com/${REGISTRY_USER}/personalwebsite"
 
-          echo "Applying Deployment and Service manifests to namespace '${NAMESPACE}' with tag '${VERSION}'..."
+          echo "Applying Production Deployment and Service manifests to namespace '${NAMESPACE}'..."
           sed -E 's/^ {10}//' <<EOF | kubectl apply -f -
           apiVersion: apps/v1
           kind: Deployment
@@ -72,7 +95,6 @@ jobs:
               app.kubernetes.io/part-of: personal-website-app
               app.openshift.io/runtime: nodejs
             annotations:
-              # Links this workload to the ARC runner scale set component (app.kubernetes.io/instance=personal-site-runner) in Topology.
               app.openshift.io/connects-to: '["personal-site-runner"]'
           spec:
             replicas: 3
@@ -119,8 +141,110 @@ jobs:
             type: ClusterIP
           EOF
 
+      - name: Deploy Development Workloads
+        if: ${{ inputs.target_env == 'all' || inputs.target_env == 'development' }}
+        run: |
+          NAMESPACE="personal-site-dev-envs"
+          SECRET_NAME="${{ inputs.secret_name || 'quay-pull-secret' }}"
+          VERSION="${{ inputs.tag || 'latest' }}"
+          REGISTRY_USER="${{ secrets.QUAY_USERNAME || 'admin' }}"
+          IMAGE="quay.kubesoar.com/${REGISTRY_USER}/personalwebsite"
+          DEV_DOMAIN="jwhiteaker.homelab.kubesoar.com"
+
+          echo "Applying Dev Deployment, Service, and Ingress manifests to namespace '${NAMESPACE}'..."
+          sed -E 's/^ {10}//' <<EOF | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: personal-site
+            namespace: ${NAMESPACE}
+            labels:
+              app: personal-site
+              version: ${VERSION}
+              app.kubernetes.io/name: personal-site
+              app.kubernetes.io/version: ${VERSION}
+              app.kubernetes.io/part-of: personal-website-app
+              app.openshift.io/runtime: nodejs
+            annotations:
+              app.openshift.io/connects-to: '["personal-site-runner"]'
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: personal-site
+            template:
+              metadata:
+                labels:
+                  app: personal-site
+                  version: ${VERSION}
+                  app.kubernetes.io/name: personal-site
+                  app.kubernetes.io/version: ${VERSION}
+                  app.kubernetes.io/part-of: personal-website-app
+              spec:
+                imagePullSecrets:
+                - name: ${SECRET_NAME}
+                containers:
+                - name: personalwebsite
+                  image: ${IMAGE}:${VERSION}
+                  imagePullPolicy: Always
+                  ports:
+                  - containerPort: 3000
+                  env:
+                  - name: PORT
+                    value: "3000"
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: personal-site
+            namespace: ${NAMESPACE}
+            labels:
+              app: personal-site
+              app.kubernetes.io/name: personal-site
+              app.kubernetes.io/part-of: personal-website-app
+          spec:
+            selector:
+              app: personal-site
+            ports:
+              - protocol: TCP
+                port: 80
+                targetPort: 3000
+            type: ClusterIP
+          ---
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: personal-site-dev-ingress
+            namespace: ${NAMESPACE}
+            labels:
+              app: personal-site
+              app.kubernetes.io/name: personal-site
+              app.kubernetes.io/part-of: personal-website-app
+            annotations:
+              kubernetes.io/ingress.class: istio
+          spec:
+            ingressClassName: istio
+            rules:
+            - host: ${DEV_DOMAIN}
+              http:
+                paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: personal-site
+                      port:
+                        number: 80
+          EOF
+
       - name: Verify Rollout Status
         run: |
-          NAMESPACE="${{ inputs.namespace || 'personal-site' }}"
-          echo "Waiting for personal-site deployment rollout to complete..."
-          kubectl rollout status deployment/personal-site -n "${NAMESPACE}" --timeout=180s
+          TARGET_ENV="${{ inputs.target_env || 'all' }}"
+          if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "production" ]; then
+            echo "Waiting for production personal-site rollout..."
+            kubectl rollout status deployment/personal-site -n personal-site --timeout=180s
+          fi
+          if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "development" ]; then
+            echo "Waiting for development personal-site rollout..."
+            kubectl rollout status deployment/personal-site -n personal-site-dev-envs --timeout=180s
+          fi
