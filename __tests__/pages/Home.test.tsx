@@ -27,7 +27,7 @@ describe("Home Page", () => {
     ).toHaveAttribute("href", "/about");
   });
 
-  it("renders core architectural pillars with headings", () => {
+  it("renders core overview pillars", () => {
     render(<Home />);
     expect(
       screen.getByRole("heading", { name: /Kubernetes Ecosystem/i }),
