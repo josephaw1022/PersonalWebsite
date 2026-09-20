@@ -1,6 +1,6 @@
 # Personal Website
 
-A simple static website served by **NGINX**, containerized and hosted on a **homelab OpenShift cluster** with secure external access via **Cloudflare Tunnel**.
+A personal website built with **Next.js**, containerized and hosted on a **homelab OpenShift cluster** with secure external access via **Cloudflare Tunnel**.
 
 **Live at:** [jwhiteaker22.com](https://jwhiteaker22.com)
 
@@ -58,7 +58,7 @@ The `cloudflared` deployment runs in its own namespace and handles all inbound t
 
 **4. Personal Site Deployment**
 
-The NGINX deployment serves the static website content. Traffic is routed from `cloudflared` to the `personal-site` ClusterIP service.
+The Next.js deployment serves the website application. Traffic is routed from `cloudflared` to the `personal-site` ClusterIP service.
 
 ![OpenShift Personal Site Topology](assets/okd-personal-site-topology.png)
 
@@ -83,7 +83,7 @@ Deploy to OpenShift with a single command:
 This script creates:
 
 - The `personal-site` namespace/project
-- A 3-replica NGINX Deployment
+- A 3-replica Next.js Deployment
 - A ClusterIP Service
 - A NetworkPolicy restricting traffic to cloudflared only
 
@@ -91,14 +91,23 @@ This script creates:
 
 ## Local Development
 
-Build and run locally with Podman/Docker:
+Run the Next.js development server locally:
+
+```bash
+task dev
+# or: npm run dev
+```
+
+Then visit http://localhost:3000
+
+Alternatively, build and run the production container locally with Podman:
 
 ```bash
 # Build
-podman build -t personalwebsite -f Containerfile .
+task build-container
+# or: npm run build && podman build -t personal-site -f Containerfile .
 
 # Run
-podman run -p 8080:80 personalwebsite
+task run-container
+# or: podman run -p 3000:3000 personal-site
 ```
-
-Then visit http://localhost:8080
