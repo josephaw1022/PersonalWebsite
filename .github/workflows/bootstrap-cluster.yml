@@ -34,15 +34,25 @@ jobs:
         with:
           version: "latest"
 
-      - name: Ensure Namespaces Exist
+      - name: Validate Target Namespaces Exist
         run: |
           TARGET_ENV="${{ inputs.target_env || 'all' }}"
+          NAMESPACES=()
           if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "production" ]; then
-            kubectl create namespace personal-site --dry-run=client -o yaml | kubectl apply -f -
+            NAMESPACES+=("personal-site")
           fi
           if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "development" ]; then
-            kubectl create namespace personal-site-dev-envs --dry-run=client -o yaml | kubectl apply -f -
+            NAMESPACES+=("personal-site-dev-envs")
           fi
+
+          for NS in "${NAMESPACES[@]}"; do
+            echo "Checking that namespace '${NS}' exists..."
+            if ! kubectl get namespace "${NS}" >/dev/null 2>&1; then
+              echo "Error: Namespace '${NS}' does not exist. Please run 'infra/arc-setup.sh' to set up cluster infrastructure and runner RBAC before bootstrapping workloads." >&2
+              exit 1
+            fi
+            echo "Namespace '${NS}' is ready."
+          done
 
       - name: Create or Update Image Pull Secret
         run: |
