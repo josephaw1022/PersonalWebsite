@@ -91,7 +91,7 @@ jobs:
           IMAGE="quay.kubesoar.com/${REGISTRY_USER}/personalwebsite"
 
           echo "Applying Production Deployment and Service manifests to namespace '${NAMESPACE}'..."
-          sed -E 's/^ {10}//' <<EOF | kubectl apply -f -
+          kubectl apply -f - <<EOF
           apiVersion: apps/v1
           kind: Deployment
           metadata:
@@ -162,7 +162,7 @@ jobs:
           DEV_DOMAIN="jwhiteaker.homelab.kubesoar.com"
 
           echo "Applying Dev Deployment, Service, and Ingress manifests to namespace '${NAMESPACE}'..."
-          sed -E 's/^ {10}//' <<EOF | kubectl apply -f -
+          kubectl apply -f - <<EOF
           apiVersion: apps/v1
           kind: Deployment
           metadata:
