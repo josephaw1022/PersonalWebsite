@@ -13,7 +13,9 @@ Cluster runner infrastructure is managed via `./infra/arc-setup.sh`, while appli
 
 - **GitHub Actions Runner Controller (ARC) Setup:** `./infra/arc-setup.sh`
 - **Workload Bootstrap:** `.github/workflows/bootstrap-cluster.yml`
-- **Continuous Deployment:** `.github/workflows/deploy.yml`
+- **Continuous Deployment (Dev):** `.github/workflows/deploy-dev.yml`
+- **Manual Deployment (Production):** `.github/workflows/deploy-prod.yml`
+- **Shared Deployment Action:** `.github/actions/deploy-workload`
 
 #### ARC Setup Process (`arc-setup.sh`):
 

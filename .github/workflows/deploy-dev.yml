@@ -1,0 +1,49 @@
+name: Deploy Dev Personal Site
+
+on:
+  workflow_run:
+    workflows: ["Container Build & Push"]
+    types:
+      - completed
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Container image tag to deploy (defaults to git commit SHA)"
+        required: false
+        type: string
+
+jobs:
+  deploy-dev:
+    name: Deploy to Dev
+    runs-on: personal-site-runner
+    environment: development
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Resolve Image Tag
+        id: resolve-tag
+        run: |
+          INPUT_TAG="${{ inputs.tag }}"
+          if [ -n "${INPUT_TAG}" ]; then
+            TAG="${INPUT_TAG}"
+          elif [ "${{ github.event_name }}" = "workflow_run" ]; then
+            SHA="${{ github.event.workflow_run.head_sha }}"
+            TAG="${SHA:0:7}"
+          else
+            SHA="${{ github.sha }}"
+            TAG="${SHA:0:7}"
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to Dev Environment
+        uses: ./.github/actions/deploy-workload
+        with:
+          namespace: personal-site-dev-envs
+          deployment-name: personal-site
+          tag: ${{ steps.resolve-tag.outputs.tag }}
+          registry-user: ${{ secrets.QUAY_USERNAME || 'admin' }}
