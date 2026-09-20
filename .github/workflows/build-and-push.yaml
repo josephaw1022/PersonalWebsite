@@ -2,40 +2,41 @@ name: Container Build & Push
 on:
   push:
     branches: [main, master]
+  pull_request:
+    branches: [main, master]
   workflow_dispatch:
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: personal-site-runner
     steps:
       - uses: actions/checkout@v6
 
-      - name: Log in to GHCR
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - name: Log in to Quay Registry
+        run: echo "${{ secrets.QUAY_PASSWORD }}" | podman login quay.kubesoar.com -u "${{ secrets.QUAY_USERNAME }}" --password-stdin
 
       - name: Build image
         run: |
-          IMAGE="ghcr.io/$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')"
+          IMAGE="quay.kubesoar.com/${{ secrets.QUAY_USERNAME }}/personalwebsite"
           SHA="${{ github.sha }}"
           SHORT_SHA="${SHA:0:7}"
-          docker build -f Containerfile \
+          podman build -f Containerfile \
             -t "${IMAGE}:${SHORT_SHA}" \
             -t "${IMAGE}:${SHA}" .
           if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
-            docker tag "${IMAGE}:${SHORT_SHA}" "${IMAGE}:latest"
+            podman tag "${IMAGE}:${SHORT_SHA}" "${IMAGE}:latest"
           fi
 
       - name: Push image
         run: |
-          IMAGE="ghcr.io/$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')"
+          IMAGE="quay.kubesoar.com/${{ secrets.QUAY_USERNAME }}/personalwebsite"
           SHA="${{ github.sha }}"
           SHORT_SHA="${SHA:0:7}"
-          docker push "${IMAGE}:${SHORT_SHA}"
-          docker push "${IMAGE}:${SHA}"
+          podman push "${IMAGE}:${SHORT_SHA}"
+          podman push "${IMAGE}:${SHA}"
           if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
-            docker push "${IMAGE}:latest"
+            podman push "${IMAGE}:latest"
           fi

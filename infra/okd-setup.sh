@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
       - name: personalwebsite
-        image: ghcr.io/josephaw1022/personalwebsite:${VERSION}
+        image: quay.kubesoar.com/admin/personalwebsite:${VERSION}
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
