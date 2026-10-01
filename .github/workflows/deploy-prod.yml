@@ -1,6 +1,14 @@
 name: Deploy Production Personal Site
 
 on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - charts/personal-site/values.yaml
+      - charts/personal-site/values-prod.yaml
+      - charts/personal-site/templates/**
   workflow_dispatch:
     inputs:
       tag:
@@ -19,15 +27,12 @@ jobs:
 
       - name: Resolve Image Tag
         id: resolve-tag
-        run: |
-          INPUT_TAG="${{ inputs.tag }}"
-          if [ -n "${INPUT_TAG}" ]; then
-            TAG="${INPUT_TAG}"
-          else
-            SHA="${{ github.sha }}"
-            TAG="${SHA:0:7}"
-          fi
-          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+        uses: ./.github/actions/resolve-image-tag
+        with:
+          tag: ${{ inputs.tag }}
+          default-sha: ${{ github.sha }}
+          registry-user: ${{ secrets.QUAY_USERNAME || 'admin' }}
+          registry-password: ${{ secrets.QUAY_PASSWORD }}
 
       - name: Deploy to Production Environment
         uses: ./.github/actions/deploy-workload

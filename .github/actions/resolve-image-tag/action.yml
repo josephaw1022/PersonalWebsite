@@ -1,0 +1,112 @@
+name: Resolve Image Tag
+description: Resolve container image tag or verify candidate commit tag against container registry with fallback
+
+inputs:
+  tag:
+    description: Explicitly supplied container image tag (bypasses fallback if non-empty)
+    required: false
+    default: ""
+  default-sha:
+    description: Git commit SHA to derive candidate image tag from if no explicit tag is supplied
+    required: false
+    default: ""
+  registry-server:
+    description: Container registry server host
+    required: false
+    default: quay.kubesoar.com
+  registry-user:
+    description: Container registry username / namespace
+    required: false
+    default: admin
+  registry-password:
+    description: Container registry password or token for authentication
+    required: false
+    default: ""
+  repository-name:
+    description: Repository name on the container registry
+    required: false
+    default: personalwebsite
+
+outputs:
+  tag:
+    description: Resolved container image tag (or empty string if tag does not exist in registry)
+    value: ${{ steps.resolve.outputs.tag }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve and verify image tag
+      id: resolve
+      shell: bash
+      env:
+        INPUT_TAG: ${{ inputs.tag }}
+        INPUT_SHA: ${{ inputs.default-sha }}
+        REGISTRY_SERVER: ${{ inputs.registry-server }}
+        REGISTRY_USER: ${{ inputs.registry-user }}
+        REGISTRY_PASSWORD: ${{ inputs.registry-password }}
+        REPO_NAME: ${{ inputs.repository-name }}
+      run: |
+        if [ -n "${INPUT_TAG}" ]; then
+          echo "Using explicitly provided image tag: ${INPUT_TAG}"
+          echo "tag=${INPUT_TAG}" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        SHA="${INPUT_SHA:-${{ github.sha }}}"
+        CANDIDATE_TAG="${SHA:0:7}"
+        IMAGE="${REGISTRY_SERVER}/${REGISTRY_USER}/${REPO_NAME}"
+        FULL_IMAGE="${IMAGE}:${CANDIDATE_TAG}"
+
+        echo "No explicit tag provided. Candidate tag based on commit SHA: ${CANDIDATE_TAG}"
+
+        if [ -n "${REGISTRY_PASSWORD}" ] && [ -n "${REGISTRY_USER}" ]; then
+          if command -v podman >/dev/null 2>&1; then
+            echo "${REGISTRY_PASSWORD}" | podman login "${REGISTRY_SERVER}" -u "${REGISTRY_USER}" --password-stdin 2>/dev/null || true
+          elif command -v docker >/dev/null 2>&1; then
+            echo "${REGISTRY_PASSWORD}" | docker login "${REGISTRY_SERVER}" -u "${REGISTRY_USER}" --password-stdin 2>/dev/null || true
+          fi
+        fi
+
+        IMAGE_EXISTS=false
+
+        echo "Attempting to pull candidate image '${FULL_IMAGE}'..."
+        if command -v podman >/dev/null 2>&1; then
+          if podman pull "${FULL_IMAGE}"; then
+            echo "Successfully pulled '${FULL_IMAGE}' via podman."
+            IMAGE_EXISTS=true
+          fi
+        elif command -v docker >/dev/null 2>&1; then
+          if docker pull "${FULL_IMAGE}"; then
+            echo "Successfully pulled '${FULL_IMAGE}' via docker."
+            IMAGE_EXISTS=true
+          fi
+        fi
+
+        if [ "${IMAGE_EXISTS}" = "false" ]; then
+          echo "Image pull unsuccessful. Checking Quay registry API for tag '${CANDIDATE_TAG}'..."
+          API_URL="https://${REGISTRY_SERVER}/api/v1/repository/${REGISTRY_USER}/${REPO_NAME}/tag/?onlyActiveTags=true"
+          AUTH_ARGS=()
+          if [ -n "${REGISTRY_PASSWORD}" ] && [ -n "${REGISTRY_USER}" ]; then
+            AUTH_ARGS=(-u "${REGISTRY_USER}:${REGISTRY_PASSWORD}")
+          fi
+
+          TAGS_JSON=$(curl -s -k -f "${AUTH_ARGS[@]}" "${API_URL}" 2>/dev/null || true)
+          if [ -n "${TAGS_JSON}" ]; then
+            if echo "${TAGS_JSON}" | grep -q "\"name\": \"${CANDIDATE_TAG}\""; then
+              echo "Tag '${CANDIDATE_TAG}' found in Quay registry tag list via API."
+              IMAGE_EXISTS=true
+            else
+              echo "Tag '${CANDIDATE_TAG}' not found in Quay registry tags list via API."
+            fi
+          else
+            echo "Could not query Quay API or empty response received."
+          fi
+        fi
+
+        if [ "${IMAGE_EXISTS}" = "true" ]; then
+          echo "Image tag '${CANDIDATE_TAG}' verified in Quay. Setting image tag for deployment."
+          echo "tag=${CANDIDATE_TAG}" >> "$GITHUB_OUTPUT"
+        else
+          echo "Candidate tag '${CANDIDATE_TAG}' is not available in Quay. Omitting image tag override so existing/chart values are used."
+          echo "tag=" >> "$GITHUB_OUTPUT"
+        fi

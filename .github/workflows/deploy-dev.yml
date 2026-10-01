@@ -1,6 +1,14 @@
 name: Deploy Dev Personal Site
 
 on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - charts/personal-site/values.yaml
+      - charts/personal-site/values-dev.yaml
+      - charts/personal-site/templates/**
   workflow_run:
     workflows: ["Container Build & Push"]
     types:
@@ -20,25 +28,19 @@ jobs:
     name: Deploy to Dev
     runs-on: personal-site-runner
     environment: development
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
 
       - name: Resolve Image Tag
         id: resolve-tag
-        run: |
-          INPUT_TAG="${{ inputs.tag }}"
-          if [ -n "${INPUT_TAG}" ]; then
-            TAG="${INPUT_TAG}"
-          elif [ "${{ github.event_name }}" = "workflow_run" ]; then
-            SHA="${{ github.event.workflow_run.head_sha }}"
-            TAG="${SHA:0:7}"
-          else
-            SHA="${{ github.sha }}"
-            TAG="${SHA:0:7}"
-          fi
-          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+        uses: ./.github/actions/resolve-image-tag
+        with:
+          tag: ${{ inputs.tag }}
+          default-sha: ${{ github.event.workflow_run.head_sha || github.sha }}
+          registry-user: ${{ secrets.QUAY_USERNAME || 'admin' }}
+          registry-password: ${{ secrets.QUAY_PASSWORD }}
 
       - name: Deploy to Dev Environment
         uses: ./.github/actions/deploy-workload
