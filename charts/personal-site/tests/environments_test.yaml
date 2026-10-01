@@ -10,6 +10,18 @@ tests:
     values:
       - ../values-dev.yaml
     asserts:
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+        template: deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: "/"
+        template: deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: "/"
+        template: deployment.yaml
       - isNull:
           path: spec.replicas
         template: deployment.yaml
@@ -43,6 +55,18 @@ tests:
     values:
       - ../values-prod.yaml
     asserts:
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+        template: deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: "/"
+        template: deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: "/"
+        template: deployment.yaml
       - equal:
           path: spec.replicas
           value: 5

@@ -50,6 +50,10 @@ spec:
             - name: http
               containerPort: {{ .Values.port | default 3000 }}
               protocol: TCP
+          {{- if .Values.startupProbe }}
+          startupProbe:
+            {{- toYaml .Values.startupProbe | nindent 12 }}
+          {{- end }}
           {{- if .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
