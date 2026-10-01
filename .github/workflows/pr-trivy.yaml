@@ -1,4 +1,4 @@
-name: PR Security Scan (Trivy)
+name: Pull Request - Trivy Security Scan
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: Deploy Dev Personal Site
+name: Deploy Personal Site - Development
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
       - charts/personal-site/values-dev.yaml
       - charts/personal-site/templates/**
   workflow_run:
-    workflows: ["Container Build & Push"]
+    workflows: ["Container Image - Build & Push"]
     types:
       - completed
     branches:

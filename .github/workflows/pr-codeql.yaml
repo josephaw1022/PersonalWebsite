@@ -1,4 +1,4 @@
-name: PR CodeQL Scan
+name: Pull Request - CodeQL Scan
 
 on:
   push:

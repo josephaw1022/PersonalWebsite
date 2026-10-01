@@ -8,7 +8,7 @@ description: Multi-environment deployment model (dev vs prod), Helm values, name
 Workloads are packaged with Helm (`charts/personal-site`) and deployed across two cluster environments:
 
 - **Development (`personal-site-dev-envs`)**:
-  - Automatically deployed on completion of `Container Build & Push`, on `push` to `main` impacting Helm values (`values.yaml`, `values-dev.yaml`) or templates (`templates/**`), or manually via `workflow_dispatch` in `.github/workflows/deploy-dev.yml`.
+  - Automatically deployed on completion of `Container Image - Build & Push`, on `push` to `main` impacting Helm values (`values.yaml`, `values-dev.yaml`) or templates (`templates/**`), or manually via `workflow_dispatch` in `.github/workflows/deploy-dev.yml`.
   - Configured using `charts/personal-site/values-dev.yaml` (HPA autoscaling: 3–5 replicas, Ingress enabled, PDB enabled with minAvailable 1).
   - Ingress configured with `istio` ingress class for `jwhiteaker.homelab.kubesoar.com`.
   - Runner ServiceAccount in `personal-site` has `admin` RBAC over this namespace.

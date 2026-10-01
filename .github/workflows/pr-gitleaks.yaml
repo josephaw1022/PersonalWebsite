@@ -1,4 +1,4 @@
-name: PR GitLeaks Scan
+name: Pull Request - GitLeaks Scan
 
 on:
   push:

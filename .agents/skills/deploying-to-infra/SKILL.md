@@ -41,4 +41,4 @@ Cluster runner infrastructure is managed via `./infra/arc-setup.sh`, while appli
 4. Idempotently deploys the `personal-site` Helm chart to production and/or dev namespaces using `helm upgrade --install`.
 5. Verifies release rollout status.
 
-To set up CI/CD runners, run `bash infra/arc-setup.sh` with the required GitHub App credentials. Once runners are online, trigger the **Bootstrap Cluster Infrastructure** workflow in GitHub Actions to bootstrap workloads on the cluster.
+To set up CI/CD runners, run `bash infra/arc-setup.sh` with the required GitHub App credentials. Once runners are online, trigger the **Cluster Infrastructure - Bootstrap** workflow in GitHub Actions to bootstrap workloads on the cluster.

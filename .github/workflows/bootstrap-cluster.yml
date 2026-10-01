@@ -1,4 +1,4 @@
-name: Bootstrap Cluster Infrastructure
+name: Cluster Infrastructure - Bootstrap
 
 on:
   workflow_dispatch:

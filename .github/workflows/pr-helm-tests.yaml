@@ -1,4 +1,4 @@
-name: PR Helm Chart Tests
+name: Pull Request - Helm Chart Tests
 
 on:
   pull_request:
