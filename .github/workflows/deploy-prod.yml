@@ -1,4 +1,4 @@
-name: Deploy Production Personal Site
+name: Deploy Personal Site - Production
 
 on:
   push:

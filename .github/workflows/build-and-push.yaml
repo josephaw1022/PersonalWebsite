@@ -1,4 +1,4 @@
-name: Container Build & Push
+name: Container Image - Build & Push
 on:
   push:
     branches: [main, master]
