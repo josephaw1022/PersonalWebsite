@@ -1,0 +1,6 @@
+apiVersion: v2
+name: personal-site
+description: Helm chart for Personal Website Next.js application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

@@ -1,0 +1,44 @@
+suite: test environment values
+templates:
+  - deployment.yaml
+  - ingress.yaml
+  - pdb.yaml
+  - service.yaml
+tests:
+  - it: should correctly configure development environment
+    values:
+      - ../values-dev.yaml
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 1
+        template: deployment.yaml
+      - isKind:
+          of: Ingress
+        template: ingress.yaml
+      - equal:
+          path: spec.rules[0].host
+          value: jwhiteaker.homelab.kubesoar.com
+        template: ingress.yaml
+      - hasDocuments:
+          count: 0
+        template: pdb.yaml
+
+  - it: should correctly configure production environment
+    values:
+      - ../values-prod.yaml
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+        template: deployment.yaml
+      - hasDocuments:
+          count: 0
+        template: ingress.yaml
+      - isKind:
+          of: PodDisruptionBudget
+        template: pdb.yaml
+      - equal:
+          path: spec.minAvailable
+          value: 1
+        template: pdb.yaml

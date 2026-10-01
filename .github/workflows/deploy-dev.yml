@@ -44,6 +44,8 @@ jobs:
         uses: ./.github/actions/deploy-workload
         with:
           namespace: personal-site-dev-envs
-          deployment-name: personal-site
+          release-name: personal-site
+          chart-path: ./charts/personal-site
+          values-file: ./charts/personal-site/values-dev.yaml
           tag: ${{ steps.resolve-tag.outputs.tag }}
           registry-user: ${{ secrets.QUAY_USERNAME || 'admin' }}

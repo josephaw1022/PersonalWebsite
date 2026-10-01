@@ -52,12 +52,29 @@ tasks:
     cmds:
       - npm run format:check
 
+  test:helm:
+    desc: Run Helm unit tests using helm-unittest
+    cmds:
+      - helm unittest charts/personal-site
+
+  helm:lint:
+    desc: Lint Helm chart
+    cmds:
+      - helm lint charts/personal-site
+
+  helm:test:
+    desc: Run Helm unit tests using helm-unittest
+    cmds:
+      - helm unittest charts/personal-site
+
   check:
-    desc: Run all quality checks (formatting check, lint, unit tests, and E2E tests)
+    desc: Run all quality checks (formatting check, lint, unit tests, Helm unit tests, and E2E tests)
     cmds:
       - npm run format:check
       - npm run lint
       - npm run test
+      - helm lint charts/personal-site
+      - helm unittest charts/personal-site
       - npm run test:e2e
 
   build-container:
