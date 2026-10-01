@@ -1,4 +1,4 @@
-name: Pull Request - Dependabot Auto-Merge
+name: Pull Request - Dependabot Updates
 
 on: pull_request
 
