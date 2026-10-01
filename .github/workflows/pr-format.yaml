@@ -3,6 +3,19 @@ name: PR Format Check
 on:
   pull_request:
     branches: [main, master]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "e2e/**"
+      - "__tests__/**"
+      - "infra/**"
+      - ".agents/**"
+      - ".cursor/**"
+      - ".devcontainer/**"
+      - ".github/**"
+      - "*.{js,jsx,ts,tsx,mjs,cjs,json,css,md,yaml,yml}"
+      - ".prettierignore"
+      - ".gitignore"
   workflow_dispatch:
 
 jobs:

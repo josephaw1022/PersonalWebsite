@@ -3,6 +3,16 @@ name: PR Build Check
 on:
   pull_request:
     branches: [main, master]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "package.json"
+      - "package-lock.json"
+      - "next.config.ts"
+      - "tsconfig.json"
+      - "postcss.config.mjs"
+      - "eslint.config.mjs"
+      - ".github/workflows/pr-build.yaml"
   workflow_dispatch:
 
 jobs:
