@@ -47,7 +47,7 @@ runs:
         version: latest
 
     - name: Setup Helm
-      uses: azure/setup-helm@v4
+      uses: azure/setup-helm@v5
       with:
         version: latest
 
@@ -79,7 +79,13 @@ runs:
           echo "Setting image tag to: ${TAG}"
           HELM_ARGS+=(--set "image.tag=${TAG}")
         else
-          echo "No image tag specified; omitting image.tag override in Helm command."
+          if helm status "${RELEASE_NAME}" --namespace "${NAMESPACE}" >/dev/null 2>&1; then
+            echo "No image tag specified; reusing previous release values for image tag."
+            HELM_ARGS+=(--reuse-values)
+          else
+            echo "No image tag specified and release does not exist; defaulting image.tag override to 'latest'."
+            HELM_ARGS+=(--set "image.tag=latest")
+          fi
         fi
 
         if [ -n "${VALUES_FILE}" ] && [ -f "${VALUES_FILE}" ]; then
