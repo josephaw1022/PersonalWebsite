@@ -30,7 +30,7 @@ jobs:
     environment: production
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v5
@@ -38,7 +38,7 @@ jobs:
           version: "latest"
 
       - name: Setup Helm
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@v5
         with:
           version: "latest"
 
