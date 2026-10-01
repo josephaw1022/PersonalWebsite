@@ -3,8 +3,38 @@ name: PR CodeQL Scan
 on:
   push:
     branches: [main, master]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "__tests__/**"
+      - "e2e/**"
+      - "package.json"
+      - "package-lock.json"
+      - "next.config.ts"
+      - "tsconfig.json"
+      - "postcss.config.mjs"
+      - "eslint.config.mjs"
+      - "jest.config.ts"
+      - "jest.setup.ts"
+      - "playwright.config.ts"
+      - ".github/workflows/pr-codeql.yaml"
   pull_request:
     branches: [main, master]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "__tests__/**"
+      - "e2e/**"
+      - "package.json"
+      - "package-lock.json"
+      - "next.config.ts"
+      - "tsconfig.json"
+      - "postcss.config.mjs"
+      - "eslint.config.mjs"
+      - "jest.config.ts"
+      - "jest.setup.ts"
+      - "playwright.config.ts"
+      - ".github/workflows/pr-codeql.yaml"
   schedule:
     - cron: "0 6 * * 1"
   workflow_dispatch:
