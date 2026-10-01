@@ -4,14 +4,14 @@ templates:
   - ingress.yaml
   - pdb.yaml
   - service.yaml
+  - hpa.yaml
 tests:
   - it: should correctly configure development environment
     values:
       - ../values-dev.yaml
     asserts:
-      - equal:
+      - isNull:
           path: spec.replicas
-          value: 1
         template: deployment.yaml
       - isKind:
           of: Ingress
@@ -23,6 +23,17 @@ tests:
       - hasDocuments:
           count: 0
         template: pdb.yaml
+      - isKind:
+          of: HorizontalPodAutoscaler
+        template: hpa.yaml
+      - equal:
+          path: spec.minReplicas
+          value: 1
+        template: hpa.yaml
+      - equal:
+          path: spec.maxReplicas
+          value: 5
+        template: hpa.yaml
 
   - it: should correctly configure production environment
     values:
@@ -42,3 +53,6 @@ tests:
           path: spec.minAvailable
           value: 1
         template: pdb.yaml
+      - hasDocuments:
+          count: 0
+        template: hpa.yaml

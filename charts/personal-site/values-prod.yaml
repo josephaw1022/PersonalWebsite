@@ -7,3 +7,6 @@ ingress:
 podDisruptionBudget:
   enabled: true
   minAvailable: 1
+
+autoscaling:
+  enabled: false
