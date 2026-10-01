@@ -54,59 +54,56 @@ runs:
 
         SHA="${INPUT_SHA:-${{ github.sha }}}"
         CANDIDATE_TAG="${SHA:0:7}"
-        IMAGE="${REGISTRY_SERVER}/${REGISTRY_USER}/${REPO_NAME}"
-        FULL_IMAGE="${IMAGE}:${CANDIDATE_TAG}"
-
         echo "No explicit tag provided. Candidate tag based on commit SHA: ${CANDIDATE_TAG}"
-
-        if [ -n "${REGISTRY_PASSWORD}" ] && [ -n "${REGISTRY_USER}" ]; then
-          if command -v podman >/dev/null 2>&1; then
-            echo "${REGISTRY_PASSWORD}" | podman login "${REGISTRY_SERVER}" -u "${REGISTRY_USER}" --password-stdin 2>/dev/null || true
-          elif command -v docker >/dev/null 2>&1; then
-            echo "${REGISTRY_PASSWORD}" | docker login "${REGISTRY_SERVER}" -u "${REGISTRY_USER}" --password-stdin 2>/dev/null || true
-          fi
-        fi
 
         IMAGE_EXISTS=false
 
-        echo "Attempting to pull candidate image '${FULL_IMAGE}'..."
-        if command -v podman >/dev/null 2>&1; then
-          if podman pull "${FULL_IMAGE}"; then
-            echo "Successfully pulled '${FULL_IMAGE}' via podman."
-            IMAGE_EXISTS=true
-          fi
-        elif command -v docker >/dev/null 2>&1; then
-          if docker pull "${FULL_IMAGE}"; then
-            echo "Successfully pulled '${FULL_IMAGE}' via docker."
-            IMAGE_EXISTS=true
-          fi
+        # 1. Check candidate tag via OCI v2 manifest API
+        echo "Checking registry for tag '${CANDIDATE_TAG}' via OCI v2 API..."
+        AUTH_ARGS=()
+        if [ -n "${REGISTRY_USER}" ] && [ -n "${REGISTRY_PASSWORD}" ]; then
+          AUTH_ARGS=(-u "${REGISTRY_USER}:${REGISTRY_PASSWORD}")
         fi
 
+        TOKEN_RESP=$(curl -s -k "${AUTH_ARGS[@]}" "https://${REGISTRY_SERVER}/v2/auth?service=${REGISTRY_SERVER}&scope=repository:${REGISTRY_USER}/${REPO_NAME}:pull" 2>/dev/null || true)
+        TOKEN=$(echo "${TOKEN_RESP}" | grep -o '"token":"[^"]*' | cut -d'"' -f4)
+        if [ -z "${TOKEN}" ]; then
+          TOKEN=$(echo "${TOKEN_RESP}" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
+        fi
+
+        HEADERS=()
+        if [ -n "${TOKEN}" ]; then
+          HEADERS=(-H "Authorization: Bearer ${TOKEN}")
+        fi
+
+        HTTP_CODE=$(curl -s -k -o /dev/null -w "%{http_code}" "${HEADERS[@]}" "https://${REGISTRY_SERVER}/v2/${REGISTRY_USER}/${REPO_NAME}/manifests/${CANDIDATE_TAG}" 2>/dev/null || true)
+        if [ "${HTTP_CODE}" = "200" ]; then
+          echo "Candidate tag '${CANDIDATE_TAG}' verified in registry via OCI API."
+          IMAGE_EXISTS=true
+        fi
+
+        # 2. Check candidate tag via container runtime pull if available and not yet verified
         if [ "${IMAGE_EXISTS}" = "false" ]; then
-          echo "Image pull unsuccessful. Checking Quay registry API for tag '${CANDIDATE_TAG}'..."
-          API_URL="https://${REGISTRY_SERVER}/api/v1/repository/${REGISTRY_USER}/${REPO_NAME}/tag/?onlyActiveTags=true"
-          AUTH_ARGS=()
+          FULL_IMAGE="${REGISTRY_SERVER}/${REGISTRY_USER}/${REPO_NAME}:${CANDIDATE_TAG}"
           if [ -n "${REGISTRY_PASSWORD}" ] && [ -n "${REGISTRY_USER}" ]; then
-            AUTH_ARGS=(-u "${REGISTRY_USER}:${REGISTRY_PASSWORD}")
+            if command -v podman >/dev/null 2>&1; then
+              echo "${REGISTRY_PASSWORD}" | podman login "${REGISTRY_SERVER}" -u "${REGISTRY_USER}" --password-stdin 2>/dev/null || true
+            fi
           fi
 
-          TAGS_JSON=$(curl -s -k -f "${AUTH_ARGS[@]}" "${API_URL}" 2>/dev/null || true)
-          if [ -n "${TAGS_JSON}" ]; then
-            if echo "${TAGS_JSON}" | grep -q "\"name\": \"${CANDIDATE_TAG}\""; then
-              echo "Tag '${CANDIDATE_TAG}' found in Quay registry tag list via API."
+          if command -v podman >/dev/null 2>&1; then
+            echo "Attempting to pull '${FULL_IMAGE}' via podman..."
+            if podman pull "${FULL_IMAGE}" 2>/dev/null; then
+              echo "Successfully pulled '${FULL_IMAGE}' via podman."
               IMAGE_EXISTS=true
-            else
-              echo "Tag '${CANDIDATE_TAG}' not found in Quay registry tags list via API."
             fi
-          else
-            echo "Could not query Quay API or empty response received."
           fi
         fi
 
         if [ "${IMAGE_EXISTS}" = "true" ]; then
-          echo "Image tag '${CANDIDATE_TAG}' verified in Quay. Setting image tag for deployment."
+          echo "Image tag '${CANDIDATE_TAG}' verified. Setting image tag for deployment."
           echo "tag=${CANDIDATE_TAG}" >> "$GITHUB_OUTPUT"
         else
-          echo "Candidate tag '${CANDIDATE_TAG}' is not available in Quay. Omitting image tag override so existing/chart values are used."
+          echo "Candidate tag '${CANDIDATE_TAG}' is not available in registry. Omitting image tag override so existing release values are reused."
           echo "tag=" >> "$GITHUB_OUTPUT"
         fi
