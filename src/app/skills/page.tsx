@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import {
   Cloud,
   Boxes,
@@ -130,13 +127,6 @@ const skillCategories: SkillCategory[] = [
 ];
 
 export default function Skills() {
-  const [selectedFilter, setSelectedFilter] = useState<string>("all");
-
-  const filteredCategories =
-    selectedFilter === "all"
-      ? skillCategories
-      : skillCategories.filter((cat) => cat.id === selectedFilter);
-
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 animate-fade-in">
       {/* Header */}
@@ -154,41 +144,9 @@ export default function Skills() {
         </p>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex flex-wrap items-center gap-2 mb-10 pb-4 border-b border-zinc-200 dark:border-zinc-800">
-        <button
-          type="button"
-          onClick={() => setSelectedFilter("all")}
-          className={`px-3.5 py-1.5 rounded-md text-xs font-mono transition-colors ${
-            selectedFilter === "all"
-              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-semibold"
-              : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-          }`}
-        >
-          All Domains
-        </button>
-        {skillCategories.map((category) => {
-          const isActive = selectedFilter === category.id;
-          return (
-            <button
-              key={category.id}
-              type="button"
-              onClick={() => setSelectedFilter(category.id)}
-              className={`px-3.5 py-1.5 rounded-md text-xs font-mono transition-colors ${
-                isActive
-                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-semibold"
-                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              }`}
-            >
-              {category.name}
-            </button>
-          );
-        })}
-      </div>
-
       {/* Categories Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCategories.map((category) => {
+        {skillCategories.map((category) => {
           const Icon = category.icon;
           return (
             <div
