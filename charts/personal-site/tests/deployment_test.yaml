@@ -41,6 +41,33 @@ tests:
       - equal:
           path: metadata.annotations["app.openshift.io/connects-to"]
           value: '["personal-site-runner"]'
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/port"]
+          value: "3000"
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/path"]
+          value: "/"
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: "/"
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.port
+          value: http
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.initialDelaySeconds
+          value: 15
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: "/"
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.port
+          value: http
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.initialDelaySeconds
+          value: 5
 
   - it: should override replicas and image tag
     set:
@@ -120,3 +147,80 @@ tests:
           value: "key1"
       - isNotEmpty:
           path: spec.template.spec.affinity.nodeAffinity
+
+  - it: should configure custom liveness, readiness, and startup probes
+    set:
+      livenessProbe:
+        httpGet:
+          path: /api/health
+          port: 3000
+        initialDelaySeconds: 30
+        periodSeconds: 15
+      readinessProbe:
+        httpGet:
+          path: /api/ready
+          port: 3000
+        initialDelaySeconds: 10
+        periodSeconds: 5
+      startupProbe:
+        httpGet:
+          path: /api/health
+          port: 3000
+        initialDelaySeconds: 5
+        periodSeconds: 3
+        failureThreshold: 30
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: /api/health
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.initialDelaySeconds
+          value: 30
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: /api/ready
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.initialDelaySeconds
+          value: 10
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.httpGet.path
+          value: /api/health
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.failureThreshold
+          value: 30
+
+  - it: should allow disabling probes
+    set:
+      livenessProbe: null
+      readinessProbe: null
+    asserts:
+      - isNull:
+          path: spec.template.spec.containers[0].livenessProbe
+      - isNull:
+          path: spec.template.spec.containers[0].readinessProbe
+
+  - it: should customize prometheus annotations and pod labels
+    set:
+      podAnnotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+        custom.annotation/key: "custom-value"
+      podLabels:
+        metrics: "enabled"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/port"]
+          value: "8080"
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/path"]
+          value: "/metrics"
+      - equal:
+          path: spec.template.metadata.annotations["custom.annotation/key"]
+          value: "custom-value"
+      - equal:
+          path: spec.template.metadata.labels["metrics"]
+          value: "enabled"
