@@ -3,6 +3,9 @@ name: PR Helm Chart Tests
 on:
   pull_request:
     branches: [main, master]
+    paths:
+      - "charts/**"
+      - ".github/workflows/pr-helm-tests.yaml"
   workflow_dispatch:
 
 jobs:
