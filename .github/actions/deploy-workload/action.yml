@@ -75,6 +75,13 @@ runs:
           --set "imagePullSecrets[0].name=${PULL_SECRET}"
         )
 
+        if helm upgrade --help | grep -q -- '--force-conflicts'; then
+          HELM_ARGS+=(--force-conflicts)
+        fi
+        if helm upgrade --help | grep -q -- '--take-ownership'; then
+          HELM_ARGS+=(--take-ownership)
+        fi
+
         if [ -n "${TAG}" ]; then
           echo "Setting image tag to: ${TAG}"
           HELM_ARGS+=(--set "image.tag=${TAG}")

@@ -98,6 +98,14 @@ jobs:
           REGISTRY_USER="${{ secrets.QUAY_USERNAME || 'admin' }}"
           IMAGE="quay.kubesoar.com/${REGISTRY_USER}/personalwebsite"
 
+          EXTRA_FLAGS=()
+          if helm upgrade --help | grep -q -- '--force-conflicts'; then
+            EXTRA_FLAGS+=(--force-conflicts)
+          fi
+          if helm upgrade --help | grep -q -- '--take-ownership'; then
+            EXTRA_FLAGS+=(--take-ownership)
+          fi
+
           echo "Deploying production Helm chart release to namespace '${NAMESPACE}'..."
           helm upgrade --install personal-site ./charts/personal-site \
             --namespace "${NAMESPACE}" \
@@ -106,7 +114,8 @@ jobs:
             --set image.tag="${VERSION}" \
             --set imagePullSecrets[0].name="${SECRET_NAME}" \
             --wait \
-            --timeout 5m
+            --timeout 5m \
+            "${EXTRA_FLAGS[@]}"
 
       - name: Deploy Development Workloads (Helm)
         if: ${{ inputs.target_env == 'all' || inputs.target_env == 'development' }}
@@ -117,6 +126,14 @@ jobs:
           REGISTRY_USER="${{ secrets.QUAY_USERNAME || 'admin' }}"
           IMAGE="quay.kubesoar.com/${REGISTRY_USER}/personalwebsite"
 
+          EXTRA_FLAGS=()
+          if helm upgrade --help | grep -q -- '--force-conflicts'; then
+            EXTRA_FLAGS+=(--force-conflicts)
+          fi
+          if helm upgrade --help | grep -q -- '--take-ownership'; then
+            EXTRA_FLAGS+=(--take-ownership)
+          fi
+
           echo "Deploying development Helm chart release to namespace '${NAMESPACE}'..."
           helm upgrade --install personal-site ./charts/personal-site \
             --namespace "${NAMESPACE}" \
@@ -125,7 +142,8 @@ jobs:
             --set image.tag="${VERSION}" \
             --set imagePullSecrets[0].name="${SECRET_NAME}" \
             --wait \
-            --timeout 5m
+            --timeout 5m \
+            "${EXTRA_FLAGS[@]}"
 
       - name: Verify Rollout Status
         run: |
