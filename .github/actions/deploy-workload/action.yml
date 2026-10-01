@@ -19,7 +19,8 @@ inputs:
     default: ""
   tag:
     description: Image tag to deploy
-    required: true
+    required: false
+    default: ""
   registry-user:
     description: Container registry username
     required: false
@@ -71,16 +72,22 @@ runs:
           --wait
           --timeout "${TIMEOUT}"
           --set "image.repository=${IMAGE_REPO}"
-          --set "image.tag=${TAG}"
           --set "imagePullSecrets[0].name=${PULL_SECRET}"
         )
+
+        if [ -n "${TAG}" ]; then
+          echo "Setting image tag to: ${TAG}"
+          HELM_ARGS+=(--set "image.tag=${TAG}")
+        else
+          echo "No image tag specified; omitting image.tag override in Helm command."
+        fi
 
         if [ -n "${VALUES_FILE}" ] && [ -f "${VALUES_FILE}" ]; then
           echo "Using environment values file: ${VALUES_FILE}"
           HELM_ARGS+=(-f "${VALUES_FILE}")
         fi
 
-        echo "Deploying Helm release '${RELEASE_NAME}' to namespace '${NAMESPACE}' with image '${IMAGE_REPO}:${TAG}'..."
+        echo "Deploying Helm release '${RELEASE_NAME}' to namespace '${NAMESPACE}'..."
         helm upgrade "${RELEASE_NAME}" "${CHART_PATH}" "${HELM_ARGS[@]}"
 
         echo "Helm release '${RELEASE_NAME}' successfully deployed to namespace '${NAMESPACE}'."
