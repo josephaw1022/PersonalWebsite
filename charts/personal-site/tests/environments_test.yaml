@@ -20,15 +20,19 @@ tests:
           path: spec.rules[0].host
           value: jwhiteaker.homelab.kubesoar.com
         template: ingress.yaml
-      - hasDocuments:
-          count: 0
+      - isKind:
+          of: PodDisruptionBudget
+        template: pdb.yaml
+      - equal:
+          path: spec.minAvailable
+          value: 1
         template: pdb.yaml
       - isKind:
           of: HorizontalPodAutoscaler
         template: hpa.yaml
       - equal:
           path: spec.minReplicas
-          value: 1
+          value: 3
         template: hpa.yaml
       - equal:
           path: spec.maxReplicas
@@ -41,7 +45,7 @@ tests:
     asserts:
       - equal:
           path: spec.replicas
-          value: 3
+          value: 5
         template: deployment.yaml
       - hasDocuments:
           count: 0
@@ -51,7 +55,7 @@ tests:
         template: pdb.yaml
       - equal:
           path: spec.minAvailable
-          value: 1
+          value: 2
         template: pdb.yaml
       - hasDocuments:
           count: 0

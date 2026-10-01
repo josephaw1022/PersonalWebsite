@@ -1,12 +1,12 @@
 # Production environment values for personal-site
-replicaCount: 3
+replicaCount: 5
 
 ingress:
   enabled: false
 
 podDisruptionBudget:
   enabled: true
-  minAvailable: 1
+  minAvailable: 2
 
 autoscaling:
   enabled: false
