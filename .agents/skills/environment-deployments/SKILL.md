@@ -9,13 +9,13 @@ Workloads are packaged with Helm (`charts/personal-site`) and deployed across tw
 
 - **Development (`personal-site-dev-envs`)**:
   - Automatically deployed on push to `main` via `.github/workflows/deploy-dev.yml`.
-  - Configured using `charts/personal-site/values-dev.yaml` (HPA autoscaling enabled: 1–5 replicas, Ingress enabled, PDB disabled).
+  - Configured using `charts/personal-site/values-dev.yaml` (HPA autoscaling: 3–5 replicas, Ingress enabled, PDB enabled with minAvailable 1).
   - Ingress configured with `istio` ingress class for `jwhiteaker.homelab.kubesoar.com`.
   - Runner ServiceAccount in `personal-site` has `admin` RBAC over this namespace.
 
 - **Production (`personal-site`)**:
   - Deployed manually via `workflow_dispatch` in `.github/workflows/deploy-prod.yml`.
-  - Configured using `charts/personal-site/values-prod.yaml` (3 replicas, Ingress disabled, PDB enabled with minAvailable 1).
+  - Configured using `charts/personal-site/values-prod.yaml` (5 replicas, Ingress disabled, PDB enabled with minAvailable 2).
   - No Ingress; external access is handled via Cloudflare Tunnel.
 
 Deployment execution is shared via composite action `.github/actions/deploy-workload` using `helm upgrade --install`.
