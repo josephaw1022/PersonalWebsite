@@ -3,8 +3,34 @@ name: PR GitLeaks Scan
 on:
   push:
     branches: [main, master]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "e2e/**"
+      - "__tests__/**"
+      - "infra/**"
+      - "charts/**"
+      - ".github/**"
+      - "package.json"
+      - "package-lock.json"
+      - "Containerfile"
+      - "*.{js,jsx,ts,tsx,mjs,cjs,json,yaml,yml,sh}"
+      - ".github/workflows/pr-gitleaks.yaml"
   pull_request:
     branches: [main, master]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "e2e/**"
+      - "__tests__/**"
+      - "infra/**"
+      - "charts/**"
+      - ".github/**"
+      - "package.json"
+      - "package-lock.json"
+      - "Containerfile"
+      - "*.{js,jsx,ts,tsx,mjs,cjs,json,yaml,yml,sh}"
+      - ".github/workflows/pr-gitleaks.yaml"
   workflow_dispatch:
 
 permissions:
