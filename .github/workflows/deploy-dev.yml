@@ -35,80 +35,12 @@ jobs:
 
       - name: Resolve Image Tag
         id: resolve-tag
-        env:
-          INPUT_TAG: ${{ inputs.tag }}
-          QUAY_USER: ${{ secrets.QUAY_USERNAME || 'admin' }}
-          QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
-          REGISTRY_SERVER: "quay.kubesoar.com"
-        run: |
-          if [ -n "${INPUT_TAG}" ]; then
-            echo "Using explicitly provided image tag: ${INPUT_TAG}"
-            echo "tag=${INPUT_TAG}" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          if [ "${{ github.event_name }}" = "workflow_run" ]; then
-            SHA="${{ github.event.workflow_run.head_sha }}"
-          else
-            SHA="${{ github.sha }}"
-          fi
-          CANDIDATE_TAG="${SHA:0:7}"
-          IMAGE="${REGISTRY_SERVER}/${QUAY_USER}/personalwebsite"
-          FULL_IMAGE="${IMAGE}:${CANDIDATE_TAG}"
-
-          echo "No image tag input provided. Candidate tag based on commit SHA: ${CANDIDATE_TAG}"
-
-          if [ -n "${QUAY_PASSWORD}" ] && [ -n "${QUAY_USER}" ]; then
-            if command -v podman >/dev/null 2>&1; then
-              echo "${QUAY_PASSWORD}" | podman login "${REGISTRY_SERVER}" -u "${QUAY_USER}" --password-stdin 2>/dev/null || true
-            elif command -v docker >/dev/null 2>&1; then
-              echo "${QUAY_PASSWORD}" | docker login "${REGISTRY_SERVER}" -u "${QUAY_USER}" --password-stdin 2>/dev/null || true
-            fi
-          fi
-
-          IMAGE_EXISTS=false
-
-          echo "Attempting to pull image '${FULL_IMAGE}'..."
-          if command -v podman >/dev/null 2>&1; then
-            if podman pull "${FULL_IMAGE}"; then
-              echo "Successfully pulled image '${FULL_IMAGE}' with podman."
-              IMAGE_EXISTS=true
-            fi
-          elif command -v docker >/dev/null 2>&1; then
-            if docker pull "${FULL_IMAGE}"; then
-              echo "Successfully pulled image '${FULL_IMAGE}' with docker."
-              IMAGE_EXISTS=true
-            fi
-          fi
-
-          if [ "${IMAGE_EXISTS}" = "false" ]; then
-            echo "Image pull unsuccessful. Checking Quay registry API for tag '${CANDIDATE_TAG}'..."
-            API_URL="https://${REGISTRY_SERVER}/api/v1/repository/${QUAY_USER}/personalwebsite/tag/?onlyActiveTags=true"
-            AUTH_ARGS=()
-            if [ -n "${QUAY_PASSWORD}" ] && [ -n "${QUAY_USER}" ]; then
-              AUTH_ARGS=(-u "${QUAY_USER}:${QUAY_PASSWORD}")
-            fi
-
-            TAGS_JSON=$(curl -s -k -f "${AUTH_ARGS[@]}" "${API_URL}" 2>/dev/null || true)
-            if [ -n "${TAGS_JSON}" ]; then
-              if echo "${TAGS_JSON}" | grep -q "\"name\": \"${CANDIDATE_TAG}\""; then
-                echo "Tag '${CANDIDATE_TAG}' found in Quay registry tag list via API."
-                IMAGE_EXISTS=true
-              else
-                echo "Tag '${CANDIDATE_TAG}' not found in Quay registry tag list via API."
-              fi
-            else
-              echo "Could not query Quay API or empty response received."
-            fi
-          fi
-
-          if [ "${IMAGE_EXISTS}" = "true" ]; then
-            echo "Image tag '${CANDIDATE_TAG}' verified in Quay. Setting image tag for deployment."
-            echo "tag=${CANDIDATE_TAG}" >> "$GITHUB_OUTPUT"
-          else
-            echo "Candidate tag '${CANDIDATE_TAG}' is not available in Quay. Omitting image tag override so existing/chart values are used."
-            echo "tag=" >> "$GITHUB_OUTPUT"
-          fi
+        uses: ./.github/actions/resolve-image-tag
+        with:
+          tag: ${{ inputs.tag }}
+          default-sha: ${{ github.event.workflow_run.head_sha || github.sha }}
+          registry-user: ${{ secrets.QUAY_USERNAME || 'admin' }}
+          registry-password: ${{ secrets.QUAY_PASSWORD }}
 
       - name: Deploy to Dev Environment
         uses: ./.github/actions/deploy-workload
