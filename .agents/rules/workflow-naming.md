@@ -12,7 +12,7 @@ All GitHub Actions workflows must follow a consistent `<xyz> - <abc>` naming con
 <Category / Domain> - <Action / Target>
 ```
 
-- `<Category / Domain>`: The primary subject or scope of the workflow (e.g., `Deploy Personal Site`, `Container Image`, `Cluster Infrastructure`, `Pull Request`, `Dependabot`).
+- `<Category / Domain>`: The primary subject or scope of the workflow (e.g., `Deploy Personal Site`, `Container Image`, `Cluster Infrastructure`, `Pull Request`).
 - `<Action / Target>`: The specific action, environment, or check being executed (e.g., `Development`, `Production`, `Build & Push`, `Bootstrap`, `Unit Tests`, `Auto-Merge`).
 
 ## Key Requirements
