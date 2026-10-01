@@ -87,9 +87,8 @@ Set up the GitHub Actions Runner Controller (ARC) runner scale set on your OpenS
 Trigger the **Bootstrap Cluster Infrastructure** workflow (`.github/workflows/bootstrap-cluster.yml`) via `workflow_dispatch` in GitHub Actions. This idempotent workflow runs on the in-cluster runners and creates:
 
 - The container image pull secret (`quay-pull-secret`) linked to the default service account
-- The 3-replica Next.js `Deployment` configured with telemetry labels
-- The `ClusterIP` Service exposing port 80 (target port 3000)
-- Verifies rollout completion
+- The Helm release for `personal-site` (`charts/personal-site`), deploying the Next.js `Deployment` configured with telemetry labels, `ClusterIP` Service, and PodDisruptionBudget (PDB)
+- Verifies rollout and Helm release completion
 
 ---
 

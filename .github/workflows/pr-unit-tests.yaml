@@ -3,6 +3,17 @@ name: PR Unit Tests
 on:
   pull_request:
     branches: [main, master]
+    paths:
+      - "src/**"
+      - "__tests__/**"
+      - "public/**"
+      - "package.json"
+      - "package-lock.json"
+      - "jest.config.ts"
+      - "jest.setup.ts"
+      - "tsconfig.json"
+      - "next.config.ts"
+      - ".github/workflows/pr-unit-tests.yaml"
   workflow_dispatch:
 
 jobs:
@@ -12,10 +23,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: "20"
           cache: "npm"

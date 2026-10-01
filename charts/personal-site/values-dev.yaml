@@ -1,0 +1,30 @@
+# Dev environment values for personal-site
+replicaCount: 3
+
+ingress:
+  enabled: true
+  className: "istio"
+  name: "personal-site-dev-ingress"
+  annotations:
+    kubernetes.io/ingress.class: istio
+    cert-manager.io/cluster-issuer: cloudflare-dns01
+  hosts:
+    - host: jwhiteaker.homelab.kubesoar.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: personal-site-dev-tls
+      hosts:
+        - jwhiteaker.homelab.kubesoar.com
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80

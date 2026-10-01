@@ -1,0 +1,226 @@
+suite: test deployment template
+templates:
+  - deployment.yaml
+tests:
+  - it: should render a Deployment with default values
+    asserts:
+      - isKind:
+          of: Deployment
+      - isAPIVersion:
+          of: apps/v1
+      - equal:
+          path: metadata.name
+          value: personal-site
+      - equal:
+          path: spec.replicas
+          value: 3
+      - equal:
+          path: spec.selector.matchLabels.app
+          value: personal-site
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: personalwebsite
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: quay.kubesoar.com/admin/personalwebsite:1.0.0
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: Always
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 3000
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: PORT
+            value: "3000"
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: quay-pull-secret
+      - equal:
+          path: metadata.annotations["app.openshift.io/connects-to"]
+          value: '["personal-site-runner"]'
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/port"]
+          value: "3000"
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/path"]
+          value: "/"
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: "/"
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.port
+          value: http
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.initialDelaySeconds
+          value: 15
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: "/"
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.port
+          value: http
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.initialDelaySeconds
+          value: 5
+
+  - it: should override replicas and image tag
+    set:
+      replicaCount: 5
+      image:
+        repository: custom-registry.io/user/app
+        tag: "v2.0.0"
+        pullPolicy: IfNotPresent
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 5
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: custom-registry.io/user/app:v2.0.0
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+      - equal:
+          path: metadata.labels["version"]
+          value: "v2.0.0"
+      - equal:
+          path: metadata.labels["app.kubernetes.io/version"]
+          value: "v2.0.0"
+
+  - it: should set custom pod labels and annotations
+    set:
+      podAnnotations:
+        test.annotation/key: test-value
+      podLabels:
+        custom-label: custom-value
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["test.annotation/key"]
+          value: test-value
+      - equal:
+          path: spec.template.metadata.labels["custom-label"]
+          value: custom-value
+
+  - it: should set resources, nodeSelector, tolerations, and affinity
+    set:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
+      nodeSelector:
+        disktype: ssd
+      tolerations:
+        - key: "key1"
+          operator: "Equal"
+          value: "value1"
+          effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/e2e-az-name
+                    operator: In
+                    values:
+                      - e2e-az1
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.cpu
+          value: 500m
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: 128Mi
+      - equal:
+          path: spec.template.spec.nodeSelector.disktype
+          value: ssd
+      - equal:
+          path: spec.template.spec.tolerations[0].key
+          value: "key1"
+      - isNotEmpty:
+          path: spec.template.spec.affinity.nodeAffinity
+
+  - it: should configure custom liveness, readiness, and startup probes
+    set:
+      livenessProbe:
+        httpGet:
+          path: /api/health
+          port: 3000
+        initialDelaySeconds: 30
+        periodSeconds: 15
+      readinessProbe:
+        httpGet:
+          path: /api/ready
+          port: 3000
+        initialDelaySeconds: 10
+        periodSeconds: 5
+      startupProbe:
+        httpGet:
+          path: /api/health
+          port: 3000
+        initialDelaySeconds: 5
+        periodSeconds: 3
+        failureThreshold: 30
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: /api/health
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.initialDelaySeconds
+          value: 30
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: /api/ready
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.initialDelaySeconds
+          value: 10
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.httpGet.path
+          value: /api/health
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.failureThreshold
+          value: 30
+
+  - it: should allow disabling probes
+    set:
+      livenessProbe: null
+      readinessProbe: null
+    asserts:
+      - isNull:
+          path: spec.template.spec.containers[0].livenessProbe
+      - isNull:
+          path: spec.template.spec.containers[0].readinessProbe
+
+  - it: should customize prometheus annotations and pod labels
+    set:
+      podAnnotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+        custom.annotation/key: "custom-value"
+      podLabels:
+        metrics: "enabled"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/port"]
+          value: "8080"
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/path"]
+          value: "/metrics"
+      - equal:
+          path: spec.template.metadata.annotations["custom.annotation/key"]
+          value: "custom-value"
+      - equal:
+          path: spec.template.metadata.labels["metrics"]
+          value: "enabled"

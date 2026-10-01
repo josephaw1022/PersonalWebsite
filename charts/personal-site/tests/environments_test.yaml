@@ -1,0 +1,93 @@
+suite: test environment values
+templates:
+  - deployment.yaml
+  - ingress.yaml
+  - pdb.yaml
+  - service.yaml
+  - hpa.yaml
+  - networkpolicy.yaml
+tests:
+  - it: should correctly configure development environment
+    values:
+      - ../values-dev.yaml
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+        template: deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: "/"
+        template: deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: "/"
+        template: deployment.yaml
+      - isNull:
+          path: spec.replicas
+        template: deployment.yaml
+      - isKind:
+          of: Ingress
+        template: ingress.yaml
+      - equal:
+          path: spec.rules[0].host
+          value: jwhiteaker.homelab.kubesoar.com
+        template: ingress.yaml
+      - isKind:
+          of: PodDisruptionBudget
+        template: pdb.yaml
+      - equal:
+          path: spec.minAvailable
+          value: 1
+        template: pdb.yaml
+      - isKind:
+          of: HorizontalPodAutoscaler
+        template: hpa.yaml
+      - equal:
+          path: spec.minReplicas
+          value: 3
+        template: hpa.yaml
+      - equal:
+          path: spec.maxReplicas
+          value: 5
+        template: hpa.yaml
+      - hasDocuments:
+          count: 0
+        template: networkpolicy.yaml
+
+  - it: should correctly configure production environment
+    values:
+      - ../values-prod.yaml
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+        template: deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: "/"
+        template: deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: "/"
+        template: deployment.yaml
+      - equal:
+          path: spec.replicas
+          value: 5
+        template: deployment.yaml
+      - hasDocuments:
+          count: 0
+        template: ingress.yaml
+      - isKind:
+          of: PodDisruptionBudget
+        template: pdb.yaml
+      - equal:
+          path: spec.minAvailable
+          value: 2
+        template: pdb.yaml
+      - hasDocuments:
+          count: 0
+        template: hpa.yaml
+      - hasDocuments:
+          count: 0
+        template: networkpolicy.yaml

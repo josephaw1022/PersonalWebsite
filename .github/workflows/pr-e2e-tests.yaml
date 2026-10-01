@@ -3,6 +3,17 @@ name: PR E2E Tests
 on:
   pull_request:
     branches: [main, master]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "e2e/**"
+      - "package.json"
+      - "package-lock.json"
+      - "playwright.config.ts"
+      - "next.config.ts"
+      - "tsconfig.json"
+      - "postcss.config.mjs"
+      - ".github/workflows/pr-e2e-tests.yaml"
   workflow_dispatch:
 
 jobs:
@@ -12,10 +23,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: "20"
           cache: "npm"

@@ -1,0 +1,148 @@
+# Default values for personal-site chart.
+# This is a YAML-formatted file.
+
+replicaCount: 3
+
+image:
+  repository: quay.kubesoar.com/admin/personalwebsite
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets:
+  - name: quay-pull-secret
+
+nameOverride: ""
+fullnameOverride: "personal-site"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "3000"
+  prometheus.io/path: "/"
+
+podLabels: {}
+deploymentAnnotations: {}
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+startupProbe: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+port: 3000
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+ingress:
+  enabled: false
+  className: "istio"
+  name: ""
+  annotations:
+    kubernetes.io/ingress.class: istio
+    cert-manager.io/cluster-issuer: cloudflare-dns01
+  hosts:
+    - host: jwhiteaker.homelab.kubesoar.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: personal-site-dev-tls
+      hosts:
+        - jwhiteaker.homelab.kubesoar.com
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+  # maxUnavailable: 1
+  annotations: {}
+
+# Network policies configuration
+# Allows configuring one or multiple NetworkPolicies for network traffic isolation.
+# Supports both list and map formats.
+networkPolicies: []
+  # - name: default-deny
+  #   enabled: true
+  #   podSelector: {}
+  #   policyTypes:
+  #     - Ingress
+  #     - Egress
+  # - name: allow-cloudflared
+  #   enabled: true
+  #   podSelector:
+  #     matchLabels:
+  #       app: personal-site
+  #   policyTypes:
+  #     - Ingress
+  #   ingress:
+  #     - from:
+  #         - namespaceSelector:
+  #             matchLabels:
+  #               kubernetes.io/metadata.name: cloudflare-connector
+  #       ports:
+  #         - protocol: TCP
+  #           port: 3000
+  # - name: allow-dns
+  #   enabled: true
+  #   policyTypes:
+  #     - Egress
+  #   egress:
+  #     - to:
+  #         - namespaceSelector: {}
+  #       ports:
+  #         - protocol: UDP
+  #           port: 53
+  #         - protocol: TCP
+  #           port: 53
+
+openshift:
+  partOf: personal-website-app
+  runtime: nodejs
+  connectsTo: '["personal-site-runner"]'
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+  annotations: {}
+  behavior: {}
+  extraMetrics: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+extraEnv: []

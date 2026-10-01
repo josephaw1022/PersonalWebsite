@@ -3,6 +3,19 @@ name: PR Format Check
 on:
   pull_request:
     branches: [main, master]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "e2e/**"
+      - "__tests__/**"
+      - "infra/**"
+      - ".agents/**"
+      - ".cursor/**"
+      - ".devcontainer/**"
+      - ".github/**"
+      - "*.{js,jsx,ts,tsx,mjs,cjs,json,css,md,yaml,yml}"
+      - ".prettierignore"
+      - ".gitignore"
   workflow_dispatch:
 
 jobs:
@@ -12,10 +25,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: "20"
           cache: "npm"
