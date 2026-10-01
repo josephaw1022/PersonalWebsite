@@ -2,6 +2,17 @@ name: Container Build & Push
 on:
   push:
     branches: [main, master]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "package.json"
+      - "package-lock.json"
+      - "next.config.ts"
+      - "tsconfig.json"
+      - "postcss.config.mjs"
+      - "eslint.config.mjs"
+      - "Containerfile"
+      - ".github/workflows/build-and-push.yaml"
   workflow_dispatch:
 
 permissions:
