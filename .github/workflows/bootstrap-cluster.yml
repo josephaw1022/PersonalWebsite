@@ -29,8 +29,16 @@ jobs:
     runs-on: personal-site-runner
     environment: production
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
       - name: Setup kubectl
         uses: azure/setup-kubectl@v5
+        with:
+          version: "latest"
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
         with:
           version: "latest"
 
@@ -81,7 +89,7 @@ jobs:
             kubectl patch serviceaccount default -n "${NS}" -p "{\"imagePullSecrets\": [{\"name\": \"${SECRET_NAME}\"}]}" || true
           done
 
-      - name: Deploy Production Workloads
+      - name: Deploy Production Workloads (Helm)
         if: ${{ inputs.target_env == 'all' || inputs.target_env == 'production' }}
         run: |
           NAMESPACE="personal-site"
@@ -90,68 +98,17 @@ jobs:
           REGISTRY_USER="${{ secrets.QUAY_USERNAME || 'admin' }}"
           IMAGE="quay.kubesoar.com/${REGISTRY_USER}/personalwebsite"
 
-          echo "Applying Production Deployment and Service manifests to namespace '${NAMESPACE}'..."
-          kubectl apply -f - <<EOF
-          apiVersion: apps/v1
-          kind: Deployment
-          metadata:
-            name: personal-site
-            namespace: ${NAMESPACE}
-            labels:
-              app: personal-site
-              version: ${VERSION}
-              app.kubernetes.io/name: personal-site
-              app.kubernetes.io/version: ${VERSION}
-              app.kubernetes.io/part-of: personal-website-app
-              app.openshift.io/runtime: nodejs
-            annotations:
-              app.openshift.io/connects-to: '["personal-site-runner"]'
-          spec:
-            replicas: 3
-            selector:
-              matchLabels:
-                app: personal-site
-            template:
-              metadata:
-                labels:
-                  app: personal-site
-                  version: ${VERSION}
-                  app.kubernetes.io/name: personal-site
-                  app.kubernetes.io/version: ${VERSION}
-                  app.kubernetes.io/part-of: personal-website-app
-              spec:
-                imagePullSecrets:
-                - name: ${SECRET_NAME}
-                containers:
-                - name: personalwebsite
-                  image: ${IMAGE}:${VERSION}
-                  imagePullPolicy: Always
-                  ports:
-                  - containerPort: 3000
-                  env:
-                  - name: PORT
-                    value: "3000"
-          ---
-          apiVersion: v1
-          kind: Service
-          metadata:
-            name: personal-site
-            namespace: ${NAMESPACE}
-            labels:
-              app: personal-site
-              app.kubernetes.io/name: personal-site
-              app.kubernetes.io/part-of: personal-website-app
-          spec:
-            selector:
-              app: personal-site
-            ports:
-              - protocol: TCP
-                port: 80
-                targetPort: 3000
-            type: ClusterIP
-          EOF
+          echo "Deploying production Helm chart release to namespace '${NAMESPACE}'..."
+          helm upgrade --install personal-site ./charts/personal-site \
+            --namespace "${NAMESPACE}" \
+            -f ./charts/personal-site/values-prod.yaml \
+            --set image.repository="${IMAGE}" \
+            --set image.tag="${VERSION}" \
+            --set imagePullSecrets[0].name="${SECRET_NAME}" \
+            --wait \
+            --timeout 5m
 
-      - name: Deploy Development Workloads
+      - name: Deploy Development Workloads (Helm)
         if: ${{ inputs.target_env == 'all' || inputs.target_env == 'development' }}
         run: |
           NAMESPACE="personal-site-dev-envs"
@@ -159,107 +116,25 @@ jobs:
           VERSION="${{ inputs.tag || 'latest' }}"
           REGISTRY_USER="${{ secrets.QUAY_USERNAME || 'admin' }}"
           IMAGE="quay.kubesoar.com/${REGISTRY_USER}/personalwebsite"
-          DEV_DOMAIN="jwhiteaker.homelab.kubesoar.com"
 
-          echo "Applying Dev Deployment, Service, and Ingress manifests to namespace '${NAMESPACE}'..."
-          kubectl apply -f - <<EOF
-          apiVersion: apps/v1
-          kind: Deployment
-          metadata:
-            name: personal-site
-            namespace: ${NAMESPACE}
-            labels:
-              app: personal-site
-              version: ${VERSION}
-              app.kubernetes.io/name: personal-site
-              app.kubernetes.io/version: ${VERSION}
-              app.kubernetes.io/part-of: personal-website-app
-              app.openshift.io/runtime: nodejs
-            annotations:
-              app.openshift.io/connects-to: '["personal-site-runner"]'
-          spec:
-            replicas: 1
-            selector:
-              matchLabels:
-                app: personal-site
-            template:
-              metadata:
-                labels:
-                  app: personal-site
-                  version: ${VERSION}
-                  app.kubernetes.io/name: personal-site
-                  app.kubernetes.io/version: ${VERSION}
-                  app.kubernetes.io/part-of: personal-website-app
-              spec:
-                imagePullSecrets:
-                - name: ${SECRET_NAME}
-                containers:
-                - name: personalwebsite
-                  image: ${IMAGE}:${VERSION}
-                  imagePullPolicy: Always
-                  ports:
-                  - containerPort: 3000
-                  env:
-                  - name: PORT
-                    value: "3000"
-          ---
-          apiVersion: v1
-          kind: Service
-          metadata:
-            name: personal-site
-            namespace: ${NAMESPACE}
-            labels:
-              app: personal-site
-              app.kubernetes.io/name: personal-site
-              app.kubernetes.io/part-of: personal-website-app
-          spec:
-            selector:
-              app: personal-site
-            ports:
-              - protocol: TCP
-                port: 80
-                targetPort: 3000
-            type: ClusterIP
-          ---
-          apiVersion: networking.k8s.io/v1
-          kind: Ingress
-          metadata:
-            name: personal-site-dev-ingress
-            namespace: ${NAMESPACE}
-            labels:
-              app: personal-site
-              app.kubernetes.io/name: personal-site
-              app.kubernetes.io/part-of: personal-website-app
-            annotations:
-              kubernetes.io/ingress.class: istio
-              cert-manager.io/cluster-issuer: cloudflare-dns01
-          spec:
-            ingressClassName: istio
-            tls:
-            - hosts:
-              - ${DEV_DOMAIN}
-              secretName: personal-site-dev-tls
-            rules:
-            - host: ${DEV_DOMAIN}
-              http:
-                paths:
-                - path: /
-                  pathType: Prefix
-                  backend:
-                    service:
-                      name: personal-site
-                      port:
-                        number: 80
-          EOF
+          echo "Deploying development Helm chart release to namespace '${NAMESPACE}'..."
+          helm upgrade --install personal-site ./charts/personal-site \
+            --namespace "${NAMESPACE}" \
+            -f ./charts/personal-site/values-dev.yaml \
+            --set image.repository="${IMAGE}" \
+            --set image.tag="${VERSION}" \
+            --set imagePullSecrets[0].name="${SECRET_NAME}" \
+            --wait \
+            --timeout 5m
 
       - name: Verify Rollout Status
         run: |
           TARGET_ENV="${{ inputs.target_env || 'all' }}"
           if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "production" ]; then
-            echo "Waiting for production personal-site rollout..."
-            kubectl rollout status deployment/personal-site -n personal-site --timeout=180s
+            echo "Verifying production personal-site Helm release..."
+            helm status personal-site -n personal-site
           fi
           if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "development" ]; then
-            echo "Waiting for development personal-site rollout..."
-            kubectl rollout status deployment/personal-site -n personal-site-dev-envs --timeout=180s
+            echo "Verifying development personal-site Helm release..."
+            helm status personal-site -n personal-site-dev-envs
           fi

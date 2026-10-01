@@ -1,0 +1,122 @@
+suite: test deployment template
+templates:
+  - deployment.yaml
+tests:
+  - it: should render a Deployment with default values
+    asserts:
+      - isKind:
+          of: Deployment
+      - isAPIVersion:
+          of: apps/v1
+      - equal:
+          path: metadata.name
+          value: personal-site
+      - equal:
+          path: spec.replicas
+          value: 3
+      - equal:
+          path: spec.selector.matchLabels.app
+          value: personal-site
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: personalwebsite
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: quay.kubesoar.com/admin/personalwebsite:1.0.0
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: Always
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 3000
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: PORT
+            value: "3000"
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: quay-pull-secret
+      - equal:
+          path: metadata.annotations["app.openshift.io/connects-to"]
+          value: '["personal-site-runner"]'
+
+  - it: should override replicas and image tag
+    set:
+      replicaCount: 5
+      image:
+        repository: custom-registry.io/user/app
+        tag: "v2.0.0"
+        pullPolicy: IfNotPresent
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 5
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: custom-registry.io/user/app:v2.0.0
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+      - equal:
+          path: metadata.labels["version"]
+          value: "v2.0.0"
+      - equal:
+          path: metadata.labels["app.kubernetes.io/version"]
+          value: "v2.0.0"
+
+  - it: should set custom pod labels and annotations
+    set:
+      podAnnotations:
+        test.annotation/key: test-value
+      podLabels:
+        custom-label: custom-value
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["test.annotation/key"]
+          value: test-value
+      - equal:
+          path: spec.template.metadata.labels["custom-label"]
+          value: custom-value
+
+  - it: should set resources, nodeSelector, tolerations, and affinity
+    set:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
+      nodeSelector:
+        disktype: ssd
+      tolerations:
+        - key: "key1"
+          operator: "Equal"
+          value: "value1"
+          effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/e2e-az-name
+                    operator: In
+                    values:
+                      - e2e-az1
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.cpu
+          value: 500m
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: 128Mi
+      - equal:
+          path: spec.template.spec.nodeSelector.disktype
+          value: ssd
+      - equal:
+          path: spec.template.spec.tolerations[0].key
+          value: "key1"
+      - isNotEmpty:
+          path: spec.template.spec.affinity.nodeAffinity

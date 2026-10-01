@@ -1,0 +1,58 @@
+suite: test environment values
+templates:
+  - deployment.yaml
+  - ingress.yaml
+  - pdb.yaml
+  - service.yaml
+  - hpa.yaml
+tests:
+  - it: should correctly configure development environment
+    values:
+      - ../values-dev.yaml
+    asserts:
+      - isNull:
+          path: spec.replicas
+        template: deployment.yaml
+      - isKind:
+          of: Ingress
+        template: ingress.yaml
+      - equal:
+          path: spec.rules[0].host
+          value: jwhiteaker.homelab.kubesoar.com
+        template: ingress.yaml
+      - hasDocuments:
+          count: 0
+        template: pdb.yaml
+      - isKind:
+          of: HorizontalPodAutoscaler
+        template: hpa.yaml
+      - equal:
+          path: spec.minReplicas
+          value: 1
+        template: hpa.yaml
+      - equal:
+          path: spec.maxReplicas
+          value: 5
+        template: hpa.yaml
+
+  - it: should correctly configure production environment
+    values:
+      - ../values-prod.yaml
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+        template: deployment.yaml
+      - hasDocuments:
+          count: 0
+        template: ingress.yaml
+      - isKind:
+          of: PodDisruptionBudget
+        template: pdb.yaml
+      - equal:
+          path: spec.minAvailable
+          value: 1
+        template: pdb.yaml
+      - hasDocuments:
+          count: 0
+        template: hpa.yaml

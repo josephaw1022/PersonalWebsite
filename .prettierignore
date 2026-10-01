@@ -3,6 +3,9 @@ node_modules
 # Prettier mangles YAML frontmatter in SKILL.md (e.g. ** globs in `paths`)
 .agents/skills/**/SKILL.md
 
+# Helm templates contain Go templating syntax which cannot be formatted as raw YAML
+charts/**/templates/**
+
 .next
 out
 build
