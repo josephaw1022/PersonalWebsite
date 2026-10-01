@@ -70,6 +70,13 @@ resources: {}
 
 autoscaling:
   enabled: false
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+  annotations: {}
+  behavior: {}
+  extraMetrics: []
 
 nodeSelector: {}
 tolerations: []

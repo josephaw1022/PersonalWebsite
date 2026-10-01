@@ -8,7 +8,7 @@ paths:
 
 ## Deploying to Infrastructure
 
-Cluster runner infrastructure is managed via `./infra/arc-setup.sh`, while application workloads (Deployment, Service, Ingress, PodDisruptionBudget) are packaged as a Helm chart in `charts/personal-site` and deployed using GitHub Actions workflows.
+Cluster runner infrastructure is managed via `./infra/arc-setup.sh`, while application workloads (Deployment, Service, Ingress, PodDisruptionBudget, HorizontalPodAutoscaler) are packaged as a Helm chart in `charts/personal-site` and deployed using GitHub Actions workflows.
 
 ### Implementation
 

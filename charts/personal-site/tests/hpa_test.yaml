@@ -1,0 +1,75 @@
+suite: test horizontal pod autoscaler template
+templates:
+  - hpa.yaml
+  - deployment.yaml
+tests:
+  - it: should not render HorizontalPodAutoscaler by default
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: hpa.yaml
+      - equal:
+          path: spec.replicas
+          value: 3
+        template: deployment.yaml
+
+  - it: should render HorizontalPodAutoscaler when enabled and omit replicas on deployment
+    set:
+      autoscaling:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 8
+        targetCPUUtilizationPercentage: 75
+        targetMemoryUtilizationPercentage: 85
+        annotations:
+          test.autoscaling/annotation: "true"
+    asserts:
+      - isKind:
+          of: HorizontalPodAutoscaler
+        template: hpa.yaml
+      - isAPIVersion:
+          of: autoscaling/v2
+        template: hpa.yaml
+      - equal:
+          path: metadata.name
+          value: personal-site
+        template: hpa.yaml
+      - equal:
+          path: spec.scaleTargetRef.kind
+          value: Deployment
+        template: hpa.yaml
+      - equal:
+          path: spec.scaleTargetRef.name
+          value: personal-site
+        template: hpa.yaml
+      - equal:
+          path: spec.minReplicas
+          value: 2
+        template: hpa.yaml
+      - equal:
+          path: spec.maxReplicas
+          value: 8
+        template: hpa.yaml
+      - equal:
+          path: spec.metrics[0].resource.name
+          value: cpu
+        template: hpa.yaml
+      - equal:
+          path: spec.metrics[0].resource.target.averageUtilization
+          value: 75
+        template: hpa.yaml
+      - equal:
+          path: spec.metrics[1].resource.name
+          value: memory
+        template: hpa.yaml
+      - equal:
+          path: spec.metrics[1].resource.target.averageUtilization
+          value: 85
+        template: hpa.yaml
+      - equal:
+          path: metadata.annotations["test.autoscaling/annotation"]
+          value: "true"
+        template: hpa.yaml
+      - isNull:
+          path: spec.replicas
+        template: deployment.yaml
