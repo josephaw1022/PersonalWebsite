@@ -87,6 +87,44 @@ podDisruptionBudget:
   # maxUnavailable: 1
   annotations: {}
 
+# Network policies configuration
+# Allows configuring one or multiple NetworkPolicies for network traffic isolation.
+# Supports both list and map formats.
+networkPolicies: []
+  # - name: default-deny
+  #   enabled: true
+  #   podSelector: {}
+  #   policyTypes:
+  #     - Ingress
+  #     - Egress
+  # - name: allow-cloudflared
+  #   enabled: true
+  #   podSelector:
+  #     matchLabels:
+  #       app: personal-site
+  #   policyTypes:
+  #     - Ingress
+  #   ingress:
+  #     - from:
+  #         - namespaceSelector:
+  #             matchLabels:
+  #               kubernetes.io/metadata.name: cloudflare-connector
+  #       ports:
+  #         - protocol: TCP
+  #           port: 3000
+  # - name: allow-dns
+  #   enabled: true
+  #   policyTypes:
+  #     - Egress
+  #   egress:
+  #     - to:
+  #         - namespaceSelector: {}
+  #       ports:
+  #         - protocol: UDP
+  #           port: 53
+  #         - protocol: TCP
+  #           port: 53
+
 openshift:
   partOf: personal-website-app
   runtime: nodejs

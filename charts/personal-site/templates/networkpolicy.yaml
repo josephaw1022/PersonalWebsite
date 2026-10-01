@@ -1,0 +1,80 @@
+{{- $policies := list -}}
+{{- if .Values.networkPolicies -}}
+  {{- if kindIs "slice" .Values.networkPolicies -}}
+    {{- $policies = .Values.networkPolicies -}}
+  {{- else if kindIs "map" .Values.networkPolicies -}}
+    {{- if hasKey .Values.networkPolicies "policies" -}}
+      {{- if or (not (hasKey .Values.networkPolicies "enabled")) .Values.networkPolicies.enabled -}}
+        {{- $policies = .Values.networkPolicies.policies -}}
+      {{- end -}}
+    {{- else -}}
+      {{- range $k, $v := .Values.networkPolicies -}}
+        {{- if kindIs "map" $v -}}
+          {{- $p := merge (dict "name" (default $k $v.name)) $v -}}
+          {{- $policies = append $policies $p -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- else if and .Values.networkPolicy (or (not (hasKey .Values.networkPolicy "enabled")) .Values.networkPolicy.enabled) -}}
+  {{- $policies = list .Values.networkPolicy -}}
+{{- end -}}
+
+{{- range $index, $policy := $policies }}
+{{- if or (not (hasKey $policy "enabled")) $policy.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ if $policy.fullnameOverride }}{{ $policy.fullnameOverride }}{{ else if $policy.name }}{{ printf "%s-%s" (include "personal-site.fullname" $) $policy.name }}{{ else }}{{ include "personal-site.fullname" $ }}{{ end }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "personal-site.labels" $ | nindent 4 }}
+    {{- with $policy.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with $policy.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  podSelector:
+    {{- if hasKey $policy "podSelector" }}
+    {{- if empty $policy.podSelector }}
+    {}
+    {{- else }}
+    {{- toYaml $policy.podSelector | nindent 4 }}
+    {{- end }}
+    {{- else }}
+    matchLabels:
+      app: {{ include "personal-site.name" $ }}
+    {{- end }}
+  policyTypes:
+    {{- if $policy.policyTypes }}
+    {{- toYaml $policy.policyTypes | nindent 4 }}
+    {{- else if and (hasKey $policy "ingress") (hasKey $policy "egress") }}
+    - Ingress
+    - Egress
+    {{- else if hasKey $policy "egress" }}
+    - Egress
+    {{- else }}
+    - Ingress
+    {{- end }}
+  {{- if hasKey $policy "ingress" }}
+  {{- if empty $policy.ingress }}
+  ingress: []
+  {{- else }}
+  ingress:
+    {{- toYaml $policy.ingress | nindent 4 }}
+  {{- end }}
+  {{- end }}
+  {{- if hasKey $policy "egress" }}
+  {{- if empty $policy.egress }}
+  egress: []
+  {{- else }}
+  egress:
+    {{- toYaml $policy.egress | nindent 4 }}
+  {{- end }}
+  {{- end }}
+{{- end }}
+{{- end }}

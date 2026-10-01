@@ -1,0 +1,228 @@
+suite: test network policy template
+templates:
+  - networkpolicy.yaml
+tests:
+  - it: should not render NetworkPolicy by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render single NetworkPolicy from list with default selector and ingress
+    set:
+      networkPolicies:
+        - name: allow-cloudflared
+          ingress:
+            - from:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: cloudflare-connector
+              ports:
+                - protocol: TCP
+                  port: 3000
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: NetworkPolicy
+      - isAPIVersion:
+          of: networking.k8s.io/v1
+      - equal:
+          path: metadata.name
+          value: personal-site-allow-cloudflared
+      - equal:
+          path: spec.podSelector.matchLabels.app
+          value: personal-site
+      - equal:
+          path: spec.policyTypes[0]
+          value: Ingress
+      - equal:
+          path: spec.ingress[0].ports[0].port
+          value: 3000
+      - equal:
+          path: spec.ingress[0].from[0].namespaceSelector.matchLabels["kubernetes.io/metadata.name"]
+          value: cloudflare-connector
+
+  - it: should render multiple NetworkPolicies when multiple policies defined
+    set:
+      networkPolicies:
+        - name: default-deny
+          podSelector: {}
+          policyTypes:
+            - Ingress
+            - Egress
+        - name: allow-ingress
+          podSelector:
+            matchLabels:
+              app: personal-site
+          ingress:
+            - from:
+                - podSelector:
+                    matchLabels:
+                      app: runner
+        - name: allow-dns
+          policyTypes:
+            - Egress
+          egress:
+            - to:
+                - namespaceSelector: {}
+              ports:
+                - protocol: UDP
+                  port: 53
+    asserts:
+      - hasDocuments:
+          count: 3
+      - isKind:
+          of: NetworkPolicy
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: personal-site-default-deny
+        documentIndex: 0
+      - equal:
+          path: spec.podSelector
+          value: {}
+        documentIndex: 0
+      - equal:
+          path: spec.policyTypes
+          value:
+            - Ingress
+            - Egress
+        documentIndex: 0
+      - isKind:
+          of: NetworkPolicy
+        documentIndex: 1
+      - equal:
+          path: metadata.name
+          value: personal-site-allow-ingress
+        documentIndex: 1
+      - equal:
+          path: spec.podSelector.matchLabels.app
+          value: personal-site
+        documentIndex: 1
+      - equal:
+          path: spec.policyTypes[0]
+          value: Ingress
+        documentIndex: 1
+      - isKind:
+          of: NetworkPolicy
+        documentIndex: 2
+      - equal:
+          path: metadata.name
+          value: personal-site-allow-dns
+        documentIndex: 2
+      - equal:
+          path: spec.policyTypes[0]
+          value: Egress
+        documentIndex: 2
+      - equal:
+          path: spec.egress[0].ports[0].port
+          value: 53
+        documentIndex: 2
+
+  - it: should skip policies with enabled set to false
+    set:
+      networkPolicies:
+        - name: policy-one
+          enabled: false
+          ingress:
+            - ports:
+                - port: 80
+        - name: policy-two
+          enabled: true
+          ingress:
+            - ports:
+                - port: 3000
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: personal-site-policy-two
+
+  - it: should support fullnameOverride and custom annotations/labels
+    set:
+      networkPolicies:
+        - fullnameOverride: custom-global-netpol
+          annotations:
+            custom.io/annotation: test-annotation
+          labels:
+            custom.io/label: test-label
+          policyTypes:
+            - Ingress
+          ingress: []
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: custom-global-netpol
+      - equal:
+          path: metadata.annotations["custom.io/annotation"]
+          value: test-annotation
+      - equal:
+          path: metadata.labels["custom.io/label"]
+          value: test-label
+      - equal:
+          path: spec.ingress
+          value: []
+
+  - it: should support custom podSelector with matchExpressions
+    set:
+      networkPolicies:
+        - name: backend-tier
+          podSelector:
+            matchExpressions:
+              - key: tier
+                operator: In
+                values:
+                  - backend
+                  - api
+          ingress:
+            - ports:
+                - port: 3000
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.podSelector.matchExpressions[0].key
+          value: tier
+      - equal:
+          path: spec.podSelector.matchExpressions[0].operator
+          value: In
+
+  - it: should auto-detect policyTypes when both ingress and egress are defined
+    set:
+      networkPolicies:
+        - name: dual-direction
+          ingress:
+            - ports:
+                - port: 3000
+          egress:
+            - ports:
+                - port: 53
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.policyTypes
+          value:
+            - Ingress
+            - Egress
+
+  - it: should support singular networkPolicy object configuration
+    set:
+      networkPolicies: null
+      networkPolicy:
+        enabled: true
+        name: isolated
+        policyTypes:
+          - Ingress
+        ingress:
+          - ports:
+              - port: 3000
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: personal-site-isolated
