@@ -1,11 +1,11 @@
-name: Pull Request - Helm Chart Test
+name: Pull Request - Helm Unit Tests
 
 on:
   pull_request:
     branches: [main, master]
     paths:
       - "charts/**"
-      - ".github/workflows/pr-helm-tests.yaml"
+      - ".github/workflows/pr-helm-unit-tests.yaml"
   workflow_dispatch:
 
 jobs:
