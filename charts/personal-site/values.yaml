@@ -145,4 +145,5 @@ autoscaling:
 nodeSelector: {}
 tolerations: []
 affinity: {}
+topologySpreadConstraints: []
 extraEnv: []
