@@ -12,14 +12,15 @@ export default function Home() {
         </div>
 
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-foreground mb-6 leading-tight">
-          Building reliable <br className="hidden sm:block" />
-          cloud infrastructure.
+          Building scalable <br className="hidden sm:block" />
+          developer platforms.
         </h1>
 
         <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed mb-10">
-          I design and build secure, scalable developer platforms and Kubernetes
-          control planes. Specializing in declarative GitOps, supply chain
-          security, and enterprise infrastructure automation.
+          I design and build secure, scalable developer platforms and enterprise
+          control planes running on Kubernetes. Specializing in declarative
+          GitOps, network security, supply chain security, and platform
+          automation.
         </p>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 font-mono text-sm">
@@ -45,11 +46,11 @@ export default function Home() {
             <Layers className="w-5 h-5" />
           </div>
           <h2 className="text-base font-semibold text-foreground mb-2">
-            Kubernetes Ecosystem
+            Kubernetes Platforms
           </h2>
           <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-            Multi-cluster control plane architecture, custom operators, and
-            automated workload orchestration.
+            Multi-cluster enterprise control planes running on Kubernetes,
+            custom operators, and automated workload orchestration.
           </p>
         </div>
 

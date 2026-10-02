@@ -9,7 +9,7 @@ test.describe("Site Navigation", () => {
     await expect(page).toHaveTitle(
       /Joseph Whiteaker \| Senior Platform Engineer/,
     );
-    await expect(page.locator("h1")).toContainText("Building reliable");
+    await expect(page.locator("h1")).toContainText("Building scalable");
 
     // Click on About navigation link
     await page.click("nav >> text=About");
@@ -24,7 +24,7 @@ test.describe("Site Navigation", () => {
     // Click on Overview navigation link to go back home
     await page.click("nav >> text=Overview");
     await expect(page).toHaveURL(/.*\//);
-    await expect(page.locator("h1")).toContainText("Building reliable");
+    await expect(page.locator("h1")).toContainText("Building scalable");
   });
 
   test("call to action buttons on home page work", async ({ page }) => {
