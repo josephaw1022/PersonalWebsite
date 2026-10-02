@@ -80,8 +80,9 @@ test.describe("Homelab Page", () => {
     ).toBeVisible();
 
     // Verify external repo link
-    const repoLink = page.getByRole("link", { name: /view_okd_repo/i });
-    await expect(repoLink).toHaveAttribute(
+    const repoLinks = page.getByRole("link", { name: /view_okd_repo/i });
+    await expect(repoLinks).toHaveCount(2);
+    await expect(repoLinks.first()).toHaveAttribute(
       "href",
       "https://github.com/josephaw1022/okd-sno-manual-install",
     );

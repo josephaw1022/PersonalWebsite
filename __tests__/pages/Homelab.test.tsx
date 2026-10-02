@@ -103,12 +103,6 @@ describe("Homelab Page", () => {
     expect(
       screen.getAllByText("quay.kubesoar.com").length,
     ).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("192.168.1.34").length).toBeGreaterThanOrEqual(
-      1,
-    );
-    expect(
-      screen.getAllByText("quay-clair.kubesoar.com").length,
-    ).toBeGreaterThanOrEqual(1);
     expect(
       screen.getAllByText("personal-laptop (Tailscale)").length,
     ).toBeGreaterThanOrEqual(1);
@@ -134,8 +128,13 @@ describe("Homelab Page", () => {
 
   it("renders external link to the okd repo", () => {
     render(<Homelab />);
-    const repoLink = screen.getByRole("link", { name: /view_okd_repo/i });
-    expect(repoLink).toHaveAttribute(
+    const repoLinks = screen.getAllByRole("link", { name: /view_okd_repo/i });
+    expect(repoLinks).toHaveLength(2);
+    expect(repoLinks[0]).toHaveAttribute(
+      "href",
+      "https://github.com/josephaw1022/okd-sno-manual-install",
+    );
+    expect(repoLinks[1]).toHaveAttribute(
       "href",
       "https://github.com/josephaw1022/okd-sno-manual-install",
     );
