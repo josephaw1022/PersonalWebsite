@@ -253,15 +253,20 @@ export default function Homelab() {
           self-hosted Quay container registry, Tailscale container mesh routing,
           and dedicated Pi-hole DNS virtualization.
         </p>
-        <a
-          href="https://github.com/josephaw1022/okd-sno-manual-install"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 font-mono text-sm text-emerald-600 dark:text-emerald-400 hover:underline"
-        >
-          <span>view_okd_repo</span>
-          <ExternalLink className="w-4 h-4" />
-        </a>
+        <div className="mb-6 flex flex-col items-center justify-between gap-4 sm:flex-row">
+          <span className="font-mono text-sm text-zinc-600 dark:text-zinc-400">
+            Explore the code repository and automation makefile on GitHub.
+          </span>
+          <a
+            href="https://github.com/josephaw1022/okd-sno-manual-install"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex shrink-0 items-center gap-2 rounded-sm bg-zinc-900 px-5 py-2.5 font-mono text-sm font-medium text-zinc-50 shadow-sm transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+          >
+            <span>view_okd_repo</span>
+            <ExternalLink className="h-4 w-4" />
+          </a>
+        </div>
 
         {/* Quick Highlights / Badges */}
         <div className="flex flex-wrap items-center gap-2.5 font-mono text-xs">
