@@ -6,10 +6,10 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 ENV_FILE="${REPO_ROOT}/.env"
 
 usage() {
-  echo "Usage: $0 [--app-id <APP_ID>] [--installation-id <INSTALLATION_ID>] [--private-key-file <PRIVATE_KEY_FILE>]"
+  echo "Usage: $0 [--app-id <APP_ID>] [--installation-id <INSTALLATION_ID>] [--private-key-file <PRIVATE_KEY_FILE>] [--arc-version <ARC_VERSION>]"
   echo ""
   echo "Flags are optional when ${ENV_FILE} defines:"
-  echo "  GITHUB_APP_ID, GITHUB_APP_INSTALLATION_ID, GITHUB_APP_PRIVATE_KEY_FILE"
+  echo "  GITHUB_APP_ID, GITHUB_APP_INSTALLATION_ID, GITHUB_APP_PRIVATE_KEY_FILE, ARC_VERSION"
   echo ""
   echo "CLI flags override values from .env."
   exit 1
@@ -30,17 +30,20 @@ load_env_file() {
 GITHUB_APP_ID=""
 GITHUB_APP_INSTALLATION_ID=""
 GITHUB_APP_PRIVATE_KEY_FILE=""
+ARC_VERSION=""
 
 load_env_file
 GITHUB_APP_ID="${GITHUB_APP_ID:-}"
 GITHUB_APP_INSTALLATION_ID="${GITHUB_APP_INSTALLATION_ID:-}"
 GITHUB_APP_PRIVATE_KEY_FILE="${GITHUB_APP_PRIVATE_KEY_FILE:-}"
+ARC_VERSION="${ARC_VERSION:-}"
 
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     --app-id) GITHUB_APP_ID="$2"; shift ;;
     --installation-id) GITHUB_APP_INSTALLATION_ID="$2"; shift ;;
     --private-key-file) GITHUB_APP_PRIVATE_KEY_FILE="$2"; shift ;;
+    --arc-version|--version) ARC_VERSION="$2"; shift ;;
     -h|--help) usage ;;
     *) echo "Unknown parameter passed: $1"; usage ;;
   esac
@@ -192,9 +195,26 @@ echo "==> Granting anyuid SCC to runner ServiceAccount (required for actions-run
 oc --context "${KUBE_CONTEXT}" adm policy add-scc-to-user anyuid \
   -z "${SA_NAME}" -n "${RUNNER_NS}" 2>/dev/null || true
 
-echo "==> Installing/Upgrading gha-runner-scale-set..."
+if [[ -z "${ARC_VERSION}" ]]; then
+  echo "==> Detecting ARC controller version from namespace '${CONTROLLER_NS}'..."
+  DETECTED_VERSION=$("${KUBECTL[@]}" get deployment -n "${CONTROLLER_NS}" -l "app.kubernetes.io/name=gha-rs-controller" -o jsonpath='{.items[0].metadata.labels.app\.kubernetes\.io/version}' 2>/dev/null || true)
+  if [[ -n "${DETECTED_VERSION}" ]]; then
+    echo "    Found controller version: ${DETECTED_VERSION}"
+    ARC_VERSION="${DETECTED_VERSION}"
+  else
+    echo "    Could not auto-detect controller version; proceeding with default chart resolution."
+  fi
+fi
+
+HELM_VERSION_ARGS=()
+if [[ -n "${ARC_VERSION}" ]]; then
+  HELM_VERSION_ARGS=(--version "${ARC_VERSION}")
+fi
+
+echo "==> Installing/Upgrading gha-runner-scale-set${ARC_VERSION:+ (version ${ARC_VERSION})}..."
 "${HELM[@]}" upgrade --install "${RUNNER_RELEASE}" \
   --namespace "${RUNNER_NS}" \
+  "${HELM_VERSION_ARGS[@]}" \
   oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
   -f - <<EOF
 githubConfigUrl: "${GITHUB_CONFIG_URL}"
