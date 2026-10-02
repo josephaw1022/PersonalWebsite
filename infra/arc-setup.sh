@@ -11,7 +11,7 @@ usage() {
   echo "Flags are optional when ${ENV_FILE} defines:"
   echo "  GITHUB_APP_ID, GITHUB_APP_INSTALLATION_ID, GITHUB_APP_PRIVATE_KEY_FILE, ARC_VERSION"
   echo ""
-  echo "CLI flags override values from .env."
+  echo "CLI flags override values from .env (defaults to detected controller version or ${DEFAULT_ARC_VERSION})."
   exit 1
 }
 
@@ -27,6 +27,7 @@ load_env_file() {
   set +a
 }
 
+DEFAULT_ARC_VERSION="0.15.0"
 GITHUB_APP_ID=""
 GITHUB_APP_INSTALLATION_ID=""
 GITHUB_APP_PRIVATE_KEY_FILE=""
@@ -202,7 +203,8 @@ if [[ -z "${ARC_VERSION}" ]]; then
     echo "    Found controller version: ${DETECTED_VERSION}"
     ARC_VERSION="${DETECTED_VERSION}"
   else
-    echo "    Could not auto-detect controller version; proceeding with default chart resolution."
+    echo "    Could not auto-detect controller version; defaulting to ${DEFAULT_ARC_VERSION}."
+    ARC_VERSION="${DEFAULT_ARC_VERSION}"
   fi
 fi
 
@@ -225,7 +227,7 @@ controllerServiceAccount:
   namespace: "${CONTROLLER_NS}"
   name: "${CONTROLLER_SA_NAME}"
 # Propagate OpenShift Dev Console labels to EphemeralRunner* objects (chart reserves app.kubernetes.io/part-of on AutoscalingRunnerSet only).
-# Non-empty annotations are required on these blocks: ARC 0.14.x mergeAnnotations(nil, ...) panics ("assignment to entry in nil map")
+# Non-empty annotations are required on these blocks: ARC 0.14.x+ mergeAnnotations(nil, ...) panics ("assignment to entry in nil map")
 # when metadata exists with labels only (Helm omits annotations:), breaking createEphemeralRunnerSet.
 resourceMeta:
   ephemeralRunnerSet:
