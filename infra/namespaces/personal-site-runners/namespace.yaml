@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: personal-site-runners
+  labels:
+    app.kubernetes.io/part-of: personal-website-app
+    app.kubernetes.io/managed-by: github-actions
+    openshift.io/display-name: "Personal Site (Runners)"
+    openshift.io/description: "Dedicated namespace for GitHub Actions self-hosted runners"

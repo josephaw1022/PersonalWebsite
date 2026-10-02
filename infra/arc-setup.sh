@@ -84,23 +84,13 @@ else
   }
 fi
 
-echo "==> Ensuring runner and target namespaces exist..."
-"${KUBECTL[@]}" apply -f - <<EOF
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: ${RUNNER_NS}
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: ${TARGET_NS}
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: ${DEV_NS}
-EOF
+echo "==> Ensuring runner and target namespaces exist with quotas and limit ranges..."
+"${KUBECTL[@]}" apply -f "${REPO_ROOT}/infra/namespaces/${RUNNER_NS}/namespace.yaml"
+"${KUBECTL[@]}" apply -f "${REPO_ROOT}/infra/namespaces/${TARGET_NS}/namespace.yaml"
+"${KUBECTL[@]}" apply -f "${REPO_ROOT}/infra/namespaces/${DEV_NS}/namespace.yaml"
+"${KUBECTL[@]}" apply -R -f "${REPO_ROOT}/infra/namespaces/${RUNNER_NS}/"
+"${KUBECTL[@]}" apply -R -f "${REPO_ROOT}/infra/namespaces/${TARGET_NS}/"
+"${KUBECTL[@]}" apply -R -f "${REPO_ROOT}/infra/namespaces/${DEV_NS}/"
 
 echo "==> Cleaning up existing runner scale set (forces fresh GitHub registration)..."
 if "${HELM[@]}" status "${RUNNER_RELEASE}" -n "${RUNNER_NS}" >/dev/null 2>&1; then

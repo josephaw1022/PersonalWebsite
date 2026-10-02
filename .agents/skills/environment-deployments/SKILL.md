@@ -19,4 +19,4 @@ Workloads are packaged with Helm (`charts/personal-site`) and deployed across tw
   - No Ingress; external access is handled via Cloudflare Tunnel.
 
 Deployment execution is shared via composite action `.github/actions/deploy-workload` using `helm upgrade --install`. If no image tag input is provided, candidate tags are resolved and verified in Quay via composite action `.github/actions/resolve-image-tag` (via OCI v2 manifest API and container runtime) before setting the tag override; if unavailable, `--reuse-values` is used to preserve existing release values.
-Workloads in both environments can be bootstrapped via `.github/workflows/bootstrap-cluster.yml`.
+Workloads in both environments can be bootstrapped via `.github/workflows/bootstrap-cluster.yml`, which idempotently applies the namespace declarations, granular ResourceQuotas (CPU, memory, pods, storage, configmaps, secrets, services), and LimitRanges (containers, pods, PVCs) defined under `infra/namespaces/`.
