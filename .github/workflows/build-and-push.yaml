@@ -12,7 +12,8 @@ on:
       - "postcss.config.mjs"
       - "Containerfile"
       - ".github/workflows/build-and-push.yaml"
-      - ".github/actions/**"
+      - ".github/actions/container-scan-attestation/**"
+      - ".github/actions/container-sbom-attestation/**"
   workflow_dispatch:
 
 permissions:
