@@ -61,8 +61,8 @@ export default function About() {
             repeatability, and scalability. As Team Architect at Versaterm
             across both the Control Plane and Product Runtime pods, I lead the
             architecture of enterprise Kubernetes platforms managing and
-            reconciling over 1,200 applications across dozens of AWS and Azure
-            data plane clusters, onboarding 40+ diverse product teams.
+            reconciling over 750 ArgoCD apps across dozens of AWS and Azure data
+            plane clusters, onboarding 25+ teams.
           </p>
           <p className="text-lg text-zinc-700 dark:text-zinc-300 leading-relaxed">
             I operate with a &quot;Platform as a Product&quot; mindset: treating
