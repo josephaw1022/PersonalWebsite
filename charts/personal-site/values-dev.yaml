@@ -28,3 +28,31 @@ autoscaling:
   maxReplicas: 5
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
+
+networkPolicies:
+  - name: default-deny
+    podSelector: {}
+    policyTypes:
+      - Ingress
+      - Egress
+  - name: allow-ingress
+    podSelector:
+      matchLabels:
+        app: personal-site
+    policyTypes:
+      - Ingress
+    ingress:
+      - ports:
+          - protocol: TCP
+            port: 3000
+  - name: allow-dns
+    policyTypes:
+      - Egress
+    egress:
+      - to:
+          - namespaceSelector: {}
+        ports:
+          - protocol: UDP
+            port: 53
+          - protocol: TCP
+            port: 53

@@ -9,4 +9,8 @@ podDisruptionBudget:
   minAvailable: 2
 
 autoscaling:
-  enabled: false
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
