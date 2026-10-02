@@ -66,7 +66,7 @@ CONTROLLER_NS="github-arc"
 # Must match the Helm release name for gha-runner-scale-set-controller (see helm upgrade --install below).
 CONTROLLER_RELEASE="arc"
 CONTROLLER_SA_NAME="${CONTROLLER_RELEASE}-gha-rs-controller"
-RUNNER_NS="personal-site"
+RUNNER_NS="personal-site-runners"
 TARGET_NS="personal-site"
 DEV_NS="personal-site-dev-envs"
 RUNNER_RELEASE="personal-site-runner"
@@ -86,8 +86,10 @@ fi
 
 echo "==> Ensuring runner and target namespaces exist with quotas and limit ranges..."
 "${KUBECTL[@]}" apply -f "${REPO_ROOT}/infra/namespaces/${RUNNER_NS}/namespace.yaml"
+"${KUBECTL[@]}" apply -f "${REPO_ROOT}/infra/namespaces/${TARGET_NS}/namespace.yaml"
 "${KUBECTL[@]}" apply -f "${REPO_ROOT}/infra/namespaces/${DEV_NS}/namespace.yaml"
 "${KUBECTL[@]}" apply -R -f "${REPO_ROOT}/infra/namespaces/${RUNNER_NS}/"
+"${KUBECTL[@]}" apply -R -f "${REPO_ROOT}/infra/namespaces/${TARGET_NS}/"
 "${KUBECTL[@]}" apply -R -f "${REPO_ROOT}/infra/namespaces/${DEV_NS}/"
 
 echo "==> Cleaning up existing runner scale set (forces fresh GitHub registration)..."
@@ -111,8 +113,22 @@ metadata:
   namespace: ${RUNNER_NS}
 EOF
 
-echo "==> Creating RoleBinding for the runner ServiceAccount in production and dev namespaces..."
+echo "==> Creating RoleBinding for the runner ServiceAccount in runner, production, and dev namespaces..."
 "${KUBECTL[@]}" apply -f - <<EOF
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runner-admin-binding
+  namespace: ${RUNNER_NS}
+subjects:
+- kind: ServiceAccount
+  name: ${SA_NAME}
+  namespace: ${RUNNER_NS}
+roleRef:
+  kind: ClusterRole
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
