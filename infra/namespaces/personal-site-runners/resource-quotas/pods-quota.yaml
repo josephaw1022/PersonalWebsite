@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: pods-quota
+  namespace: personal-site-runners
+  labels:
+    app.kubernetes.io/part-of: personal-website-app
+    app.kubernetes.io/managed-by: github-actions
+spec:
+  hard:
+    pods: "30"

@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       target_env:
-        description: "Target environment to bootstrap (all, production, development)"
+        description: "Target environment to bootstrap (all, production, development, runners)"
         required: false
         default: "all"
         type: choice
@@ -18,6 +18,7 @@ on:
           - all
           - production
           - development
+          - runners
       tag:
         description: "Container image tag to deploy (defaults to latest)"
         required: false
@@ -52,6 +53,9 @@ jobs:
           if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "development" ]; then
             NAMESPACES+=("personal-site-dev-envs")
           fi
+          if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "runners" ]; then
+            NAMESPACES+=("personal-site-runners")
+          fi
 
           for NS in "${NAMESPACES[@]}"; do
             echo "Applying namespace manifest for '${NS}'..."
@@ -73,6 +77,9 @@ jobs:
           fi
           if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "development" ]; then
             NAMESPACES+=("personal-site-dev-envs")
+          fi
+          if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "runners" ]; then
+            NAMESPACES+=("personal-site-runners")
           fi
 
           for NS in "${NAMESPACES[@]}"; do
