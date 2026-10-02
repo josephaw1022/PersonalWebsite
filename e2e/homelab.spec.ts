@@ -70,7 +70,7 @@ test.describe("Homelab Page", () => {
     ).toBeVisible();
     await expect(
       page.getByRole("heading", {
-        name: "Quay Container Registry & Node Pull-Through Caching",
+        name: /Quay Container Registry.*Clair Security/i,
       }),
     ).toBeVisible();
 

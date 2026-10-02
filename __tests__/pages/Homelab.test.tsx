@@ -55,7 +55,7 @@ describe("Homelab Page", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: /Quay Container Registry & Node Pull-Through Caching/i,
+        name: /Quay Container Registry.*Clair Security/i,
       }),
     ).toBeInTheDocument();
     expect(
@@ -102,6 +102,12 @@ describe("Homelab Page", () => {
     );
     expect(
       screen.getAllByText("quay.kubesoar.com").length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("192.168.1.34").length).toBeGreaterThanOrEqual(
+      1,
+    );
+    expect(
+      screen.getAllByText("quay-clair.kubesoar.com").length,
     ).toBeGreaterThanOrEqual(1);
   });
 
