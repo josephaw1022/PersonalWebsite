@@ -16,14 +16,15 @@ import {
   ArrowRight,
   ExternalLink,
   CheckCircle2,
-  Database,
   Radio,
+  Workflow,
 } from "lucide-react";
+import Mermaid from "@/components/Mermaid";
 
 export const metadata = {
   title: "Homelab Infrastructure | Joseph Whiteaker",
   description:
-    "Deep dive into Joseph Whiteaker's bare-metal OKD OpenShift cluster, Istio Ambient Mesh, MetalLB L2 routing, Keycloak & Entra ID SSO, OpenBao, Quay registry, and Pi-hole DNS network topology.",
+    "Deep dive into Joseph Whiteaker's bare-metal OKD OpenShift cluster, Istio Ambient Mesh, MetalLB L2 routing, Keycloak & Entra ID SSO, OpenBao, Quay registry, Tailscale containers, and Pi-hole DNS network topology.",
 };
 
 interface IpAllocation {
@@ -39,7 +40,7 @@ const ipAllocations: IpAllocation[] = [
     ip: "192.168.1.4",
     hostname: "laptop-server.kubesoar.com",
     subsystem: "Host / Hypervisor",
-    role: "CentOS Stream 10 ThinkPad (KVM Host, Cockpit, Quay Stack, Tailscale Exit Node)",
+    role: "CentOS Stream 10 ThinkPad (KVM Host, Cockpit, Quay Stack, Tailscale Subnet Router Container)",
     ingressType: "Direct HTTPS / Port 443 (Certbot TLS)",
   },
   {
@@ -53,7 +54,7 @@ const ipAllocations: IpAllocation[] = [
     ip: "192.168.1.9",
     hostname: "desktop-server.kubesoar.com",
     subsystem: "Host / Hypervisor",
-    role: "CentOS Stream 10 Server (125GB RAM, OKD Master VMs, Datadog Host Agent)",
+    role: "CentOS Stream 10 Server (125GB RAM, OKD Master VMs, Tailscale Container, Datadog Host Agent)",
     ingressType: "Direct HTTPS / Port 443 (Certbot TLS)",
   },
   {
@@ -144,10 +145,113 @@ const ipAllocations: IpAllocation[] = [
     ip: "100.110.200.108",
     hostname: "laptop-server (Tailscale)",
     subsystem: "Remote Access Mesh",
-    role: "Tailscale Exit Node & Subnet Router advertising 192.168.1.0/24 subnet",
+    role: "Tailscale Exit Node & Subnet Router Container advertising 192.168.1.0/24",
+    ingressType: "Tailscale Encrypted WireGuard Mesh",
+  },
+  {
+    ip: "Tailscale Mesh IP",
+    hostname: "desktop-server (Tailscale)",
+    subsystem: "Remote Access Mesh",
+    role: "Tailscale Node Container providing direct administrative mesh connectivity",
     ingressType: "Tailscale Encrypted WireGuard Mesh",
   },
 ];
+
+const serversTopologyChart = `flowchart TB
+  subgraph CloudflareEdge["Cloudflare Edge & Public Internet"]
+    CF_DNS["Cloudflare DNS (DNS-01 Challenge)"]
+    CF_Tunnel["Cloudflare Zero-Trust Tunnel"]
+  end
+
+  subgraph SubnetLAN["Private Router Subnet: 192.168.0.0/21 (Gateway: 192.168.1.1)"]
+    direction TB
+
+    subgraph DesktopHost["desktop-server / SuperMicro (192.168.1.9) - CentOS Stream 10 (125GB RAM)"]
+      direction TB
+      DT_KVM["Libvirt / KVM Hypervisor"]
+      DT_OKD["OKD 4.22 Converged Master VMs (master-0, master-1, master-2)"]
+      DT_TS["Tailscale Container (Mesh Management)"]
+      DT_DD["Datadog Host Agent Container"]
+      DT_CP["Cockpit Web Admin (Port 443 / TLS)"]
+      DT_STOR["LVMS okd-storage Pool (/dev/vdb Raw Disks)"]
+      
+      DT_KVM --> DT_OKD
+      DT_KVM --> DT_STOR
+    end
+
+    subgraph LaptopHost["laptop-server / ThinkPad (192.168.1.4) - CentOS Stream 10"]
+      direction TB
+      LP_KVM["Libvirt / KVM Hypervisor"]
+      LP_PI["Pi-hole DNS VM (192.168.1.5 - Fedora Cloud 44)"]
+      LP_TS["Tailscale Exit Node & Subnet Router Container (100.110.200.108 - Route: 192.168.1.0/24)"]
+      LP_QUAY["Quay Registry Stack (PostgreSQL, Valkey, Registry, Nginx Proxy)"]
+      LP_BYOC["Datadog BYOC Storage (PostgreSQL 192.168.1.25, MinIO 192.168.1.26)"]
+      LP_CP["Cockpit Web Admin (Port 443 / TLS)"]
+
+      LP_KVM --> LP_PI
+    end
+
+    subgraph WireGuardMesh["Tailscale Encrypted Mesh Overlay"]
+      TS_MESH["Tailscale WireGuard Mesh Network"]
+      TS_MESH <--> LP_TS
+      TS_MESH <--> DT_TS
+    end
+  end
+
+  CF_DNS -.->|ACME Validation| DesktopHost
+  CF_DNS -.->|ACME Validation| LaptopHost
+  CF_Tunnel <==>|Encrypted Tunnel| DT_OKD
+`;
+
+const nodesIpMappingChart = `flowchart LR
+  subgraph DNS["Pi-hole Split DNS (192.168.1.5)"]
+    DNS_OKD["okd.conf (api, api-int, *.apps.okd)"]
+    DNS_HOME["homelab.conf (*.homelab -> 192.168.1.230)"]
+    DNS_QUAY["quay.conf (quay -> 192.168.1.33)"]
+  end
+
+  subgraph LoadBalancing["Layer 4/7 Load Balancers"]
+    NGINX_LB["Nginx MacVLAN LB (192.168.1.20)"]
+    METALLB["MetalLB L2 Pool (192.168.1.230 - .249)"]
+  end
+
+  subgraph OKDCluster["OKD 3-Node Converged Master Cluster (OKD 4.22 SCOS / K8s v1.35.5)"]
+    M0["master-0 (192.168.1.22)<br/>Rendezvous / Control Plane / Worker<br/>ztunnel + CNI"]
+    M1["master-1 (192.168.1.23)<br/>Control Plane / Worker<br/>ztunnel + CNI"]
+    M2["master-2 (192.168.1.24)<br/>Control Plane / Worker<br/>ztunnel + CNI"]
+  end
+
+  subgraph IngressTier["Service Ingress Gateways & VIPs"]
+    ISTIO_GW["Istio Ingress Gateway VIP (192.168.1.230)<br/>*.homelab.kubesoar.com"]
+    OKD_ROUTER["OpenShift Router (*.apps.okd.kubesoar.com)"]
+    QUAY_NGINX["Quay Nginx Ingress (192.168.1.33)<br/>quay.kubesoar.com"]
+  end
+
+  subgraph Applications["Workloads & Services"]
+    KEYCLOAK["Keycloak SSO (keycloak.homelab.kubesoar.com)"]
+    OPENBAO["OpenBao Vault (openbao.homelab.kubesoar.com)"]
+    DEV_SITE["Personal Site Dev (jwhiteaker.homelab.kubesoar.com)"]
+    CONSOLE["OKD Console (console-openshift-console.apps.okd)"]
+    KIALI["Kiali Mesh UI (kiali.apps.okd)"]
+  end
+
+  DNS_OKD --> NGINX_LB
+  DNS_HOME --> METALLB
+  DNS_QUAY --> QUAY_NGINX
+
+  NGINX_LB -->|Ports 6443, 22623, 80, 443| M0
+  NGINX_LB -->|Ports 6443, 22623, 80, 443| M1
+  NGINX_LB -->|Ports 6443, 22623, 80, 443| M2
+
+  METALLB --> ISTIO_GW
+  ISTIO_GW --> KEYCLOAK
+  ISTIO_GW --> OPENBAO
+  ISTIO_GW --> DEV_SITE
+
+  NGINX_LB --> OKD_ROUTER
+  OKD_ROUTER --> CONSOLE
+  OKD_ROUTER --> KIALI
+`;
 
 export default function Homelab() {
   return (
@@ -165,8 +269,8 @@ export default function Homelab() {
           A production-grade, bare-metal OpenShift OKD cluster running
           sidecarless Istio Ambient Mesh, MetalLB L2 load balancing, Keycloak
           &amp; Microsoft Entra ID single sign-on, OpenBao HA secrets engine,
-          self-hosted Quay container registry, and dedicated Pi-hole DNS
-          virtualization.
+          self-hosted Quay container registry, Tailscale container mesh routing,
+          and dedicated Pi-hole DNS virtualization.
         </p>
 
         {/* Quick Highlights / Badges */}
@@ -195,11 +299,34 @@ export default function Homelab() {
             <Boxes className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>Quay Registry Stack + Pull Cache</span>
           </span>
+          <span className="px-3 py-1.5 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+            <Lock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>Tailscale Subnet &amp; Host Containers</span>
+          </span>
         </div>
       </div>
 
       <div className="space-y-14">
-        {/* Hardware & Hypervisors */}
+        {/* Mermaid Diagram 1: Servers Architecture */}
+        <section>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <Workflow className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold text-foreground">
+                Servers &amp; Hypervisors Architecture Diagram
+              </h2>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                Visual topology of physical host hypervisors, virtual machines,
+                container stacks, and remote Tailscale mesh.
+              </p>
+            </div>
+          </div>
+          <Mermaid chart={serversTopologyChart} />
+        </section>
+
+        {/* Hardware & Hypervisors Cards */}
         <section>
           <div className="flex items-center gap-3 mb-6">
             <div className="w-9 h-9 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
@@ -256,6 +383,12 @@ export default function Homelab() {
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                     <span>
+                      Tailscale Container for administrative mesh access
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <span>
                       Podman Datadog Host Agent &amp; Cockpit Console on Port
                       443 with Cloudflare TLS
                     </span>
@@ -296,21 +429,40 @@ export default function Homelab() {
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                     <span>
-                      Quay Registry Stack (PostgreSQL, Valkey cache, Quay core,
-                      Nginx TLS proxy)
+                      Tailscale Exit Node &amp; Subnet Router Container
+                      (advertising 192.168.1.0/24 subnet)
                     </span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                     <span>
-                      Tailscale Exit Node &amp; Subnet Router (advertising
-                      192.168.1.0/24 subnet)
+                      Quay Registry Stack (PostgreSQL, Valkey cache, Quay core,
+                      Nginx TLS proxy)
                     </span>
                   </li>
                 </ul>
               </div>
             </div>
           </div>
+        </section>
+
+        {/* Mermaid Diagram 2: OKD Nodes & Ingress IP Mapping */}
+        <section>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <Network className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold text-foreground">
+                Cluster Nodes, MetalLB VIPs &amp; Ingress Topology Diagram
+              </h2>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                Detailed flow showing DNS resolution, load balancing, master
+                nodes, and Layer 7 Ingress routing.
+              </p>
+            </div>
+          </div>
+          <Mermaid chart={nodesIpMappingChart} />
         </section>
 
         {/* Network & IP Allocation Map */}
@@ -589,6 +741,101 @@ export default function Homelab() {
                   </span>
                 </li>
               </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* Tailscale Remote Networking */}
+        <section>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-9 h-9 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <Lock className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold text-foreground">
+                Tailscale Mesh Containers &amp; Subnet Routing
+              </h2>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                Encrypted point-to-point WireGuard mesh networking connecting
+                desktop-server and laptop-server with remote subnet routing.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="card-minimal rounded-lg p-6">
+              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-mono text-xs font-semibold mb-3">
+                <Lock className="w-4 h-4" />
+                <span>laptop-server Subnet Router</span>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                Exit Node &amp; Subnet Router Container
+              </h3>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-4">
+                Configured on the ThinkPad host via Ansible (
+                <code className="text-emerald-600 dark:text-emerald-400 font-mono">
+                  configure-tailscale-laptop.yml
+                </code>
+                ). Enables kernel IP forwarding (
+                <code className="text-emerald-600 dark:text-emerald-400 font-mono">
+                  net.ipv4.ip_forward=1
+                </code>
+                ) and trusted firewalld zones, advertising the complete{" "}
+                <code className="text-emerald-600 dark:text-emerald-400 font-mono">
+                  192.168.1.0/24
+                </code>{" "}
+                subnet alongside full exit-node tunneling (
+                <code className="text-emerald-600 dark:text-emerald-400 font-mono">
+                  100.110.200.108
+                </code>
+                ).
+              </p>
+              <div className="text-xs font-mono text-zinc-600 dark:text-zinc-400 space-y-1">
+                <p>
+                  • Advertised Subnet:{" "}
+                  <span className="text-foreground">192.168.1.0/24</span>
+                </p>
+                <p>
+                  • Tailscale Exit IP:{" "}
+                  <span className="text-foreground">100.110.200.108</span>
+                </p>
+                <p>• Capability: Full LAN routing &amp; secure egress</p>
+              </div>
+            </div>
+
+            <div className="card-minimal rounded-lg p-6">
+              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-mono text-xs font-semibold mb-3">
+                <Lock className="w-4 h-4" />
+                <span>desktop-server Node Mesh</span>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                Compute Node Mesh Container
+              </h3>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-4">
+                Automated via Ansible (
+                <code className="text-emerald-600 dark:text-emerald-400 font-mono">
+                  start-tailscale-supermicro.yml
+                </code>
+                ) on the primary SuperMicro compute server. Provides secure,
+                direct administrative SSH, Cockpit remote management, and
+                telemetry streaming directly over the encrypted WireGuard mesh
+                without exposing ports on WAN.
+              </p>
+              <div className="text-xs font-mono text-zinc-600 dark:text-zinc-400 space-y-1">
+                <p>
+                  • Service:{" "}
+                  <span className="text-foreground">
+                    Tailscale Container Daemon
+                  </span>
+                </p>
+                <p>
+                  • Cockpit Access:{" "}
+                  <span className="text-foreground">
+                    https://desktop-server.kubesoar.com
+                  </span>
+                </p>
+                <p>• Security: End-to-end zero-trust encryption</p>
+              </div>
             </div>
           </div>
         </section>

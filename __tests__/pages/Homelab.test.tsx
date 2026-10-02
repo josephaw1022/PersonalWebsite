@@ -11,11 +11,21 @@ describe("Homelab Page", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the core architecture section headings", () => {
+  it("renders the core architecture section headings including mermaid diagrams", () => {
     render(<Homelab />);
     expect(
       screen.getByRole("heading", {
+        name: /Servers & Hypervisors Architecture Diagram/i,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
         name: /Hardware & Virtualization Topology/i,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: /Cluster Nodes, MetalLB VIPs & Ingress Topology Diagram/i,
       }),
     ).toBeInTheDocument();
     expect(
@@ -31,6 +41,11 @@ describe("Homelab Page", () => {
     expect(
       screen.getByRole("heading", {
         name: /Istio Ambient Mesh & MetalLB L2 Ingress/i,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: /Tailscale Mesh Containers & Subnet Routing/i,
       }),
     ).toBeInTheDocument();
     expect(

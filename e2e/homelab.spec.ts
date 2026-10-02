@@ -23,11 +23,24 @@ test.describe("Homelab Page", () => {
     await expect(
       page.getByText("Istio Ambient Mesh (ztunnel + HBONE)"),
     ).toBeVisible();
+    await expect(
+      page.getByText("Tailscale Subnet & Host Containers"),
+    ).toBeVisible();
 
     // Verify Section Headings
     await expect(
       page.getByRole("heading", {
+        name: "Servers & Hypervisors Architecture Diagram",
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
         name: "Hardware & Virtualization Topology",
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: "Cluster Nodes, MetalLB VIPs & Ingress Topology Diagram",
       }),
     ).toBeVisible();
     await expect(
@@ -43,6 +56,11 @@ test.describe("Homelab Page", () => {
     await expect(
       page.getByRole("heading", {
         name: "Istio Ambient Mesh & MetalLB L2 Ingress",
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: "Tailscale Mesh Containers & Subnet Routing",
       }),
     ).toBeVisible();
     await expect(
