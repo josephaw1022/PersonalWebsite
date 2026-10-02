@@ -109,6 +109,18 @@ describe("Homelab Page", () => {
     expect(
       screen.getAllByText("quay-clair.kubesoar.com").length,
     ).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText("personal-laptop (Tailscale)").length,
+    ).toBeGreaterThanOrEqual(1);
+  });
+
+  it("renders the Tailscale remote client workstation card", () => {
+    render(<Homelab />);
+    expect(
+      screen.getByRole("heading", {
+        name: /ThinkPad Remote Admin Workstation/i,
+      }),
+    ).toBeInTheDocument();
   });
 
   it("renders external link to the okd repo", () => {

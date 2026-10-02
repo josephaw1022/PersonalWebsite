@@ -103,7 +103,7 @@ const skillCategories: SkillCategory[] = [
     icon: Network,
     skills: [
       "Cloudflare Tunnels & DNS",
-      "NetBird Overlay VPN",
+      "Tailscale Mesh VPN",
       "Istio Service Mesh",
       "Nginx Reverse Proxy",
       "AWS Route 53",

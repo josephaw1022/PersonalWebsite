@@ -43,5 +43,6 @@ describe("Skills Page", () => {
     expect(
       screen.getByText("Datadog (Certified, APM, RUM)"),
     ).toBeInTheDocument();
+    expect(screen.getByText("Tailscale Mesh VPN")).toBeInTheDocument();
   });
 });
