@@ -5,11 +5,11 @@ description: Use this skill to understand how container images are built, pushed
 
 ## Container Image Builds
 
-Container image builds, SBOM generation, and security scan attestations are fully automated using **GitHub Actions workflows**.
+Container image builds, SBOM generation, and security scan attestations are fully automated within the unified **Container Image - Build & Push** workflow using reusable composite actions.
 
-### Workflows
+### Workflow & Actions
 
-1. **Build & Push:**
+1. **Build, Push, Scan & Attest Workflow:**
    - **Location:** `.github/workflows/build-and-push.yaml`
    - **Triggers:** Pushes to `main` or `master` branches, or manually via `workflow_dispatch`.
    - **Runs on:** `personal-site-runner` (local Actions Runner Controller scale set)
@@ -17,19 +17,13 @@ Container image builds, SBOM generation, and security scan attestations are full
      1. Authenticates to Quay container registry (`quay.kubesoar.com`) using `QUAY_USERNAME` and `QUAY_PASSWORD` secrets.
      2. Builds the container image using Podman and the repository's `Containerfile`.
      3. Tags the image with the git commit SHA and short SHA.
-     4. If running on `main` or `master`, it also tags the image as `latest`.
-     5. Pushes the built image(s) to `quay.kubesoar.com/<user>/personalwebsite`.
+     4. If running on `main` or `master`, tags the image as `latest`.
+     5. Pushes the built image(s) to `quay.kubesoar.com/<user>/personalwebsite` and captures the image digest.
+     6. Invokes `.github/actions/container-scan-attestation` with the resolved image and digest to scan for vulnerabilities with Grype, publish SARIF to GitHub Security, upload reports, and create in-toto vulnerability attestations.
+     7. Invokes `.github/actions/container-sbom-attestation` to generate an SPDX SBOM with Syft, create artifact attestations, and upload SBOM artifacts.
 
-2. **Security Scan & Attestation:**
-   - **Location:** `.github/workflows/container-scan-attestation.yaml`
-   - **Triggers:** Automatically runs after `Container Image - Build & Push` completion or manually via `workflow_dispatch`.
-   - **Process:** Scans the pushed container image for vulnerabilities using Anchore Grype (`anchore/scan-action`), publishes results to GitHub Security (SARIF), creates signed in-toto vulnerability scan attestations (`actions/attest`), and uploads the scan report artifact.
-
-3. **SBOM Generation & Attestation:**
-   - **Location:** `.github/workflows/container-sbom.yaml`
-   - **Triggers:** Automatically runs after `Container Image - Scan Attestation` completion or manually via `workflow_dispatch`.
-   - **Process:** Generates an SPDX Software Bill of Materials (SBOM) for the built container image tag using Anchore Syft (`anchore/sbom-action`), creates signed GitHub artifact attestations (`actions/attest-sbom`), and uploads the SBOM artifact.
+2. **Actions:**
+   - **Container Scan & Attestation:** `.github/actions/container-scan-attestation/action.yml`
+   - **Container SBOM & Attestation:** `.github/actions/container-sbom-attestation/action.yml`
 
 Do not attempt to build and push production container images manually from a local machine; let the GitHub Action handle it.
-
-

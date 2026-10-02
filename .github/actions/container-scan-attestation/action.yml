@@ -1,0 +1,97 @@
+name: Container Scan & Attestation
+description: Scan container image with Grype, upload SARIF to GitHub Security, attest vulnerability report, and upload artifacts
+
+inputs:
+  image:
+    description: Full container image reference including tag (e.g. quay.kubesoar.com/admin/personalwebsite:sha)
+    required: true
+  tag:
+    description: Container image tag
+    required: false
+    default: ""
+  subject-name:
+    description: Attestation subject name (e.g. quay.kubesoar.com/admin/personalwebsite)
+    required: false
+    default: ""
+  digest:
+    description: Image digest (sha256:...) for attestation
+    required: false
+    default: ""
+  registry-server:
+    description: Container registry server host
+    required: false
+    default: quay.kubesoar.com
+  registry-user:
+    description: Container registry username / namespace
+    required: false
+    default: ""
+  registry-password:
+    description: Container registry password or token for authentication
+    required: false
+    default: ""
+  severity-cutoff:
+    description: Severity cutoff for Grype vulnerability scanning
+    required: false
+    default: low
+  fail-build:
+    description: Whether to fail the build on vulnerability findings
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Log in to Registry
+      if: inputs.registry-password != ''
+      shell: bash
+      run: |
+        if command -v docker >/dev/null 2>&1; then
+          echo "${{ inputs.registry-password }}" | docker login "${{ inputs.registry-server }}" -u "${{ inputs.registry-user }}" --password-stdin 2>/dev/null || true
+        fi
+        if command -v podman >/dev/null 2>&1; then
+          echo "${{ inputs.registry-password }}" | podman login "${{ inputs.registry-server }}" -u "${{ inputs.registry-user }}" --password-stdin 2>/dev/null || true
+        fi
+
+    - name: Scan Image with Grype (SARIF)
+      id: grype-sarif
+      uses: anchore/scan-action@v7
+      with:
+        image: ${{ inputs.image }}
+        fail-build: ${{ inputs.fail-build }}
+        severity-cutoff: ${{ inputs.severity-cutoff }}
+        output-format: sarif
+
+    - name: Scan Image with Grype (JSON)
+      id: grype-json
+      uses: anchore/scan-action@v7
+      with:
+        image: ${{ inputs.image }}
+        fail-build: ${{ inputs.fail-build }}
+        severity-cutoff: ${{ inputs.severity-cutoff }}
+        output-format: json
+
+    - name: Upload SARIF to GitHub Security
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: ${{ steps.grype-sarif.outputs.sarif }}
+        category: "container-image-grype-scan"
+
+    - name: Attest Security Scan Results
+      if: inputs.digest != ''
+      uses: actions/attest@v2
+      with:
+        subject-name: ${{ inputs.subject-name != '' && inputs.subject-name || inputs.image }}
+        subject-digest: ${{ inputs.digest }}
+        predicate-type: "https://in-toto.io/attestation/vuln/v0.1"
+        predicate-path: ${{ steps.grype-json.outputs.json }}
+        push-to-registry: false
+
+    - name: Upload Scan Report Artifact
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: container-grype-scan-${{ inputs.tag != '' && inputs.tag || 'report' }}
+        path: |
+          ${{ steps.grype-json.outputs.json }}
+          ${{ steps.grype-sarif.outputs.sarif }}
