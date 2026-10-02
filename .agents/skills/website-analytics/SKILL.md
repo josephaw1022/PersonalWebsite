@@ -9,13 +9,17 @@ This repository tracks website analytics using **Datadog RUM (Real User Monitori
 
 ### Implementation
 
-The Datadog RUM browser agent is injected directly into the HTML. You can find the script in the `<head>` section of `site/pages/index.html`.
+The Datadog RUM browser agent is initialized via the `<DatadogInit />` client component in `src/components/DatadogInit.tsx` (rendered in `src/app/layout.tsx`).
+
+It is configured to run in:
+- **Production** (`jwhiteaker22.com`, `env: "production"`)
+- **Development** (`jwhiteaker.homelab.kubesoar.com`, `env: "development"`)
 
 It tracks:
 
 - Session sample rate: 100%
 - Session replay sample rate: 20%
 - User interactions
-- bfcache views
+- Long tasks & resources
 
 The client token and application ID are configured specifically for the `personal-website` service in the `us5.datadoghq.com` Datadog environment.

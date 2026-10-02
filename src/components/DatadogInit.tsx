@@ -4,40 +4,68 @@ import { useEffect } from "react";
 import { datadogRum } from "@datadog/browser-rum";
 
 export const PROD_HOSTNAMES = ["jwhiteaker22.com"];
+export const DEV_HOSTNAMES = [
+  "jwhiteaker.homelab.kubesoar.com",
+  "homelab.kubesoar.com",
+];
 
-export function isProductionEnvironment(currentHostname?: string): boolean {
-  if (typeof window === "undefined" && !currentHostname) {
-    return false;
-  }
-
-  // Explicit override via environment variable if provided
+export function getDatadogEnvironment(currentHostname?: string): string | null {
   if (process.env.NEXT_PUBLIC_DATADOG_ENABLED === "false") {
-    return false;
-  }
-  if (process.env.NEXT_PUBLIC_DATADOG_ENABLED === "true") {
-    return true;
+    return null;
   }
 
   if (process.env.NEXT_PUBLIC_APP_ENV) {
-    return process.env.NEXT_PUBLIC_APP_ENV === "production";
+    const appEnv = process.env.NEXT_PUBLIC_APP_ENV.toLowerCase();
+    if (appEnv === "production" || appEnv === "prod") {
+      return "production";
+    }
+    if (appEnv === "development" || appEnv === "dev") {
+      return "development";
+    }
+    if (process.env.NEXT_PUBLIC_DATADOG_ENABLED !== "true") {
+      return null;
+    }
   }
 
   const hostname =
     currentHostname ??
     (typeof window !== "undefined" ? window.location.hostname : "");
 
-  if (!hostname) {
-    return false;
+  if (hostname) {
+    const isProd = PROD_HOSTNAMES.some(
+      (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+    );
+    if (isProd) {
+      return "production";
+    }
+
+    const isDev = DEV_HOSTNAMES.some(
+      (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+    );
+    if (isDev) {
+      return "development";
+    }
   }
 
-  return PROD_HOSTNAMES.some(
-    (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
-  );
+  if (process.env.NEXT_PUBLIC_DATADOG_ENABLED === "true") {
+    return process.env.NEXT_PUBLIC_APP_ENV || "development";
+  }
+
+  return null;
+}
+
+export function isProductionEnvironment(currentHostname?: string): boolean {
+  return getDatadogEnvironment(currentHostname) === "production";
+}
+
+export function isDatadogEnabled(currentHostname?: string): boolean {
+  return getDatadogEnvironment(currentHostname) !== null;
 }
 
 export default function DatadogInit({ hostname }: { hostname?: string } = {}) {
   useEffect(() => {
-    if (!isProductionEnvironment(hostname)) {
+    const env = getDatadogEnvironment(hostname);
+    if (!env) {
       return;
     }
 
@@ -47,7 +75,7 @@ export default function DatadogInit({ hostname }: { hostname?: string } = {}) {
         clientToken: "pub65b5dd43ebefdb14d6de68b1d72d6869",
         site: "us5.datadoghq.com",
         service: "personal-website",
-        env: "production",
+        env,
         version: "1.0.0",
         sessionSampleRate: 100,
         sessionReplaySampleRate: 20,
