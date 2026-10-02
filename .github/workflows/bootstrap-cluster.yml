@@ -42,7 +42,7 @@ jobs:
         with:
           version: "latest"
 
-      - name: Validate Target Namespaces Exist
+      - name: Provision Namespaces, Resource Quotas, and Limit Ranges
         run: |
           TARGET_ENV="${{ inputs.target_env || 'all' }}"
           NAMESPACES=()
@@ -54,12 +54,11 @@ jobs:
           fi
 
           for NS in "${NAMESPACES[@]}"; do
-            echo "Checking that namespace '${NS}' exists..."
-            if ! kubectl get namespace "${NS}" >/dev/null 2>&1; then
-              echo "Error: Namespace '${NS}' does not exist. Please run 'infra/arc-setup.sh' to set up cluster infrastructure and runner RBAC before bootstrapping workloads." >&2
-              exit 1
-            fi
-            echo "Namespace '${NS}' is ready."
+            echo "Applying namespace manifest for '${NS}'..."
+            kubectl apply -f "infra/namespaces/${NS}/namespace.yaml"
+
+            echo "Applying resource quotas and limit ranges for '${NS}'..."
+            kubectl apply -R -f "infra/namespaces/${NS}/"
           done
 
       - name: Create or Update Image Pull Secret

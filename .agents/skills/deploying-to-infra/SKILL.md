@@ -37,8 +37,9 @@ Cluster runner infrastructure is managed via `./infra/arc-setup.sh`, while appli
 
 1. Triggered manually via `workflow_dispatch`.
 2. Runs on the self-hosted `personal-site-runner`.
-3. Idempotently creates or updates the container registry pull secret (`quay-pull-secret`).
-4. Idempotently deploys the `personal-site` Helm chart to production and/or dev namespaces using `helm upgrade --install`.
-5. Verifies release rollout status.
+3. Idempotently provisions target namespaces (`infra/namespaces/`), ResourceQuotas, and LimitRanges using `kubectl apply`.
+4. Idempotently creates or updates the container registry pull secret (`quay-pull-secret`).
+5. Idempotently deploys the `personal-site` Helm chart to production and/or dev namespaces using `helm upgrade --install`.
+6. Verifies release rollout status.
 
 To set up CI/CD runners, run `bash infra/arc-setup.sh` with the required GitHub App credentials. Once runners are online, trigger the **Cluster Infrastructure - Bootstrap** workflow in GitHub Actions to bootstrap workloads on the cluster.
