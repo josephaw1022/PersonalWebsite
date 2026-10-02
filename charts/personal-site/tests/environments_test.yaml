@@ -52,7 +52,34 @@ tests:
           value: 5
         template: hpa.yaml
       - hasDocuments:
-          count: 0
+          count: 3
+        template: networkpolicy.yaml
+      - isKind:
+          of: NetworkPolicy
+        documentIndex: 0
+        template: networkpolicy.yaml
+      - equal:
+          path: metadata.name
+          value: personal-site-default-deny
+        documentIndex: 0
+        template: networkpolicy.yaml
+      - isKind:
+          of: NetworkPolicy
+        documentIndex: 1
+        template: networkpolicy.yaml
+      - equal:
+          path: metadata.name
+          value: personal-site-allow-ingress
+        documentIndex: 1
+        template: networkpolicy.yaml
+      - isKind:
+          of: NetworkPolicy
+        documentIndex: 2
+        template: networkpolicy.yaml
+      - equal:
+          path: metadata.name
+          value: personal-site-allow-dns
+        documentIndex: 2
         template: networkpolicy.yaml
 
   - it: should correctly configure production environment
@@ -71,9 +98,8 @@ tests:
           path: spec.template.spec.containers[0].readinessProbe.httpGet.path
           value: "/"
         template: deployment.yaml
-      - equal:
+      - isNull:
           path: spec.replicas
-          value: 5
         template: deployment.yaml
       - hasDocuments:
           count: 0
@@ -85,8 +111,16 @@ tests:
           path: spec.minAvailable
           value: 2
         template: pdb.yaml
-      - hasDocuments:
-          count: 0
+      - isKind:
+          of: HorizontalPodAutoscaler
+        template: hpa.yaml
+      - equal:
+          path: spec.minReplicas
+          value: 3
+        template: hpa.yaml
+      - equal:
+          path: spec.maxReplicas
+          value: 10
         template: hpa.yaml
       - hasDocuments:
           count: 0
