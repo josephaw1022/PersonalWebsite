@@ -27,9 +27,7 @@ jobs:
     name: Build & Push Container Image
     runs-on: personal-site-runner
     outputs:
-      image: ${{ steps.build-push.outputs.image }}
       tag: ${{ steps.build-push.outputs.tag }}
-      subject-name: ${{ steps.build-push.outputs.subject-name }}
       digest: ${{ steps.build-push.outputs.digest }}
     steps:
       - uses: actions/checkout@v7
@@ -69,7 +67,8 @@ jobs:
       - name: Build and Push Image
         id: build-push
         run: |
-          IMAGE="quay.kubesoar.com/${{ secrets.QUAY_USERNAME }}/personalwebsite"
+          REGISTRY_USER="${{ secrets.QUAY_USERNAME || 'admin' }}"
+          IMAGE="quay.kubesoar.com/${REGISTRY_USER}/personalwebsite"
           SHA="${{ github.sha }}"
           SHORT_SHA="${SHA:0:7}"
           podman build -f Containerfile \
@@ -90,8 +89,6 @@ jobs:
             podman push "${IMAGE}:latest"
           fi
 
-          echo "image=${IMAGE}:${SHORT_SHA}" >> "$GITHUB_OUTPUT"
-          echo "subject-name=${IMAGE}" >> "$GITHUB_OUTPUT"
           echo "tag=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
 
@@ -105,11 +102,11 @@ jobs:
       - name: Scan Container Image with Grype & Attest
         uses: ./.github/actions/container-scan-attestation
         with:
-          image: ${{ needs.build.outputs.image }}
+          image: quay.kubesoar.com/${{ secrets.QUAY_USERNAME || 'admin' }}/personalwebsite:${{ needs.build.outputs.tag }}
           tag: ${{ needs.build.outputs.tag }}
-          subject-name: ${{ needs.build.outputs.subject-name }}
+          subject-name: quay.kubesoar.com/${{ secrets.QUAY_USERNAME || 'admin' }}/personalwebsite
           digest: ${{ needs.build.outputs.digest }}
-          registry-user: ${{ secrets.QUAY_USERNAME }}
+          registry-user: ${{ secrets.QUAY_USERNAME || 'admin' }}
           registry-password: ${{ secrets.QUAY_PASSWORD }}
 
   sbom:
@@ -122,9 +119,9 @@ jobs:
       - name: Generate & Attest SBOM
         uses: ./.github/actions/container-sbom-attestation
         with:
-          image: ${{ needs.build.outputs.image }}
+          image: quay.kubesoar.com/${{ secrets.QUAY_USERNAME || 'admin' }}/personalwebsite:${{ needs.build.outputs.tag }}
           tag: ${{ needs.build.outputs.tag }}
-          subject-name: ${{ needs.build.outputs.subject-name }}
+          subject-name: quay.kubesoar.com/${{ secrets.QUAY_USERNAME || 'admin' }}/personalwebsite
           digest: ${{ needs.build.outputs.digest }}
-          registry-user: ${{ secrets.QUAY_USERNAME }}
+          registry-user: ${{ secrets.QUAY_USERNAME || 'admin' }}
           registry-password: ${{ secrets.QUAY_PASSWORD }}
