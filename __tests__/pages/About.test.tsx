@@ -34,6 +34,10 @@ describe("About Page", () => {
         name: /Supply Chain Security & Identity/i,
       }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(/750 ArgoCD apps across dozens of AWS and Azure/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/onboarding 25\+ teams/i)).toBeInTheDocument();
   });
 
   it("renders homelab and open source community sections", () => {
