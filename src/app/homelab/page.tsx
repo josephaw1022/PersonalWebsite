@@ -155,12 +155,24 @@ const ipAllocations: IpAllocation[] = [
     role: "Tailscale Node Container providing direct administrative mesh connectivity",
     ingressType: "Tailscale Encrypted WireGuard Mesh",
   },
+  {
+    ip: "Tailscale Mesh IP",
+    hostname: "personal-laptop (Tailscale)",
+    subsystem: "Remote Access Mesh",
+    role: "ThinkPad Personal Workstation Client for secure remote administration and telemetry",
+    ingressType: "Tailscale Encrypted WireGuard Mesh",
+  },
 ];
 
 const serversTopologyChart = `flowchart TB
   subgraph CloudflareEdge["Cloudflare Edge & Public Internet"]
     CF_DNS["Cloudflare DNS (DNS-01 Challenge)"]
     CF_Tunnel["Cloudflare Zero-Trust Tunnel"]
+  end
+
+  subgraph TailscaleMesh["Tailscale Encrypted Mesh Overlay (Tailnet)"]
+    TS_MESH["Tailscale WireGuard Mesh Network"]
+    PL_CLIENT["Personal Laptop (CentOS Stream 10 ThinkPad)"]
   end
 
   subgraph SubnetLAN["Private Router Subnet: 192.168.0.0/21 (Gateway: 192.168.1.1)"]
@@ -190,14 +202,11 @@ const serversTopologyChart = `flowchart TB
 
       LP_KVM --> LP_PI
     end
-
-    subgraph WireGuardMesh["Tailscale Encrypted Mesh Overlay"]
-      TS_MESH["Tailscale WireGuard Mesh Network"]
-      TS_MESH <--> LP_TS
-      TS_MESH <--> DT_TS
-    end
   end
 
+  PL_CLIENT -->|Mesh Connection| TS_MESH
+  DT_TS -->|Mesh Node| TS_MESH
+  LP_TS -->|Subnet Router & Exit Node| TS_MESH
   CF_DNS -.->|ACME Validation| DesktopHost
   CF_DNS -.->|ACME Validation| LaptopHost
   CF_Tunnel <==>|Encrypted Tunnel| DT_OKD
@@ -757,71 +766,76 @@ export default function Homelab() {
               </h2>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
                 Encrypted point-to-point WireGuard mesh networking connecting
-                desktop-server and laptop-server with remote subnet routing.
+                desktop-server, laptop-server, and personal workstation with
+                remote subnet routing.
               </p>
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="card-minimal rounded-lg p-6">
-              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-mono text-xs font-semibold mb-3">
-                <Lock className="w-4 h-4" />
-                <span>laptop-server Subnet Router</span>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="card-minimal rounded-lg p-6 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-mono text-xs font-semibold mb-3">
+                  <Lock className="w-4 h-4" />
+                  <span>laptop-server Subnet Router</span>
+                </div>
+                <h3 className="text-base font-semibold text-foreground mb-2">
+                  Exit Node &amp; Subnet Router Container
+                </h3>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed mb-4">
+                  Configured on the ThinkPad host via Ansible (
+                  <code className="text-emerald-600 dark:text-emerald-400 font-mono">
+                    configure-tailscale-laptop.yml
+                  </code>
+                  ). Enables kernel IP forwarding (
+                  <code className="text-emerald-600 dark:text-emerald-400 font-mono">
+                    net.ipv4.ip_forward=1
+                  </code>
+                  ) and trusted firewalld zones, advertising the complete{" "}
+                  <code className="text-emerald-600 dark:text-emerald-400 font-mono">
+                    192.168.1.0/24
+                  </code>{" "}
+                  subnet alongside full exit-node tunneling (
+                  <code className="text-emerald-600 dark:text-emerald-400 font-mono">
+                    100.110.200.108
+                  </code>
+                  ).
+                </p>
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                Exit Node &amp; Subnet Router Container
-              </h3>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-4">
-                Configured on the ThinkPad host via Ansible (
-                <code className="text-emerald-600 dark:text-emerald-400 font-mono">
-                  configure-tailscale-laptop.yml
-                </code>
-                ). Enables kernel IP forwarding (
-                <code className="text-emerald-600 dark:text-emerald-400 font-mono">
-                  net.ipv4.ip_forward=1
-                </code>
-                ) and trusted firewalld zones, advertising the complete{" "}
-                <code className="text-emerald-600 dark:text-emerald-400 font-mono">
-                  192.168.1.0/24
-                </code>{" "}
-                subnet alongside full exit-node tunneling (
-                <code className="text-emerald-600 dark:text-emerald-400 font-mono">
-                  100.110.200.108
-                </code>
-                ).
-              </p>
-              <div className="text-xs font-mono text-zinc-600 dark:text-zinc-400 space-y-1">
+              <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/80 text-xs font-mono text-zinc-600 dark:text-zinc-400 space-y-1">
                 <p>
-                  • Advertised Subnet:{" "}
+                  • Subnet:{" "}
                   <span className="text-foreground">192.168.1.0/24</span>
                 </p>
                 <p>
-                  • Tailscale Exit IP:{" "}
+                  • Exit IP:{" "}
                   <span className="text-foreground">100.110.200.108</span>
                 </p>
-                <p>• Capability: Full LAN routing &amp; secure egress</p>
+                <p>• Capability: LAN routing &amp; secure egress</p>
               </div>
             </div>
 
-            <div className="card-minimal rounded-lg p-6">
-              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-mono text-xs font-semibold mb-3">
-                <Lock className="w-4 h-4" />
-                <span>desktop-server Node Mesh</span>
+            <div className="card-minimal rounded-lg p-6 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-mono text-xs font-semibold mb-3">
+                  <Lock className="w-4 h-4" />
+                  <span>desktop-server Node Mesh</span>
+                </div>
+                <h3 className="text-base font-semibold text-foreground mb-2">
+                  Compute Node Mesh Container
+                </h3>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed mb-4">
+                  Automated via Ansible (
+                  <code className="text-emerald-600 dark:text-emerald-400 font-mono">
+                    start-tailscale-supermicro.yml
+                  </code>
+                  ) on the primary SuperMicro compute server. Provides secure,
+                  direct administrative SSH, Cockpit remote management, and
+                  telemetry streaming directly over the encrypted WireGuard mesh
+                  without exposing ports on WAN.
+                </p>
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                Compute Node Mesh Container
-              </h3>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-4">
-                Automated via Ansible (
-                <code className="text-emerald-600 dark:text-emerald-400 font-mono">
-                  start-tailscale-supermicro.yml
-                </code>
-                ) on the primary SuperMicro compute server. Provides secure,
-                direct administrative SSH, Cockpit remote management, and
-                telemetry streaming directly over the encrypted WireGuard mesh
-                without exposing ports on WAN.
-              </p>
-              <div className="text-xs font-mono text-zinc-600 dark:text-zinc-400 space-y-1">
+              <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/80 text-xs font-mono text-zinc-600 dark:text-zinc-400 space-y-1">
                 <p>
                   • Service:{" "}
                   <span className="text-foreground">
@@ -829,12 +843,43 @@ export default function Homelab() {
                   </span>
                 </p>
                 <p>
-                  • Cockpit Access:{" "}
+                  • Cockpit:{" "}
                   <span className="text-foreground">
-                    https://desktop-server.kubesoar.com
+                    desktop-server.kubesoar.com
                   </span>
                 </p>
                 <p>• Security: End-to-end zero-trust encryption</p>
+              </div>
+            </div>
+
+            <div className="card-minimal rounded-lg p-6 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-mono text-xs font-semibold mb-3">
+                  <Lock className="w-4 h-4" />
+                  <span>Personal Laptop Client</span>
+                </div>
+                <h3 className="text-base font-semibold text-foreground mb-2">
+                  ThinkPad Remote Admin Workstation
+                </h3>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed mb-4">
+                  Personal CentOS Stream 10 ThinkPad laptop connected directly
+                  to the Tailscale overlay network. Allows secure out-of-band
+                  cluster administration, Kubeconfig access, and local subnet
+                  routing from anywhere without port forwarding.
+                </p>
+              </div>
+              <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/80 text-xs font-mono text-zinc-600 dark:text-zinc-400 space-y-1">
+                <p>
+                  • Client OS:{" "}
+                  <span className="text-foreground">CentOS Stream 10</span>
+                </p>
+                <p>
+                  • Access:{" "}
+                  <span className="text-foreground">
+                    Direct Tailnet &amp; Subnet
+                  </span>
+                </p>
+                <p>• Security: Authenticated WireGuard Mesh</p>
               </div>
             </div>
           </div>
