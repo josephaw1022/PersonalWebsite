@@ -24,7 +24,13 @@ permissions:
 
 jobs:
   build:
+    name: Build & Push Container Image
     runs-on: personal-site-runner
+    outputs:
+      image: ${{ steps.build-push.outputs.image }}
+      tag: ${{ steps.build-push.outputs.tag }}
+      subject-name: ${{ steps.build-push.outputs.subject-name }}
+      digest: ${{ steps.build-push.outputs.digest }}
     steps:
       - uses: actions/checkout@v7
 
@@ -89,20 +95,36 @@ jobs:
           echo "tag=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
 
+  scan:
+    name: Scan & Attest Container Image
+    needs: build
+    runs-on: personal-site-runner
+    steps:
+      - uses: actions/checkout@v7
+
       - name: Scan Container Image with Grype & Attest
         uses: ./.github/actions/container-scan-attestation
         with:
-          image: ${{ steps.build-push.outputs.image }}
-          tag: ${{ steps.build-push.outputs.tag }}
-          subject-name: ${{ steps.build-push.outputs.subject-name }}
-          digest: ${{ steps.build-push.outputs.digest }}
+          image: ${{ needs.build.outputs.image }}
+          tag: ${{ needs.build.outputs.tag }}
+          subject-name: ${{ needs.build.outputs.subject-name }}
+          digest: ${{ needs.build.outputs.digest }}
           registry-user: ${{ secrets.QUAY_USERNAME }}
           registry-password: ${{ secrets.QUAY_PASSWORD }}
+
+  sbom:
+    name: Generate & Attest SBOM
+    needs: build
+    runs-on: personal-site-runner
+    steps:
+      - uses: actions/checkout@v7
 
       - name: Generate & Attest SBOM
         uses: ./.github/actions/container-sbom-attestation
         with:
-          image: ${{ steps.build-push.outputs.image }}
-          tag: ${{ steps.build-push.outputs.tag }}
-          subject-name: ${{ steps.build-push.outputs.subject-name }}
-          digest: ${{ steps.build-push.outputs.digest }}
+          image: ${{ needs.build.outputs.image }}
+          tag: ${{ needs.build.outputs.tag }}
+          subject-name: ${{ needs.build.outputs.subject-name }}
+          digest: ${{ needs.build.outputs.digest }}
+          registry-user: ${{ secrets.QUAY_USERNAME }}
+          registry-password: ${{ secrets.QUAY_PASSWORD }}

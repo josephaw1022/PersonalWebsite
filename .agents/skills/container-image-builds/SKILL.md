@@ -13,14 +13,10 @@ Container image builds, SBOM generation, and security scan attestations are full
    - **Location:** `.github/workflows/build-and-push.yaml`
    - **Triggers:** Pushes to `main` or `master` branches, or manually via `workflow_dispatch`.
    - **Runs on:** `personal-site-runner` (local Actions Runner Controller scale set)
-   - **Process:**
-     1. Authenticates to Quay container registry (`quay.kubesoar.com`) using `QUAY_USERNAME` and `QUAY_PASSWORD` secrets.
-     2. Builds the container image using Podman and the repository's `Containerfile`.
-     3. Tags the image with the git commit SHA and short SHA.
-     4. If running on `main` or `master`, tags the image as `latest`.
-     5. Pushes the built image(s) to `quay.kubesoar.com/<user>/personalwebsite` and captures the image digest.
-     6. Invokes `.github/actions/container-scan-attestation` with the resolved image and digest to scan for vulnerabilities with Grype, publish SARIF to GitHub Security, upload reports, and create in-toto vulnerability attestations.
-     7. Invokes `.github/actions/container-sbom-attestation` to generate an SPDX SBOM with Syft, create artifact attestations, and upload SBOM artifacts.
+   - **Jobs:**
+     1. **`build`:** Authenticates to Quay registry, builds the Next.js application & container image with Podman, tags with commit SHA/short SHA/latest, pushes image(s) to `quay.kubesoar.com/<user>/personalwebsite`, and passes image details & digest to downstream jobs.
+     2. **`scan`:** Uses `.github/actions/container-scan-attestation` to scan the pushed image for vulnerabilities with Grype, publish SARIF to GitHub Security, upload reports, and create in-toto vulnerability attestations.
+     3. **`sbom`:** Uses `.github/actions/container-sbom-attestation` to generate an SPDX SBOM with Syft, create artifact attestations, and upload SBOM artifacts.
 
 2. **Actions:**
    - **Container Scan & Attestation:** `.github/actions/container-scan-attestation/action.yml`
