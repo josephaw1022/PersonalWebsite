@@ -14,3 +14,35 @@ autoscaling:
   maxReplicas: 10
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
+
+networkPolicies:
+  - name: default-deny
+    podSelector: {}
+    policyTypes:
+      - Ingress
+      - Egress
+  - name: allow-cloudflared
+    podSelector:
+      matchLabels:
+        app: personal-site
+    policyTypes:
+      - Ingress
+    ingress:
+      - from:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: cloudflare-connector
+        ports:
+          - protocol: TCP
+            port: 3000
+  - name: allow-dns
+    policyTypes:
+      - Egress
+    egress:
+      - to:
+          - namespaceSelector: {}
+        ports:
+          - protocol: UDP
+            port: 53
+          - protocol: TCP
+            port: 53
