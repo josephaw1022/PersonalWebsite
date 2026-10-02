@@ -6,9 +6,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-COPY --chown=1001:0 .next/standalone ./
-COPY --chown=1001:0 .next/static ./.next/static
-COPY --chown=1001:0 public ./public
+COPY .next/standalone ./
+COPY .next/static ./.next/static
+COPY public ./public
 
 USER 1001
 

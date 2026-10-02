@@ -43,6 +43,9 @@ jobs:
           [storage]
           driver = "vfs"
 
+          [storage.options]
+          ignore_chown_errors = "true"
+
           [storage.options.vfs]
           ignore_chown_errors = "true"
           EOF
