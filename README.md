@@ -16,7 +16,7 @@ flowchart TB
     end
 
     subgraph CLUSTER["HOMELAB OPENSHIFT CLUSTER"]
-        subgraph NS_CF["namespace: cloudflare-connector"]
+        subgraph NS_CF["namespace: cloudflared"]
             CFLD["cloudflared (3 replicas)"]
         end
 

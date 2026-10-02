@@ -145,7 +145,7 @@ tests:
         template: networkpolicy.yaml
       - equal:
           path: spec.ingress[0].from[0].namespaceSelector.matchLabels["kubernetes.io/metadata.name"]
-          value: cloudflare-connector
+          value: cloudflared
         documentIndex: 1
         template: networkpolicy.yaml
       - isKind:
