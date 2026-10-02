@@ -35,7 +35,7 @@ Cluster runner infrastructure is managed via `./infra/arc-setup.sh`, while appli
 
 #### Bootstrap Workflow (`bootstrap-cluster.yml`):
 
-1. Triggered manually via `workflow_dispatch`.
+1. Triggered automatically on `push` to `main` impacting `infra/namespaces/**` or manually via `workflow_dispatch`.
 2. Runs on the self-hosted `personal-site-runner`.
 3. Idempotently provisions target namespaces (`infra/namespaces/`), ResourceQuotas, and LimitRanges using `kubectl apply`.
 4. Idempotently creates or updates the container registry pull secret (`quay-pull-secret`).

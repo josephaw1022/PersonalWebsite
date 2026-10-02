@@ -1,6 +1,12 @@
 name: Cluster Infrastructure - Bootstrap
 
 on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "infra/namespaces/**"
   workflow_dispatch:
     inputs:
       target_env:
@@ -89,7 +95,7 @@ jobs:
           done
 
       - name: Deploy Production Workloads (Helm)
-        if: ${{ inputs.target_env == 'all' || inputs.target_env == 'production' }}
+        if: ${{ (inputs.target_env || 'all') == 'all' || inputs.target_env == 'production' }}
         run: |
           NAMESPACE="personal-site"
           SECRET_NAME="${{ inputs.secret_name || 'quay-pull-secret' }}"
@@ -117,7 +123,7 @@ jobs:
             "${EXTRA_FLAGS[@]}"
 
       - name: Deploy Development Workloads (Helm)
-        if: ${{ inputs.target_env == 'all' || inputs.target_env == 'development' }}
+        if: ${{ (inputs.target_env || 'all') == 'all' || inputs.target_env == 'development' }}
         run: |
           NAMESPACE="personal-site-dev-envs"
           SECRET_NAME="${{ inputs.secret_name || 'quay-pull-secret' }}"
