@@ -648,116 +648,164 @@ export default function Homelab() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="card-minimal rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-emerald-500" />
-                <span>Sidecarless Ambient Architecture</span>
-              </h3>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-4">
-                Operating Istio in{" "}
-                <strong className="text-foreground">ambient profile</strong>{" "}
-                separates L4 secure transport from L7 application routing,
-                dramatically lowering memory footprint and eliminating pod
-                restart requirements during mesh updates.
-              </p>
-              <ul className="space-y-2 text-xs font-mono text-zinc-700 dark:text-zinc-300">
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>ztunnel:</strong> Node-level DaemonSet handling
-                    mutual TLS via HBONE (HTTP-Based Overlay Network
-                    Encapsulation)
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>istio-cni:</strong> Transparent kernel-level pod
-                    traffic redirection into ztunnel
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>OVN-Kubernetes Patch:</strong> Configured with{" "}
-                    <code className="text-emerald-600 dark:text-emerald-400">
-                      routingViaHost: true
-                    </code>{" "}
-                    to ensure seamless kubelet liveness/readiness health probes
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>Kiali UI (v2.32.0):</strong> Real-time mesh topology
-                    visualization connected to Thanos Querier metrics
-                  </span>
-                </li>
-              </ul>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="card-minimal rounded-lg p-6 flex flex-col justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-emerald-500" />
+                  <span>Sidecarless Ambient Architecture</span>
+                </h3>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-4">
+                  Operating Istio in{" "}
+                  <strong className="text-foreground">ambient profile</strong>{" "}
+                  separates L4 secure transport from L7 application routing,
+                  dramatically lowering memory footprint and eliminating pod
+                  restart requirements during mesh updates.
+                </p>
+                <ul className="space-y-2 text-xs font-mono text-zinc-700 dark:text-zinc-300">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>ztunnel:</strong> Node-level DaemonSet handling
+                      mutual TLS via HBONE encapsulation
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>istio-cni:</strong> Transparent kernel-level pod
+                      traffic redirection into ztunnel
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>OVN-Kubernetes Patch:</strong> Configured with{" "}
+                      <code className="text-emerald-600 dark:text-emerald-400">
+                        routingViaHost: true
+                      </code>{" "}
+                      for health probes
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Waypoint Proxies:</strong> On-demand Layer 7 Envoy
+                      instances for advanced routing &amp; auth
+                    </span>
+                  </li>
+                </ul>
+              </div>
             </div>
 
-            <div className="card-minimal rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-                <Radio className="w-5 h-5 text-emerald-500" />
-                <span>MetalLB Layer 2 Load Balancing</span>
-              </h3>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-4">
-                MetalLB provides standard Kubernetes{" "}
-                <code className="text-emerald-600 dark:text-emerald-400 font-mono">
-                  LoadBalancer
-                </code>{" "}
-                service functionality across the bare-metal environment via
-                Layer 2 ARP advertisements.
-              </p>
-              <ul className="space-y-2 text-xs font-mono text-zinc-700 dark:text-zinc-300">
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>IPAddressPool:</strong> Dedicated range{" "}
-                    <code className="text-emerald-600 dark:text-emerald-400">
-                      192.168.1.230-192.168.1.249
-                    </code>{" "}
-                    for cluster services
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>Istio Ingress Gateway:</strong> Statically bound to
-                    VIP{" "}
-                    <code className="text-emerald-600 dark:text-emerald-400">
-                      192.168.1.230
-                    </code>{" "}
-                    for all{" "}
-                    <code className="text-emerald-600 dark:text-emerald-400">
-                      *.homelab.kubesoar.com
-                    </code>{" "}
-                    ingress routes
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>Dual-Tier Ingress:</strong> Native OpenShift Router
-                    on{" "}
-                    <code className="text-emerald-600 dark:text-emerald-400">
-                      *.apps.okd
-                    </code>{" "}
-                    alongside Istio Ingress on{" "}
-                    <code className="text-emerald-600 dark:text-emerald-400">
-                      *.homelab
-                    </code>
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>Cert-Manager &amp; Cloudflare:</strong> Automated
-                    wildcard TLS issued via Cloudflare DNS-01 challenge
-                  </span>
-                </li>
-              </ul>
+            <div className="card-minimal rounded-lg p-6 flex flex-col justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <Radio className="w-5 h-5 text-emerald-500" />
+                  <span>MetalLB Layer 2 Load Balancing</span>
+                </h3>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-4">
+                  MetalLB provides standard Kubernetes{" "}
+                  <code className="text-emerald-600 dark:text-emerald-400 font-mono">
+                    LoadBalancer
+                  </code>{" "}
+                  service functionality across the bare-metal environment via
+                  Layer 2 ARP advertisements.
+                </p>
+                <ul className="space-y-2 text-xs font-mono text-zinc-700 dark:text-zinc-300">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>IPAddressPool:</strong> Dedicated range{" "}
+                      <code className="text-emerald-600 dark:text-emerald-400">
+                        192.168.1.230-192.168.1.249
+                      </code>
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Istio Ingress Gateway:</strong> Statically bound
+                      to VIP{" "}
+                      <code className="text-emerald-600 dark:text-emerald-400">
+                        192.168.1.230
+                      </code>{" "}
+                      for{" "}
+                      <code className="text-emerald-600 dark:text-emerald-400">
+                        *.homelab
+                      </code>
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Dual-Tier Ingress:</strong> OpenShift Router (
+                      <code className="text-emerald-600 dark:text-emerald-400">
+                        *.apps.okd
+                      </code>
+                      ) alongside Istio Ingress (
+                      <code className="text-emerald-600 dark:text-emerald-400">
+                        *.homelab
+                      </code>
+                      )
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Cert-Manager &amp; Cloudflare:</strong> Automated
+                      wildcard TLS issued via DNS-01 ACME
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="card-minimal rounded-lg p-6 flex flex-col justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-emerald-500" />
+                  <span>Kiali Mesh UI Dashboard</span>
+                </h3>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-4">
+                  Dedicated service mesh observability and management console
+                  (v2.32.0) providing real-time topology mapping, traffic flow
+                  telemetry, and ambient mesh health monitoring.
+                </p>
+                <ul className="space-y-2 text-xs font-mono text-zinc-700 dark:text-zinc-300">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Topology Graph:</strong> Real-time service
+                      dependency graphs visualizing HBONE &amp; ztunnel traffic
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Thanos Integration:</strong> Connects to cluster
+                      monitoring backend for request rates and error latency
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>OpenShift OAuth SSO:</strong> RBAC authentication
+                      federated via cluster OAuth &amp; Keycloak
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Ingress Endpoint:</strong> Exposed via OpenShift
+                      Router at{" "}
+                      <code className="text-emerald-600 dark:text-emerald-400">
+                        kiali.apps.okd.kubesoar.com
+                      </code>
+                    </span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </section>

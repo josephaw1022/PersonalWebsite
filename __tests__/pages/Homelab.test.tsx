@@ -123,6 +123,15 @@ describe("Homelab Page", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders the Kiali Mesh UI dashboard card", () => {
+    render(<Homelab />);
+    expect(
+      screen.getByRole("heading", {
+        name: /Kiali Mesh UI Dashboard/i,
+      }),
+    ).toBeInTheDocument();
+  });
+
   it("renders external link to the okd repo", () => {
     render(<Homelab />);
     const repoLink = screen.getByRole("link", { name: /view_okd_repo/i });

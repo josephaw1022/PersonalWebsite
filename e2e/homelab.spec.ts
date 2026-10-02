@@ -60,6 +60,11 @@ test.describe("Homelab Page", () => {
     ).toBeVisible();
     await expect(
       page.getByRole("heading", {
+        name: "Kiali Mesh UI Dashboard",
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
         name: "Tailscale Mesh Containers & Subnet Routing",
       }),
     ).toBeVisible();
