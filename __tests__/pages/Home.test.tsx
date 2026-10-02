@@ -25,6 +25,12 @@ describe("Home Page", () => {
     expect(
       screen.getByRole("link", { name: /cat about\.md/i }),
     ).toHaveAttribute("href", "/about");
+    expect(
+      screen.getByRole("link", { name: /\.\/view_homelab\.sh/i }),
+    ).toHaveAttribute("href", "/homelab");
+    expect(
+      screen.getByRole("link", { name: /\.\/view_homelab\.sh/i }),
+    ).toHaveClass("sm:hidden");
   });
 
   it("renders core overview pillars", () => {

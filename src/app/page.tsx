@@ -36,6 +36,12 @@ export default function Home() {
           >
             cat about.md
           </Link>
+          <Link
+            href="/homelab"
+            className="sm:hidden px-6 py-3 border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center justify-center rounded-sm"
+          >
+            ./view_homelab.sh
+          </Link>
         </div>
       </div>
 

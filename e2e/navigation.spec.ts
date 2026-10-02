@@ -48,4 +48,12 @@ test.describe("Site Navigation", () => {
     await page.click("text=cat about.md");
     await expect(page).toHaveURL(/.*\/about/);
   });
+
+  test("shows the homelab CTA on mobile", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto("/");
+
+    await page.click("text=./view_homelab.sh");
+    await expect(page).toHaveURL(/.*\/homelab/);
+  });
 });
