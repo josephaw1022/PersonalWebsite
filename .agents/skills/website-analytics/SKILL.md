@@ -11,9 +11,7 @@ This repository tracks website analytics using **Datadog RUM (Real User Monitori
 
 The Datadog RUM browser agent is initialized via the `<DatadogInit />` client component in `src/components/DatadogInit.tsx` (rendered in `src/app/layout.tsx`).
 
-It is configured to run in:
-- **Production** (`jwhiteaker22.com`, `env: "production"`)
-- **Development** (`jwhiteaker.homelab.kubesoar.com`, `env: "development"`)
+It is configured to run **strictly in Production** (`jwhiteaker22.com`, `env: "production"`). It is disabled for local development and dev cluster environments (`jwhiteaker.homelab.kubesoar.com`).
 
 It tracks:
 
