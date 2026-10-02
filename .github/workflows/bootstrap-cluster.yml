@@ -30,21 +30,15 @@ on:
         type: string
 
 jobs:
-  bootstrap:
-    name: Bootstrap Cluster Workloads
+  provision-infra:
+    name: Provision Infrastructure
     runs-on: personal-site-runner
-    environment: production
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v5
-        with:
-          version: "latest"
-
-      - name: Setup Helm
-        uses: azure/setup-helm@v5
         with:
           version: "latest"
 
@@ -94,70 +88,116 @@ jobs:
             kubectl patch serviceaccount default -n "${NS}" -p "{\"imagePullSecrets\": [{\"name\": \"${SECRET_NAME}\"}]}" || true
           done
 
-      - name: Deploy Production Workloads (Helm)
-        if: ${{ (inputs.target_env || 'all') == 'all' || inputs.target_env == 'production' }}
+  bootstrap-prod:
+    name: Bootstrap Production Workload
+    runs-on: personal-site-runner
+    environment: production
+    needs: [provision-infra]
+    if: ${{ (inputs.target_env || 'all') == 'all' || inputs.target_env == 'production' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v5
+        with:
+          version: "latest"
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v5
+        with:
+          version: "latest"
+
+      - name: Deploy Production Workload (Helm)
         run: |
           NAMESPACE="personal-site"
+          RELEASE_NAME="personal-site"
           SECRET_NAME="${{ inputs.secret_name || 'quay-pull-secret' }}"
           VERSION="${{ inputs.tag || 'latest' }}"
           REGISTRY_USER="${{ secrets.QUAY_USERNAME || 'admin' }}"
           IMAGE="quay.kubesoar.com/${REGISTRY_USER}/personalwebsite"
 
-          EXTRA_FLAGS=()
-          if helm upgrade --help | grep -q -- '--force-conflicts'; then
-            EXTRA_FLAGS+=(--force-conflicts)
-          fi
-          if helm upgrade --help | grep -q -- '--take-ownership'; then
-            EXTRA_FLAGS+=(--take-ownership)
-          fi
+          if helm status "${RELEASE_NAME}" --namespace "${NAMESPACE}" 2>/dev/null | grep -iq "^STATUS:[[:space:]]*deployed"; then
+            echo "Helm release '${RELEASE_NAME}' is already successfully deployed in namespace '${NAMESPACE}'. Skipping helm upgrade/install."
+          else
+            EXTRA_FLAGS=()
+            if helm upgrade --help | grep -q -- '--force-conflicts'; then
+              EXTRA_FLAGS+=(--force-conflicts)
+            fi
+            if helm upgrade --help | grep -q -- '--take-ownership'; then
+              EXTRA_FLAGS+=(--take-ownership)
+            fi
 
-          echo "Deploying production Helm chart release to namespace '${NAMESPACE}'..."
-          helm upgrade --install personal-site ./charts/personal-site \
-            --namespace "${NAMESPACE}" \
-            -f ./charts/personal-site/values-prod.yaml \
-            --set image.repository="${IMAGE}" \
-            --set image.tag="${VERSION}" \
-            --set imagePullSecrets[0].name="${SECRET_NAME}" \
-            --wait \
-            --timeout 5m \
-            "${EXTRA_FLAGS[@]}"
-
-      - name: Deploy Development Workloads (Helm)
-        if: ${{ (inputs.target_env || 'all') == 'all' || inputs.target_env == 'development' }}
-        run: |
-          NAMESPACE="personal-site-dev-envs"
-          SECRET_NAME="${{ inputs.secret_name || 'quay-pull-secret' }}"
-          VERSION="${{ inputs.tag || 'latest' }}"
-          REGISTRY_USER="${{ secrets.QUAY_USERNAME || 'admin' }}"
-          IMAGE="quay.kubesoar.com/${REGISTRY_USER}/personalwebsite"
-
-          EXTRA_FLAGS=()
-          if helm upgrade --help | grep -q -- '--force-conflicts'; then
-            EXTRA_FLAGS+=(--force-conflicts)
+            echo "No successful Helm release found for '${RELEASE_NAME}' in namespace '${NAMESPACE}'. Deploying production Helm chart release..."
+            helm upgrade --install "${RELEASE_NAME}" ./charts/personal-site \
+              --namespace "${NAMESPACE}" \
+              -f ./charts/personal-site/values-prod.yaml \
+              --set image.repository="${IMAGE}" \
+              --set image.tag="${VERSION}" \
+              --set imagePullSecrets[0].name="${SECRET_NAME}" \
+              --wait \
+              --timeout 5m \
+              "${EXTRA_FLAGS[@]}"
           fi
-          if helm upgrade --help | grep -q -- '--take-ownership'; then
-            EXTRA_FLAGS+=(--take-ownership)
-          fi
-
-          echo "Deploying development Helm chart release to namespace '${NAMESPACE}'..."
-          helm upgrade --install personal-site ./charts/personal-site \
-            --namespace "${NAMESPACE}" \
-            -f ./charts/personal-site/values-dev.yaml \
-            --set image.repository="${IMAGE}" \
-            --set image.tag="${VERSION}" \
-            --set imagePullSecrets[0].name="${SECRET_NAME}" \
-            --wait \
-            --timeout 5m \
-            "${EXTRA_FLAGS[@]}"
 
       - name: Verify Rollout Status
         run: |
-          TARGET_ENV="${{ inputs.target_env || 'all' }}"
-          if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "production" ]; then
-            echo "Verifying production personal-site Helm release..."
-            helm status personal-site -n personal-site
+          echo "Verifying production personal-site Helm release..."
+          helm status personal-site -n personal-site
+
+  bootstrap-dev:
+    name: Bootstrap Development Workload
+    runs-on: personal-site-runner
+    environment: development
+    needs: [provision-infra]
+    if: ${{ (inputs.target_env || 'all') == 'all' || inputs.target_env == 'development' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v5
+        with:
+          version: "latest"
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v5
+        with:
+          version: "latest"
+
+      - name: Deploy Development Workload (Helm)
+        run: |
+          NAMESPACE="personal-site-dev-envs"
+          RELEASE_NAME="personal-site"
+          SECRET_NAME="${{ inputs.secret_name || 'quay-pull-secret' }}"
+          VERSION="${{ inputs.tag || 'latest' }}"
+          REGISTRY_USER="${{ secrets.QUAY_USERNAME || 'admin' }}"
+          IMAGE="quay.kubesoar.com/${REGISTRY_USER}/personalwebsite"
+
+          if helm status "${RELEASE_NAME}" --namespace "${NAMESPACE}" 2>/dev/null | grep -iq "^STATUS:[[:space:]]*deployed"; then
+            echo "Helm release '${RELEASE_NAME}' is already successfully deployed in namespace '${NAMESPACE}'. Skipping helm upgrade/install."
+          else
+            EXTRA_FLAGS=()
+            if helm upgrade --help | grep -q -- '--force-conflicts'; then
+              EXTRA_FLAGS+=(--force-conflicts)
+            fi
+            if helm upgrade --help | grep -q -- '--take-ownership'; then
+              EXTRA_FLAGS+=(--take-ownership)
+            fi
+
+            echo "No successful Helm release found for '${RELEASE_NAME}' in namespace '${NAMESPACE}'. Deploying development Helm chart release..."
+            helm upgrade --install "${RELEASE_NAME}" ./charts/personal-site \
+              --namespace "${NAMESPACE}" \
+              -f ./charts/personal-site/values-dev.yaml \
+              --set image.repository="${IMAGE}" \
+              --set image.tag="${VERSION}" \
+              --set imagePullSecrets[0].name="${SECRET_NAME}" \
+              --wait \
+              --timeout 5m \
+              "${EXTRA_FLAGS[@]}"
           fi
-          if [ "${TARGET_ENV}" = "all" ] || [ "${TARGET_ENV}" = "development" ]; then
-            echo "Verifying development personal-site Helm release..."
-            helm status personal-site -n personal-site-dev-envs
-          fi
+
+      - name: Verify Rollout Status
+        run: |
+          echo "Verifying development personal-site Helm release..."
+          helm status personal-site -n personal-site-dev-envs
