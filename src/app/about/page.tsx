@@ -144,18 +144,25 @@ export default function About() {
               </h3>
             </div>
             <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed mb-3">
-              I operate enterprise hardware at home, including SuperMicro and
-              Dell PowerEdge servers alongside a CentOS Stream ThinkPad for
-              homelab services. My setup runs bare-metal OpenShift (OKD 4.20)
-              automated via Ansible, plus multi-node K3s clusters on Podman
-              containers.
+              I operate enterprise hardware at home, including a CentOS Stream
+              10 server and ThinkPad hypervisor hosting bare-metal OpenShift
+              (OKD 4.22) automated via Ansible, Istio Ambient Mesh, MetalLB L2
+              routing, and Pi-hole DNS virtualization.
             </p>
-            <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
-              Services including Tekton Pipelines, Quay registry, External
-              Secrets Operator, Cert-Manager, Kyverno, and Datadog monitoring
-              are exposed securely through Cloudflare Tunnels without public
-              IPs.
+            <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed mb-4">
+              Services including Keycloak SSO, OpenBao Vault, Quay registry,
+              Cert-Manager, Kyverno, and Datadog monitoring are exposed securely
+              through Istio and Cloudflare Tunnels without exposed public IPs.
             </p>
+            <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
+              <Link
+                href="/homelab"
+                className="inline-flex items-center gap-1.5 text-xs font-mono text-emerald-600 dark:text-emerald-400 hover:underline"
+              >
+                <span>explore_homelab_specs</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           </div>
 
           <div className="card-minimal rounded-lg p-6 border-zinc-200 dark:border-zinc-800">
