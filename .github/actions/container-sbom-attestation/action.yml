@@ -17,10 +17,33 @@ inputs:
     description: Image digest (sha256:...) for attestation
     required: false
     default: ""
+  registry-server:
+    description: Container registry server host
+    required: false
+    default: quay.kubesoar.com
+  registry-user:
+    description: Container registry username / namespace
+    required: false
+    default: ""
+  registry-password:
+    description: Container registry password or token for authentication
+    required: false
+    default: ""
 
 runs:
   using: composite
   steps:
+    - name: Log in to Registry
+      if: inputs.registry-password != ''
+      shell: bash
+      run: |
+        if command -v docker >/dev/null 2>&1; then
+          echo "${{ inputs.registry-password }}" | docker login "${{ inputs.registry-server }}" -u "${{ inputs.registry-user }}" --password-stdin 2>/dev/null || true
+        fi
+        if command -v podman >/dev/null 2>&1; then
+          echo "${{ inputs.registry-password }}" | podman login "${{ inputs.registry-server }}" -u "${{ inputs.registry-user }}" --password-stdin 2>/dev/null || true
+        fi
+
     - name: Generate SBOM with Syft
       uses: anchore/sbom-action@v0
       with:
