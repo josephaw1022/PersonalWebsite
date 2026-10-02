@@ -44,8 +44,14 @@ describe("DatadogInit", () => {
       expect(isProductionEnvironment("127.0.0.1")).toBe(false);
     });
 
-    it("returns false for dev cluster hostname", () => {
+    it("returns false for dev cluster hostname (jwhiteaker.homelab.kubesoar.com)", () => {
       expect(isProductionEnvironment("jwhiteaker.homelab.kubesoar.com")).toBe(
+        false,
+      );
+    });
+
+    it("returns false for general homelab subdomains", () => {
+      expect(isProductionEnvironment("preview.homelab.kubesoar.com")).toBe(
         false,
       );
     });
