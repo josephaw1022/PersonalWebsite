@@ -1,117 +1,57 @@
 # Personal Website
 
-A personal website built with **Next.js**, containerized and hosted on a **homelab OpenShift cluster** with secure external access via **Cloudflare Tunnel**.
+A modern Next.js website containerized and hosted on a homelab OpenShift cluster. External traffic is securely routed through an encrypted Cloudflare Tunnel directly to in-cluster services without exposing open ingress ports.
 
-**Live at:** [jwhiteaker22.com](https://jwhiteaker22.com)
-
----
-
-## Deploying To My Homelab OpenShift Cluster & Making It Publicly Accessible
-
-```mermaid
-flowchart TB
-    subgraph INTERNET["☁️ INTERNET"]
-        USER["🌐 User Browser"]
-        CF["Cloudflare Edge Network"]
-    end
-
-    subgraph CLUSTER["HOMELAB OPENSHIFT CLUSTER"]
-        subgraph NS_CF["namespace: cloudflared"]
-            CFLD["cloudflared (3 replicas)"]
-        end
-
-        subgraph NS_SITE["namespace: personal-site"]
-            NP["NetworkPolicy"]
-            SVC["Service: personal-site"]
-            DEPLOY["personal-site Deployment"]
-            PODS["Pods (3 replicas)"]
-        end
-    end
-
-    USER -->|"jwhiteaker22.com"| CF
-    CF <-->|"Encrypted tunnel"| CFLD
-    CFLD --> NP
-    NP --> SVC
-    SVC --> PODS
-    DEPLOY --> PODS
-```
-
-## How It Works
-
-**1. Domain & DNS**
-
-The domain `jwhiteaker22.com` is registered and managed through Cloudflare's nameservers.
-
-![Cloudflare DNS Records](assets/cloudflare-dns-records.png)
-
-**2. Cloudflare Tunnel**
-
-Instead of exposing the homelab cluster to the internet with a public IP, a `cloudflared` connector runs inside the cluster and establishes an outbound-only encrypted tunnel to Cloudflare's edge network. The tunnel routes are configured in Cloudflare Zero Trust to point `jwhiteaker22.com` to the internal Kubernetes service.
-
-![Cloudflare Tunnel Routes](assets/cloudflare-tunnel-routes.png)
-
-**3. Cloudflared Connector**
-
-The `cloudflared` deployment runs in its own namespace and handles all inbound traffic from Cloudflare's edge network.
-
-![OpenShift Cloudflared Topology](assets/okd-cloudflared-topology.png)
-
-**4. Personal Site Deployment**
-
-The Next.js deployment serves the website application. Traffic is routed from `cloudflared` to the `personal-site` ClusterIP service.
-
-![OpenShift Personal Site Topology](assets/okd-personal-site-topology.png)
-
-**5. Network Security**
-
-A Kubernetes NetworkPolicy restricts the `personal-site` namespace to only accept traffic from the `cloudflared` pods, with egress limited to DNS resolution.
-
-**6. Zero Trust**
-
-No ingress controllers, load balancers, or public IPs are needed on the cluster—all traffic flows through Cloudflare's secure tunnel.
+**Live:** [jwhiteaker22.com](https://jwhiteaker22.com)
 
 ---
 
-## Deployment
+## Architecture & Cloudflare Routing
 
-1. **Configure Cluster Runners:**
+- **Cloudflare Edge & Tunnel:** DNS and edge routing are managed via Cloudflare. An in-cluster `cloudflared` connector establishes an outbound encrypted tunnel to Cloudflare's edge network, routing requests directly to internal Kubernetes services.
+- **Zero Trust Security:** Eliminates public load balancers and open ingress ports on the homelab cluster. In-cluster NetworkPolicies enforce strict isolation so application namespaces only accept ingress from `cloudflared`.
 
-Set up the GitHub Actions Runner Controller (ARC) runner scale set on your OpenShift cluster:
+---
+
+## Infrastructure Setup & Deployment
+
+### 1. Configure In-Cluster Runners (ARC)
+
+Deploy the GitHub Actions Runner Controller (ARC) scale set to the cluster:
 
 ```bash
 ./infra/arc-setup.sh
 ```
 
-2. **Bootstrap Workloads:**
+### 2. Bootstrap Cluster Infrastructure
 
-Trigger the **Cluster Infrastructure - Bootstrap** workflow (`.github/workflows/bootstrap-cluster.yml`) via `workflow_dispatch` in GitHub Actions. This idempotent workflow runs on the in-cluster runners and creates:
+Trigger the cluster bootstrap workflow using the GitHub CLI to provision namespaces, quotas, image pull secrets, and initial Helm releases:
 
-- Target namespaces (`infra/namespaces/`) along with granular ResourceQuotas and LimitRanges
-- The container image pull secret (`quay-pull-secret`) linked to the default service account
-- The Helm release for `personal-site` (`charts/personal-site`), deploying the Next.js `Deployment` configured with telemetry labels, `ClusterIP` Service, and PodDisruptionBudget (PDB)
-- Verifies rollout and Helm release completion
+```bash
+gh workflow run bootstrap-cluster.yml
+```
+
+### 3. Deploy to Environments
+
+Deploy application releases to development or production using Helm workflows:
+
+```bash
+# Deploy to Development (personal-site-dev-envs)
+gh workflow run deploy-dev.yml
+
+# Deploy to Production (personal-site)
+gh workflow run deploy-prod.yml
+```
 
 ---
 
 ## Local Development
 
-Run the Next.js development server locally:
-
 ```bash
+# Start development server (http://localhost:3000)
 task dev
-# or: npm run dev
-```
 
-Then visit http://localhost:3000
-
-Alternatively, build and run the production container locally with Podman:
-
-```bash
-# Build
+# Build and run container locally with Podman
 task build-container
-# or: npm run build && podman build -t personal-site -f Containerfile .
-
-# Run
 task run-container
-# or: podman run -p 3000:3000 personal-site
 ```
