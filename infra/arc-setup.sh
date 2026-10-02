@@ -113,7 +113,7 @@ metadata:
   namespace: ${RUNNER_NS}
 EOF
 
-echo "==> Creating RoleBinding for the runner ServiceAccount in runner, production, and dev namespaces..."
+echo "==> Creating RoleBindings and ClusterRoleBinding for the runner ServiceAccount..."
 "${KUBECTL[@]}" apply -f - <<EOF
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -155,6 +155,28 @@ subjects:
 roleRef:
   kind: ClusterRole
   name: admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runner-namespace-admin
+rules:
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runner-namespace-admin-binding
+subjects:
+- kind: ServiceAccount
+  name: ${SA_NAME}
+  namespace: ${RUNNER_NS}
+roleRef:
+  kind: ClusterRole
+  name: runner-namespace-admin
   apiGroup: rbac.authorization.k8s.io
 EOF
 
