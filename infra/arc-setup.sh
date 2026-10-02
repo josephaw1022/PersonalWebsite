@@ -167,8 +167,8 @@ metadata:
   name: runner-namespace-admin
 rules:
 - apiGroups: [""]
-  resources: ["namespaces"]
-  verbs: ["get", "list", "watch", "create", "update", "patch"]
+  resources: ["namespaces", "limitranges", "resourcequotas"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
