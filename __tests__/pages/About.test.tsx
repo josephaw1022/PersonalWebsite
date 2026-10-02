@@ -49,7 +49,7 @@ describe("About Page", () => {
       screen.getByRole("heading", { name: /Open Source & Community/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /github\.com\/josephaw1022/i }),
+      screen.getByRole("link", { name: /^github\.com\/josephaw1022$/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /medium\.com\/@josephsims1/i }),
