@@ -31,7 +31,7 @@ Cluster runner infrastructure is managed via `./infra/arc-setup.sh`, while appli
 
 1. Configures the GitHub Actions Runner Controller (ARC) scale set on the cluster in the `personal-site-runners` namespace.
 2. Requires `--app-id`, `--installation-id`, and `--private-key-file` arguments for GitHub App authentication (or loaded from `.env`).
-3. Sets up the ServiceAccount, RoleBinding (`admin`), runner authentication Secret, and installs/upgrades the runner scale set using Helm.
+3. Sets up the ServiceAccount, RoleBindings (`admin`), ClusterRole/ClusterRoleBinding for namespace management, runner authentication Secret, and installs/upgrades the runner scale set using Helm.
 
 #### Bootstrap Workflow (`bootstrap-cluster.yml`):
 
