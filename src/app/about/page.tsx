@@ -28,7 +28,8 @@ export default function About() {
         <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-3xl leading-relaxed mb-6">
           Team Architect and Platform Engineer based in Sarasota, Florida,
           specializing in enterprise control planes running on Kubernetes,
-          declarative GitOps, supply chain security, and developer velocity.
+          declarative GitOps, network security, supply chain security, and
+          developer velocity.
         </p>
 
         {/* Quick Highlights / Badges */}

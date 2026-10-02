@@ -19,7 +19,8 @@ export default function Home() {
         <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed mb-10">
           I design and build secure, scalable developer platforms and enterprise
           control planes running on Kubernetes. Specializing in declarative
-          GitOps, supply chain security, and platform automation.
+          GitOps, network security, supply chain security, and platform
+          automation.
         </p>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 font-mono text-sm">
