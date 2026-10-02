@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: configmaps-quota
+  namespace: personal-site
+  labels:
+    app.kubernetes.io/part-of: personal-website-app
+    app.kubernetes.io/managed-by: github-actions
+spec:
+  hard:
+    configmaps: "30"
