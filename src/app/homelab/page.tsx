@@ -60,7 +60,7 @@ const ipAllocations: IpAllocation[] = [
   {
     ip: "192.168.1.20",
     hostname: "api.okd.kubesoar.com",
-    subsystem: "OKD Core Ingress",
+    subsystem: "Kubernetes API Load Balancer",
     role: "Nginx Load Balancer (macvlan VIP for API 6443, MachineConfig 22623, Ingress 80/443)",
     ingressType: "Layer 4/7 Nginx Load Balancer",
   },
@@ -86,13 +86,6 @@ const ipAllocations: IpAllocation[] = [
     ingressType: "Internal Node Communication",
   },
   {
-    ip: "192.168.1.25",
-    hostname: "postgres.kubesoar.com",
-    subsystem: "Observability Storage",
-    role: "BYOC PostgreSQL Container (Datadog CloudPrem Logs Backend)",
-    ingressType: "Internal TCP Port 5432",
-  },
-  {
     ip: "192.168.1.26",
     hostname: "minio.kubesoar.com",
     subsystem: "Observability Storage",
@@ -100,39 +93,11 @@ const ipAllocations: IpAllocation[] = [
     ingressType: "Internal S3 API Port 9000/9001",
   },
   {
-    ip: "192.168.1.30",
-    hostname: "quay-postgres.kubesoar.com",
-    subsystem: "Container Registry",
-    role: "Quay PostgreSQL Dedicated Database Container",
-    ingressType: "Internal TCP Port 5432",
-  },
-  {
-    ip: "192.168.1.31",
-    hostname: "quay-valkey.kubesoar.com",
-    subsystem: "Container Registry",
-    role: "Quay Valkey In-Memory Cache Container",
-    ingressType: "Internal TCP Port 6379",
-  },
-  {
-    ip: "192.168.1.32",
-    hostname: "quay-registry.kubesoar.com",
-    subsystem: "Container Registry",
-    role: "Red Hat Quay Enterprise Registry Application Container",
-    ingressType: "Internal HTTP Port 8080",
-  },
-  {
     ip: "192.168.1.33",
     hostname: "quay.kubesoar.com",
     subsystem: "Container Registry Ingress",
     role: "Quay Nginx Ingress Reverse Proxy with Let's Encrypt TLS",
     ingressType: "HTTPS Port 443 (Certbot DNS-01 TLS)",
-  },
-  {
-    ip: "192.168.1.34",
-    hostname: "quay-clair.kubesoar.com",
-    subsystem: "Container Registry / Security",
-    role: "Clair v4 Vulnerability Scanner & Security Indexer Container",
-    ingressType: "Internal HTTP Port 8081 / gRPC",
   },
   {
     ip: "192.168.1.230",
@@ -288,6 +253,15 @@ export default function Homelab() {
           self-hosted Quay container registry, Tailscale container mesh routing,
           and dedicated Pi-hole DNS virtualization.
         </p>
+        <a
+          href="https://github.com/josephaw1022/okd-sno-manual-install"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 font-mono text-sm text-emerald-600 dark:text-emerald-400 hover:underline"
+        >
+          <span>view_okd_repo</span>
+          <ExternalLink className="w-4 h-4" />
+        </a>
 
         {/* Quick Highlights / Badges */}
         <div className="flex flex-wrap items-center gap-2.5 font-mono text-xs">
@@ -557,8 +531,7 @@ export default function Homelab() {
                 Split DNS &amp; Pi-hole Configuration
               </h2>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Local high-performance DNS resolution orchestrated through
-                Pi-hole FTL / dnsmasq with Cloudflare upstream fallback.
+                Local dnsmasq setup for the LAN.
               </p>
             </div>
           </div>
