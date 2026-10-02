@@ -26,6 +26,22 @@ tests:
       - isNull:
           path: spec.replicas
         template: deployment.yaml
+      - equal:
+          path: spec.template.spec.topologySpreadConstraints[0].maxSkew
+          value: 1
+        template: deployment.yaml
+      - equal:
+          path: spec.template.spec.topologySpreadConstraints[0].topologyKey
+          value: kubernetes.io/hostname
+        template: deployment.yaml
+      - equal:
+          path: spec.template.spec.topologySpreadConstraints[0].whenUnsatisfiable
+          value: ScheduleAnyway
+        template: deployment.yaml
+      - equal:
+          path: spec.template.spec.topologySpreadConstraints[0].labelSelector.matchLabels.app
+          value: personal-site
+        template: deployment.yaml
       - isKind:
           of: Ingress
         template: ingress.yaml
@@ -100,6 +116,22 @@ tests:
         template: deployment.yaml
       - isNull:
           path: spec.replicas
+        template: deployment.yaml
+      - equal:
+          path: spec.template.spec.topologySpreadConstraints[0].maxSkew
+          value: 1
+        template: deployment.yaml
+      - equal:
+          path: spec.template.spec.topologySpreadConstraints[0].topologyKey
+          value: kubernetes.io/hostname
+        template: deployment.yaml
+      - equal:
+          path: spec.template.spec.topologySpreadConstraints[0].whenUnsatisfiable
+          value: ScheduleAnyway
+        template: deployment.yaml
+      - equal:
+          path: spec.template.spec.topologySpreadConstraints[0].labelSelector.matchLabels.app
+          value: personal-site
         template: deployment.yaml
       - hasDocuments:
           count: 0
