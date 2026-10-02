@@ -23,6 +23,10 @@ describe("Header", () => {
       "href",
       "/skills",
     );
+    expect(screen.getByRole("link", { name: "Homelab" })).toHaveAttribute(
+      "href",
+      "/homelab",
+    );
   });
 
   it("renders the source code link", () => {

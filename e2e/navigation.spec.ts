@@ -21,6 +21,13 @@ test.describe("Site Navigation", () => {
     await expect(page).toHaveURL(/.*\/skills/);
     await expect(page.locator("h1")).toContainText("Technical Skills");
 
+    // Click on Homelab navigation link
+    await page.click("nav >> text=Homelab");
+    await expect(page).toHaveURL(/.*\/homelab/);
+    await expect(page.locator("h1")).toContainText(
+      "Enterprise Homelab Infrastructure",
+    );
+
     // Click on Overview navigation link to go back home
     await page.click("nav >> text=Overview");
     await expect(page).toHaveURL(/.*\//);
