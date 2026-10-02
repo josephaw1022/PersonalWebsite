@@ -25,7 +25,7 @@ Cluster runner infrastructure is managed via `./infra/arc-setup.sh`, while appli
 1. Chart definition: `charts/personal-site/Chart.yaml`
 2. Environment values: `values-dev.yaml` (1 replica, Ingress enabled, PDB disabled) and `values-prod.yaml` (3 replicas, Ingress disabled, PDB enabled with minAvailable: 1).
 3. PodDisruptionBudget (PDB): Configurable via `.Values.podDisruptionBudget` for high availability and zero-downtime maintenance.
-4. Testing: Tested locally and in CI (`.github/workflows/pr-helm-tests.yaml`) using `helm unittest` plugin.
+4. Testing: Tested locally and in CI (`.github/workflows/pr-helm-unit-tests.yaml`) using `helm unittest` plugin.
 
 #### ARC Setup Process (`arc-setup.sh`):
 
