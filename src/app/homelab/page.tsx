@@ -24,7 +24,7 @@ import Mermaid from "@/components/Mermaid";
 export const metadata = {
   title: "Homelab Infrastructure | Joseph Whiteaker",
   description:
-    "Deep dive into Joseph Whiteaker's bare-metal OKD OpenShift cluster, Istio Ambient Mesh, MetalLB L2 routing, Keycloak & Entra ID SSO, OpenBao, Quay registry, Tailscale containers, and Pi-hole DNS network topology.",
+    "Deep dive into Joseph Whiteaker's bare-metal OKD OpenShift cluster, Istio Ambient Mesh, MetalLB L2 routing, Keycloak & Entra ID SSO, OpenBao, Quay registry with Clair security scanning, Tailscale containers, and Pi-hole DNS network topology.",
 };
 
 interface IpAllocation {
@@ -128,6 +128,13 @@ const ipAllocations: IpAllocation[] = [
     ingressType: "HTTPS Port 443 (Certbot DNS-01 TLS)",
   },
   {
+    ip: "192.168.1.34",
+    hostname: "quay-clair.kubesoar.com",
+    subsystem: "Container Registry / Security",
+    role: "Clair v4 Vulnerability Scanner & Security Indexer Container",
+    ingressType: "Internal HTTP Port 8081 / gRPC",
+  },
+  {
     ip: "192.168.1.230",
     hostname: "*.homelab.kubesoar.com",
     subsystem: "Istio Service Mesh",
@@ -196,7 +203,7 @@ const serversTopologyChart = `flowchart TB
       LP_KVM["Libvirt / KVM Hypervisor"]
       LP_PI["Pi-hole DNS VM (192.168.1.5 - Fedora Cloud 44)"]
       LP_TS["Tailscale Exit Node & Subnet Router Container (100.110.200.108 - Route: 192.168.1.0/24)"]
-      LP_QUAY["Quay Registry Stack (PostgreSQL, Valkey, Registry, Nginx Proxy)"]
+      LP_QUAY["Quay Registry Stack (PostgreSQL, Valkey, Registry, Clair Scanner, Nginx Proxy)"]
       LP_BYOC["Datadog BYOC Storage (PostgreSQL 192.168.1.25, MinIO 192.168.1.26)"]
       LP_CP["Cockpit Web Admin (Port 443 / TLS)"]
 
@@ -306,7 +313,7 @@ export default function Homelab() {
           </span>
           <span className="px-3 py-1.5 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
             <Boxes className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>Quay Registry Stack + Pull Cache</span>
+            <span>Quay Registry + Clair Scanner</span>
           </span>
           <span className="px-3 py-1.5 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
             <Lock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -446,7 +453,7 @@ export default function Homelab() {
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                     <span>
                       Quay Registry Stack (PostgreSQL, Valkey cache, Quay core,
-                      Nginx TLS proxy)
+                      Clair security scanner, Nginx TLS proxy)
                     </span>
                   </li>
                 </ul>
@@ -616,7 +623,8 @@ export default function Homelab() {
                   quay.kubesoar.com
                 </code>{" "}
                 (192.168.1.33), PostgreSQL (192.168.1.30), Valkey
-                (192.168.1.31), and Quay core (192.168.1.32).
+                (192.168.1.31), Quay core (192.168.1.32), and Clair security
+                scanner (192.168.1.34).
               </p>
             </div>
           </div>
@@ -1019,11 +1027,13 @@ export default function Homelab() {
             </div>
             <div>
               <h2 className="text-2xl font-semibold text-foreground">
-                Quay Container Registry &amp; Node Pull-Through Caching
+                Quay Container Registry, Clair Security &amp; Node Pull-Through
+                Caching
               </h2>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Self-hosted container registry with global cluster pull caching
-                for optimized builds and offline resilience.
+                Self-hosted container registry with integrated Clair static
+                vulnerability analysis and global cluster pull caching for
+                optimized builds and offline resilience.
               </p>
             </div>
           </div>
@@ -1039,16 +1049,25 @@ export default function Homelab() {
                 <code className="text-emerald-600 dark:text-emerald-400 font-mono">
                   laptop-server
                 </code>
-                , the registry delivers full image lifecycle management, robot
-                accounts, and Microsoft Entra ID OIDC SSO.
+                , the registry delivers full image lifecycle management,
+                automated Clair vulnerability scanning, robot accounts, and
+                Microsoft Entra ID OIDC SSO.
               </p>
-              <div className="grid grid-cols-2 gap-3 text-xs font-mono">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs font-mono">
                 <div className="p-3 rounded bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800">
                   <span className="text-zinc-500 block text-[10px]">
                     REGISTRY UI &amp; API
                   </span>
                   <span className="font-semibold text-foreground">
                     quay.kubesoar.com
+                  </span>
+                </div>
+                <div className="p-3 rounded bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800">
+                  <span className="text-zinc-500 block text-[10px]">
+                    SECURITY SCANNER
+                  </span>
+                  <span className="font-semibold text-foreground">
+                    Clair v4 Engine
                   </span>
                 </div>
                 <div className="p-3 rounded bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800">
@@ -1075,13 +1094,21 @@ export default function Homelab() {
                     Nginx + Certbot DNS-01
                   </span>
                 </div>
+                <div className="p-3 rounded bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800">
+                  <span className="text-zinc-500 block text-[10px]">
+                    PULL CACHE
+                  </span>
+                  <span className="font-semibold text-foreground">
+                    DockerHub &amp; Quay.io
+                  </span>
+                </div>
               </div>
             </div>
 
             <div className="card-minimal rounded-lg p-6">
               <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                 <HardDrive className="w-5 h-5 text-emerald-500" />
-                <span>Cluster Pull-Through Mirroring</span>
+                <span>Cluster Pull-Through Mirroring &amp; Scanning</span>
               </h3>
               <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-4">
                 OKD nodes are configured with{" "}
@@ -1091,9 +1118,18 @@ export default function Homelab() {
                 and{" "}
                 <strong className="text-foreground">ImageTagMirrorSet</strong>{" "}
                 CRDs managed by the Machine Config Operator, routing container
-                image pulls through local cache mirrors.
+                image pulls through local cache mirrors with Clair static
+                analysis.
               </p>
               <ul className="space-y-2 text-xs font-mono text-zinc-700 dark:text-zinc-300">
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                  <span>
+                    <strong>Clair Static Analysis:</strong> Automated CVE
+                    indexing and layer vulnerability reporting for pushed
+                    container artifacts
+                  </span>
+                </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                   <span>
