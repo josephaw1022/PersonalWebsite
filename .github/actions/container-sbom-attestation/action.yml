@@ -1,0 +1,44 @@
+name: Container SBOM & Attestation
+description: Generate SPDX SBOM with Syft, attest SBOM attestation, and upload artifact
+
+inputs:
+  image:
+    description: Full container image reference including tag (e.g. quay.kubesoar.com/admin/personalwebsite:sha)
+    required: true
+  tag:
+    description: Container image tag
+    required: false
+    default: ""
+  subject-name:
+    description: Attestation subject name (e.g. quay.kubesoar.com/admin/personalwebsite)
+    required: false
+    default: ""
+  digest:
+    description: Image digest (sha256:...) for attestation
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Generate SBOM with Syft
+      uses: anchore/sbom-action@v0
+      with:
+        image: ${{ inputs.image }}
+        format: "spdx-json"
+        output-file: "sbom.spdx.json"
+
+    - name: Attest SBOM
+      if: inputs.digest != ''
+      uses: actions/attest-sbom@v2
+      with:
+        sbom-path: "sbom.spdx.json"
+        subject-name: ${{ inputs.subject-name != '' && inputs.subject-name || inputs.image }}
+        subject-digest: ${{ inputs.digest }}
+        push-to-registry: false
+
+    - name: Upload SBOM Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbom-spdx-${{ inputs.tag != '' && inputs.tag || 'artifact' }}
+        path: sbom.spdx.json

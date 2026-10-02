@@ -66,9 +66,9 @@ runs:
         fi
 
         TOKEN_RESP=$(curl -s -k "${AUTH_ARGS[@]}" "https://${REGISTRY_SERVER}/v2/auth?service=${REGISTRY_SERVER}&scope=repository:${REGISTRY_USER}/${REPO_NAME}:pull" 2>/dev/null || true)
-        TOKEN=$(echo "${TOKEN_RESP}" | grep -o '"token":"[^"]*' | cut -d'"' -f4)
+        TOKEN=$(echo "${TOKEN_RESP}" | grep -o '"token":"[^"]*' | cut -d'"' -f4 || true)
         if [ -z "${TOKEN}" ]; then
-          TOKEN=$(echo "${TOKEN_RESP}" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
+          TOKEN=$(echo "${TOKEN_RESP}" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4 || true)
         fi
 
         HEADERS=()

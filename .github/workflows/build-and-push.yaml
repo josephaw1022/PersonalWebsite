@@ -12,10 +12,14 @@ on:
       - "postcss.config.mjs"
       - "Containerfile"
       - ".github/workflows/build-and-push.yaml"
+      - ".github/actions/**"
   workflow_dispatch:
 
 permissions:
   contents: read
+  id-token: write
+  attestations: write
+  security-events: write
 
 jobs:
   build:
@@ -55,7 +59,8 @@ jobs:
       - name: Log in to Quay Registry
         run: echo "${{ secrets.QUAY_PASSWORD }}" | podman login quay.kubesoar.com -u "${{ secrets.QUAY_USERNAME }}" --password-stdin
 
-      - name: Build image
+      - name: Build and Push Image
+        id: build-push
         run: |
           IMAGE="quay.kubesoar.com/${{ secrets.QUAY_USERNAME }}/personalwebsite"
           SHA="${{ github.sha }}"
@@ -67,13 +72,36 @@ jobs:
             podman tag "${IMAGE}:${SHORT_SHA}" "${IMAGE}:latest"
           fi
 
-      - name: Push image
-        run: |
-          IMAGE="quay.kubesoar.com/${{ secrets.QUAY_USERNAME }}/personalwebsite"
-          SHA="${{ github.sha }}"
-          SHORT_SHA="${SHA:0:7}"
-          podman push "${IMAGE}:${SHORT_SHA}"
+          podman push --digestfile digest.txt "${IMAGE}:${SHORT_SHA}"
+          DIGEST=$(cat digest.txt 2>/dev/null || true)
+          if [ -n "${DIGEST}" ] && [[ "${DIGEST}" != sha256:* ]]; then
+            DIGEST="sha256:${DIGEST}"
+          fi
+
           podman push "${IMAGE}:${SHA}"
           if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
             podman push "${IMAGE}:latest"
           fi
+
+          echo "image=${IMAGE}:${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "subject-name=${IMAGE}" >> "$GITHUB_OUTPUT"
+          echo "tag=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+
+      - name: Scan Container Image with Grype & Attest
+        uses: ./.github/actions/container-scan-attestation
+        with:
+          image: ${{ steps.build-push.outputs.image }}
+          tag: ${{ steps.build-push.outputs.tag }}
+          subject-name: ${{ steps.build-push.outputs.subject-name }}
+          digest: ${{ steps.build-push.outputs.digest }}
+          registry-user: ${{ secrets.QUAY_USERNAME }}
+          registry-password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: Generate & Attest SBOM
+        uses: ./.github/actions/container-sbom-attestation
+        with:
+          image: ${{ steps.build-push.outputs.image }}
+          tag: ${{ steps.build-push.outputs.tag }}
+          subject-name: ${{ steps.build-push.outputs.subject-name }}
+          digest: ${{ steps.build-push.outputs.digest }}
