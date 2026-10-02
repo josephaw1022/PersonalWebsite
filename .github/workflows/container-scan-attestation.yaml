@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   scan-and-attest:
-    name: Scan Container Image & Attest
+    name: Scan Container Image with Grype & Attest
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
@@ -92,38 +92,34 @@ jobs:
           echo "Resolved digest: ${DIGEST}"
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
 
-      - name: Scan Image for Vulnerabilities (JSON)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ steps.image-info.outputs.image }}
-          format: "json"
-          output: "scan-report.json"
-          severity: "CRITICAL,HIGH,MEDIUM,LOW"
-          exit-code: "0"
-          ignore-unfixed: true
-        env:
-          TRIVY_USERNAME: ${{ secrets.QUAY_USERNAME }}
-          TRIVY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
+      - name: Log in to Quay Registry
+        run: |
+          echo "${{ secrets.QUAY_PASSWORD }}" | docker login quay.kubesoar.com -u "${{ secrets.QUAY_USERNAME || 'admin' }}" --password-stdin
 
-      - name: Scan Image for Vulnerabilities (SARIF)
-        uses: aquasecurity/trivy-action@master
+      - name: Scan Image with Grype (SARIF)
+        id: grype-sarif
+        uses: anchore/scan-action@v7
         with:
-          image-ref: ${{ steps.image-info.outputs.image }}
-          format: "sarif"
-          output: "trivy-results.sarif"
-          severity: "CRITICAL,HIGH"
-          exit-code: "0"
-          ignore-unfixed: true
-        env:
-          TRIVY_USERNAME: ${{ secrets.QUAY_USERNAME }}
-          TRIVY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
+          image: ${{ steps.image-info.outputs.image }}
+          fail-build: false
+          severity-cutoff: low
+          output-format: sarif
+
+      - name: Scan Image with Grype (JSON)
+        id: grype-json
+        uses: anchore/scan-action@v7
+        with:
+          image: ${{ steps.image-info.outputs.image }}
+          fail-build: false
+          severity-cutoff: low
+          output-format: json
 
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: "trivy-results.sarif"
-          category: "container-image-scan"
+          sarif_file: ${{ steps.grype-sarif.outputs.sarif }}
+          category: "container-image-grype-scan"
 
       - name: Attest Security Scan Results
         if: steps.image-info.outputs.digest != ''
@@ -132,14 +128,14 @@ jobs:
           subject-name: ${{ steps.image-info.outputs.subject-name }}
           subject-digest: ${{ steps.image-info.outputs.digest }}
           predicate-type: "https://in-toto.io/attestation/vuln/v0.1"
-          predicate-path: "scan-report.json"
+          predicate-path: ${{ steps.grype-json.outputs.json }}
           push-to-registry: false
 
       - name: Upload Scan Report Artifact
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: container-scan-report-${{ steps.image-info.outputs.tag }}
+          name: container-grype-scan-${{ steps.image-info.outputs.tag }}
           path: |
-            scan-report.json
-            trivy-results.sarif
+            ${{ steps.grype-json.outputs.json }}
+            ${{ steps.grype-sarif.outputs.sarif }}

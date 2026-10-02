@@ -91,15 +91,16 @@ jobs:
           echo "Resolved digest: ${DIGEST}"
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
 
-      - name: Generate SBOM with Trivy
-        uses: aquasecurity/trivy-action@master
+      - name: Log in to Quay Registry
+        run: |
+          echo "${{ secrets.QUAY_PASSWORD }}" | docker login quay.kubesoar.com -u "${{ secrets.QUAY_USERNAME || 'admin' }}" --password-stdin
+
+      - name: Generate SBOM with Syft
+        uses: anchore/sbom-action@v0
         with:
-          image-ref: ${{ steps.image-info.outputs.image }}
+          image: ${{ steps.image-info.outputs.image }}
           format: "spdx-json"
-          output: "sbom.spdx.json"
-        env:
-          TRIVY_USERNAME: ${{ secrets.QUAY_USERNAME }}
-          TRIVY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
+          output-file: "sbom.spdx.json"
 
       - name: Attest SBOM
         if: steps.image-info.outputs.digest != ''
