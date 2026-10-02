@@ -6,8 +6,8 @@ describe("Home Page", () => {
     render(<Home />);
 
     const heading = screen.getByRole("heading", { level: 1 });
-    expect(heading).toHaveTextContent(/Building reliable/i);
-    expect(heading).toHaveTextContent(/cloud infrastructure/i);
+    expect(heading).toHaveTextContent(/Building scalable/i);
+    expect(heading).toHaveTextContent(/developer platforms/i);
   });
 
   it("renders the role as Senior Platform Engineer", () => {
@@ -30,7 +30,7 @@ describe("Home Page", () => {
   it("renders core overview pillars", () => {
     render(<Home />);
     expect(
-      screen.getByRole("heading", { name: /Kubernetes Ecosystem/i }),
+      screen.getByRole("heading", { name: /Kubernetes Platforms/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: /GitOps & Automation/i }),

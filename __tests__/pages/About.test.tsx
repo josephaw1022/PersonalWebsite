@@ -9,7 +9,7 @@ describe("About Page", () => {
     expect(
       screen.getByText(/Team Architect and Platform Engineer/i),
     ).toBeInTheDocument();
-    expect(screen.getByText("Columbia, SC")).toBeInTheDocument();
+    expect(screen.getByText("Sarasota, Florida")).toBeInTheDocument();
     expect(
       screen.getByText(/BS in Mathematics, Univ\. of South Carolina/i),
     ).toBeInTheDocument();
@@ -24,7 +24,7 @@ describe("About Page", () => {
       screen.getByRole("heading", { name: /Core Focus Areas/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /Control Plane & Kubernetes/i }),
+      screen.getByRole("heading", { name: /Control Planes on Kubernetes/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: /Declarative GitOps & CI\/CD/i }),

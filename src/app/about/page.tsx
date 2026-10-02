@@ -26,16 +26,16 @@ export default function About() {
           About Me
         </h1>
         <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-3xl leading-relaxed mb-6">
-          Team Architect and Platform Engineer based in Columbia, SC,
-          specializing in Kubernetes control planes, declarative GitOps, supply
-          chain security, and developer velocity.
+          Team Architect and Platform Engineer based in Sarasota, Florida,
+          specializing in enterprise control planes running on Kubernetes,
+          declarative GitOps, supply chain security, and developer velocity.
         </p>
 
         {/* Quick Highlights / Badges */}
         <div className="flex flex-wrap items-center gap-3 font-mono text-xs text-zinc-600 dark:text-zinc-400">
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
             <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>Columbia, SC</span>
+            <span>Sarasota, Florida</span>
           </div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
             <GraduationCap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -85,12 +85,13 @@ export default function About() {
                   <Layers className="w-5 h-5" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Control Plane & Kubernetes
+                  Control Planes on Kubernetes
                 </h3>
                 <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
-                  Architecting multi-cluster Kubernetes control planes running
-                  High-Availability ArgoCD (App of Apps pattern), ACK and ASO
-                  operators, and Karpenter node pools for elastic scaling.
+                  Architecting multi-cluster enterprise control planes running
+                  on Kubernetes with High-Availability ArgoCD (App of Apps
+                  pattern), ACK and ASO operators, and Karpenter node pools for
+                  elastic scaling.
                 </p>
               </div>
             </div>
