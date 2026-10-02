@@ -2,7 +2,7 @@ name: Container Image - SBOM
 
 on:
   workflow_run:
-    workflows: ["Container Image - Build & Push"]
+    workflows: ["Container Image - Scan Attestation"]
     types:
       - completed
     branches:
