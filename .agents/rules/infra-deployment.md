@@ -1,10 +1,27 @@
 ---
 trigger: glob
-globs: "infra/**, charts/**"
-description: "Runner and workload infrastructure deployment guidelines for cluster components and Helm charts."
+globs: "infra/**, charts/**, terraform/**"
+description: "Infrastructure deployment guidelines distinguishing OpenShift homelab cluster workloads and AWS cloud fallback hosting."
 ---
 
 # Infrastructure Deployment
 
-The runner infrastructure on the cluster is configured via the `./infra/arc-setup.sh` script.
-Workload infrastructure (Deployment, Service, Ingress, PodDisruptionBudget) is packaged as a Helm chart in `charts/personal-site/` with unit tests executed via `helm-unittest`. Cluster workloads are bootstrapped using the GitHub Actions `Cluster Infrastructure - Bootstrap` workflow (`.github/workflows/bootstrap-cluster.yml`). Continuous deployment to the dev environment (`personal-site-dev-envs`) is handled by `.github/workflows/deploy-dev.yml` using `charts/personal-site/values-dev.yaml`, and production deployment (`personal-site`) is handled via `.github/workflows/deploy-prod.yml` using `charts/personal-site/values-prod.yaml`. Both workflows share deployment execution via `.github/actions/deploy-workload`.
+Deployments are divided into two distinct infrastructure environments:
+
+## OpenShift Infrastructure
+
+Responsible for the primary homelab OpenShift cluster:
+
+- Runner infrastructure configured via `./infra/arc-setup.sh`.
+- Workload infrastructure (Deployment, Service, Ingress, PodDisruptionBudget) packaged as a Helm chart in `charts/personal-site/` with unit tests executed via `helm-unittest`.
+- Cluster workloads bootstrapped via `.github/workflows/bootstrap-cluster.yml`.
+- Deployments automated to dev (`personal-site-dev-envs`) via `.github/workflows/deploy-dev.yml` and production (`personal-site`) via `.github/workflows/deploy-prod.yml` using `.github/actions/deploy-workload`.
+
+## AWS Infrastructure
+
+Responsible for temporary AWS ECS Fargate and Cloudflare fallback hosting:
+
+- Cloud infrastructure and Cloudflare Zero Trust Tunnel managed via Terraform in `terraform/`.
+- Prerequisite AWS S3 state bucket and GitHub Actions OIDC role bootstrapped via `./infra/aws-setup.sh`.
+- Container images built and pushed to GitHub Container Registry (GHCR) via `.github/workflows/build-and-push-ghcr.yaml`.
+- Infrastructure provisioning and ECS task deployments automated via `.github/workflows/deploy-aws.yml`.
