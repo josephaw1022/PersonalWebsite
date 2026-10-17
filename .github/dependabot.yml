@@ -59,3 +59,18 @@ updates:
       - "dependencies"
       - "docker"
     open-pull-requests-limit: 10
+
+  - package-ecosystem: "terraform"
+    directory: "/terraform"
+    schedule:
+      interval: "weekly"
+    groups:
+      terraform:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "build(deps)"
+    labels:
+      - "dependencies"
+      - "terraform"
+    open-pull-requests-limit: 10
