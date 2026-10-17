@@ -26,6 +26,9 @@ describe("Home Page", () => {
       screen.getByRole("link", { name: /cat about\.md/i }),
     ).toHaveAttribute("href", "/about");
     expect(
+      screen.getByRole("link", { name: /\.\/contact\.sh/i }),
+    ).toHaveAttribute("href", "/contact");
+    expect(
       screen.getByRole("link", { name: /\.\/view_homelab\.sh/i }),
     ).toHaveAttribute("href", "/homelab");
     expect(

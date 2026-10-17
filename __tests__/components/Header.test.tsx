@@ -27,6 +27,10 @@ describe("Header", () => {
       "href",
       "/homelab",
     );
+    expect(screen.getByRole("link", { name: "Contact" })).toHaveAttribute(
+      "href",
+      "/contact",
+    );
   });
 
   it("renders the source code link", () => {

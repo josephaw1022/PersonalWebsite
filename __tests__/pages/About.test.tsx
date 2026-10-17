@@ -60,4 +60,16 @@ describe("About Page", () => {
       }),
     ).toBeInTheDocument();
   });
+
+  it("renders CTA links for skills and contact", () => {
+    render(<About />);
+    expect(screen.getByRole("link", { name: /contact_me/i })).toHaveAttribute(
+      "href",
+      "/contact",
+    );
+    expect(screen.getByRole("link", { name: /view_skills/i })).toHaveAttribute(
+      "href",
+      "/skills",
+    );
+  });
 });

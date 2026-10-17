@@ -24,7 +24,7 @@ export default function Home() {
             platform automation.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 font-mono text-sm">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 sm:gap-4 font-mono text-sm">
             <Link
               href="/skills"
               className="px-5 sm:px-6 py-2.5 sm:py-3 bg-zinc-900 text-zinc-50 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 font-semibold transition-colors flex items-center justify-center rounded-sm shadow-sm"
@@ -36,6 +36,12 @@ export default function Home() {
               className="px-5 sm:px-6 py-2.5 sm:py-3 border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center justify-center rounded-sm"
             >
               cat about.md
+            </Link>
+            <Link
+              href="/contact"
+              className="px-5 sm:px-6 py-2.5 sm:py-3 border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center justify-center rounded-sm"
+            >
+              ./contact.sh
             </Link>
             <Link
               href="/homelab"

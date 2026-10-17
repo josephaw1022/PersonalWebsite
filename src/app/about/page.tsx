@@ -217,19 +217,28 @@ export default function About() {
           </div>
         </section>
 
-        {/* CTA to Skills */}
+        {/* CTA to Skills & Contact */}
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-zinc-200 dark:border-zinc-800">
           <p className="text-sm text-zinc-600 dark:text-zinc-400 font-mono">
-            Explore the tooling, orchestrators, and platforms powering these
-            systems.
+            Available for consulting and advisory across Kubernetes, cloud
+            infrastructure, and GitOps.
           </p>
-          <Link
-            href="/skills"
-            className="px-5 py-2.5 bg-zinc-900 text-zinc-50 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 font-mono text-sm font-medium transition-colors flex items-center gap-2 rounded-sm shadow-sm"
-          >
-            <span>view_skills</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/contact"
+              className="px-5 py-2.5 bg-zinc-900 text-zinc-50 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 font-mono text-sm font-medium transition-colors flex items-center gap-2 rounded-sm shadow-sm"
+            >
+              <span>contact_me</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/skills"
+              className="px-5 py-2.5 border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-mono text-sm font-medium transition-colors flex items-center gap-2 rounded-sm"
+            >
+              <span>view_skills</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       </div>
     </div>

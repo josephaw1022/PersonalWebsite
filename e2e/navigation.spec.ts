@@ -28,6 +28,13 @@ test.describe("Site Navigation", () => {
       "Enterprise Homelab Infrastructure",
     );
 
+    // Click on Contact navigation link
+    await page.click("nav >> text=Contact");
+    await expect(page).toHaveURL(/.*\/contact/);
+    await expect(page.locator("h1")).toContainText(
+      "Consulting & Platform Advisory",
+    );
+
     // Click on Overview navigation link to go back home
     await page.click("nav >> text=Overview");
     await expect(page).toHaveURL(/.*\//);
@@ -47,6 +54,16 @@ test.describe("Site Navigation", () => {
     // Test About CTA
     await page.click("text=cat about.md");
     await expect(page).toHaveURL(/.*\/about/);
+
+    // Go back
+    await page.goto("/");
+
+    // Test Contact CTA
+    await page.click("text=./contact.sh");
+    await expect(page).toHaveURL(/.*\/contact/);
+    await expect(
+      page.locator("text=consulting@exokube.com").first(),
+    ).toBeVisible();
   });
 
   test("shows the homelab CTA on mobile", async ({ page }) => {
