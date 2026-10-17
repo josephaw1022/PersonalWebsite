@@ -26,7 +26,9 @@ Run the bootstrap script to create the S3 state bucket, GitHub Actions OIDC iden
 
 ## 2. Deploy via GitHub Actions
 
-Ensure `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and `CLOUDFLARE_ZONE_ID` are set in GitHub repository secrets, then trigger the workflow:
+- Container builds pushed to GHCR automatically trigger `.github/workflows/update-ecs-image-tag.yml`, which opens a pull request updating `ghcr_image_tag` in `terraform/variables.tf`.
+- Once merged, `.github/workflows/deploy-aws.yml` automatically triggers and applies the updated task definition to the ECS cluster.
+- Alternatively, trigger the workflow manually using GitHub CLI:
 
 ```bash
 gh workflow run deploy-aws.yml -f action=apply

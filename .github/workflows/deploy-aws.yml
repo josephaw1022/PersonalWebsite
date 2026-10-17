@@ -18,9 +18,9 @@ on:
           - plan
           - destroy
       image_tag:
-        description: "GHCR container image tag to deploy"
+        description: "GHCR container image tag to deploy (leave blank to use Terraform default)"
         required: false
-        default: "latest"
+        default: ""
         type: string
 
 permissions:
@@ -35,7 +35,6 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
   TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET || secrets.TF_STATE_BUCKET }}
   TF_VAR_aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
-  TF_VAR_ghcr_image_tag: ${{ inputs.image_tag || 'latest' }}
   TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
   TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
   TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID || vars.CLOUDFLARE_ZONE_ID }}
@@ -74,6 +73,10 @@ jobs:
 
       - name: Terraform Validate
         run: terraform validate
+
+      - name: Set Image Tag Override
+        if: ${{ inputs.image_tag != '' }}
+        run: echo "TF_VAR_ghcr_image_tag=${{ inputs.image_tag }}" >> "$GITHUB_ENV"
 
       - name: Terraform Plan
         if: ${{ github.event.inputs.action != 'destroy' }}

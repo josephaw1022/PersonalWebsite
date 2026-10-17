@@ -29,6 +29,7 @@ These workflows run on GitHub-hosted runners (`ubuntu-latest`) and manage the te
 
 - `.github/workflows/build-and-push-ghcr.yaml` (**Container Image - Build & Push (GHCR)**): Builds and pushes images to GHCR.
 - `.github/workflows/deploy-aws.yml` (**Deploy Personal Site - AWS (Terraform)**): Provisions AWS ECS Fargate and Cloudflare Tunnel resources.
+- `.github/workflows/update-ecs-image-tag.yml` (**Deploy Personal Site - Update ECS Image Tag**): Automatically opens a pull request updating the ECS image tag in Terraform when a GHCR container build finishes.
 
 #### Pull Request & CI Verification Workflows
 
@@ -66,13 +67,13 @@ bash .agents/skills/manage-workflows/scripts/enable-homelab-workflows.sh
 ### AWS Terraform Workflows
 
 #### Disable AWS Terraform Workflows
-Disables `deploy-aws.yml` using `gh workflow disable`:
+Disables `deploy-aws.yml` and `update-ecs-image-tag.yml` using `gh workflow disable`:
 ```bash
 bash .agents/skills/manage-workflows/scripts/disable-aws-terraform-workflows.sh
 ```
 
 #### Enable AWS Terraform Workflows
-Re-enables `deploy-aws.yml` using `gh workflow enable`:
+Re-enables `deploy-aws.yml` and `update-ecs-image-tag.yml` using `gh workflow enable`:
 ```bash
 bash .agents/skills/manage-workflows/scripts/enable-aws-terraform-workflows.sh
 ```
@@ -104,6 +105,13 @@ Dispatches `deploy-aws.yml`.
 ```bash
 # Usage: run-deploy-aws.sh [action: apply|plan|destroy] [image_tag] [ref]
 bash .agents/skills/manage-workflows/scripts/run-deploy-aws.sh apply latest
+```
+
+#### `run-update-ecs-image-tag.sh`
+Dispatches `update-ecs-image-tag.yml`.
+```bash
+# Usage: run-update-ecs-image-tag.sh [image_tag] [ref]
+bash .agents/skills/manage-workflows/scripts/run-update-ecs-image-tag.sh
 ```
 
 #### `run-build-and-push-ghcr.sh`

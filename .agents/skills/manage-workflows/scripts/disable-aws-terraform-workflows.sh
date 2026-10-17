@@ -10,6 +10,7 @@ fi
 # AWS Terraform deployment workflows
 AWS_WORKFLOWS=(
   "deploy-aws.yml"
+  "update-ecs-image-tag.yml"
 )
 
 echo "Disabling AWS Terraform workflows..."

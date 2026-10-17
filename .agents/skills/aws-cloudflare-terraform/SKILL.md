@@ -22,4 +22,5 @@ Manages temporary cloud infrastructure powering the website on AWS ECS Fargate w
 ### Workflows
 
 - `.github/workflows/build-and-push-ghcr.yaml`: Builds and pushes Next.js container image to GHCR.
+- `.github/workflows/update-ecs-image-tag.yml`: Automatically creates a PR updating the ECS image tag in Terraform when a GHCR image build finishes.
 - `.github/workflows/deploy-aws.yml`: Runs Terraform plan and apply to provision infrastructure and update ECS tasks via GitHub Actions OIDC.
