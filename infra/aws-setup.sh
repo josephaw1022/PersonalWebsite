@@ -16,7 +16,8 @@ by the AWS Terraform deployment workflow.
 Flags are optional when .env defines:
   AWS_PROFILE, AWS_REGION, AWS_ACCOUNT_ID, TF_STATE_BUCKET, AWS_ROLE_NAME,
   AWS_POLICY_NAME, GITHUB_REPO, DOMAIN_NAME, CLOUDFLARE_ACCOUNT_ID,
-  CLOUDFLARE_ZONE_ID, CLOUDFLARE_API_TOKEN, ALERT_EMAIL, ALERT_PHONE_NUMBER
+  CLOUDFLARE_ZONE_ID, CLOUDFLARE_API_TOKEN, ALERT_EMAIL, ALERT_PHONE_NUMBER,
+  DATADOG_API_KEY, DATADOG_APP_KEY, DATADOG_ACCESS_TOKEN, DATADOG_SITE
 
 CLI flags override values from .env.
 
@@ -33,6 +34,10 @@ Options:
   --cloudflare-api-token <API_TOKEN>    Optional: sync CLOUDFLARE_API_TOKEN to GitHub repository secrets
   --alert-email <EMAIL>                 Optional: sync ALERT_EMAIL to GitHub repository secrets
   --alert-phone <PHONE_NUMBER>          Optional: sync ALERT_PHONE_NUMBER to GitHub repository secrets
+  --datadog-api-key <API_KEY>           Optional: sync DATADOG_API_KEY to GitHub repository secrets
+  --datadog-app-key <APP_KEY>           Optional: sync DATADOG_APP_KEY to GitHub repository secrets
+  --datadog-access-token <TOKEN>        Optional: sync DATADOG_ACCESS_TOKEN to GitHub repository secrets
+  --datadog-site <SITE>                 Optional: sync DATADOG_SITE to GitHub repository variables (default: us5.datadoghq.com)
   --env-file <PATH>                     Path to custom .env file
   --skip-gh-config                      Do not set GitHub repository variables/secrets via gh CLI
   -h, --help                            Show this help message
@@ -110,6 +115,10 @@ CLOUDFLARE_ZONE_ID="${CLOUDFLARE_ZONE_ID:-}"
 CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN:-${CF_API_TOKEN:-}}"
 ALERT_EMAIL="${ALERT_EMAIL:-}"
 ALERT_PHONE_NUMBER="${ALERT_PHONE_NUMBER:-}"
+DATADOG_API_KEY="${DATADOG_API_KEY:-${DD_API_KEY:-}}"
+DATADOG_APP_KEY="${DATADOG_APP_KEY:-${DD_APP_KEY:-}}"
+DATADOG_ACCESS_TOKEN="${DATADOG_ACCESS_TOKEN:-${DD_ACCESS_TOKEN:-}}"
+DATADOG_SITE="${DATADOG_SITE:-${DD_SITE:-us5.datadoghq.com}}"
 SKIP_GH_CONFIG="false"
 
 while [[ "$#" -gt 0 ]]; do
@@ -126,6 +135,10 @@ while [[ "$#" -gt 0 ]]; do
     --cloudflare-api-token) CLOUDFLARE_API_TOKEN="$2"; shift ;;
     --alert-email) ALERT_EMAIL="$2"; shift ;;
     --alert-phone|--alert-phone-number) ALERT_PHONE_NUMBER="$2"; shift ;;
+    --datadog-api-key) DATADOG_API_KEY="$2"; shift ;;
+    --datadog-app-key) DATADOG_APP_KEY="$2"; shift ;;
+    --datadog-access-token) DATADOG_ACCESS_TOKEN="$2"; shift ;;
+    --datadog-site) DATADOG_SITE="$2"; shift ;;
     --env-file) CUSTOM_ENV_FILE="$2"; shift ;;
     --skip-gh-config) SKIP_GH_CONFIG="true" ;;
     -h|--help) usage ;;
@@ -359,7 +372,7 @@ PERMISSIONS_POLICY="$(cat <<EOF
       "Resource": "*"
     },
     {
-      "Sid": "ECSTaskExecutionRoleManagement",
+      "Sid": "IAMRoleAndPolicyManagement",
       "Effect": "Allow",
       "Action": [
         "iam:CreateRole",
@@ -377,9 +390,23 @@ PERMISSIONS_POLICY="$(cat <<EOF
         "iam:DeleteRolePolicy",
         "iam:AttachRolePolicy",
         "iam:DetachRolePolicy",
-        "iam:PassRole"
+        "iam:PassRole",
+        "iam:CreatePolicy",
+        "iam:DeletePolicy",
+        "iam:GetPolicy",
+        "iam:GetPolicyVersion",
+        "iam:ListPolicyVersions",
+        "iam:CreatePolicyVersion",
+        "iam:DeletePolicyVersion",
+        "iam:TagPolicy",
+        "iam:UntagPolicy"
       ],
-      "Resource": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/*personal-site*"
+      "Resource": [
+        "arn:aws:iam::${AWS_ACCOUNT_ID}:role/*personal-site*",
+        "arn:aws:iam::${AWS_ACCOUNT_ID}:role/*Datadog*",
+        "arn:aws:iam::${AWS_ACCOUNT_ID}:policy/*personal-site*",
+        "arn:aws:iam::${AWS_ACCOUNT_ID}:policy/*Datadog*"
+      ]
     },
     {
       "Sid": "ECSServiceLinkedRoleCreation",
@@ -492,6 +519,9 @@ if [[ "${SKIP_GH_CONFIG}" == "false" ]] && command -v gh &>/dev/null; then
     gh variable set AWS_REGION --body "${AWS_REGION}" --repo "${GITHUB_REPO}"
     gh variable set TF_STATE_BUCKET --body "${TF_STATE_BUCKET}" --repo "${GITHUB_REPO}"
     gh variable set AWS_ROLE_ARN --body "${AWS_ROLE_ARN}" --repo "${GITHUB_REPO}"
+    if [[ -n "${DATADOG_SITE}" ]]; then
+      gh variable set DATADOG_SITE --body "${DATADOG_SITE}" --repo "${GITHUB_REPO}"
+    fi
 
     if [[ -n "${CLOUDFLARE_ACCOUNT_ID}" ]]; then
       gh secret set CLOUDFLARE_ACCOUNT_ID --body "${CLOUDFLARE_ACCOUNT_ID}" --repo "${GITHUB_REPO}"
@@ -507,6 +537,15 @@ if [[ "${SKIP_GH_CONFIG}" == "false" ]] && command -v gh &>/dev/null; then
     fi
     if [[ -n "${ALERT_PHONE_NUMBER}" ]]; then
       gh secret set ALERT_PHONE_NUMBER --body "${ALERT_PHONE_NUMBER}" --repo "${GITHUB_REPO}"
+    fi
+    if [[ -n "${DATADOG_API_KEY}" ]]; then
+      gh secret set DATADOG_API_KEY --body "${DATADOG_API_KEY}" --repo "${GITHUB_REPO}"
+    fi
+    if [[ -n "${DATADOG_APP_KEY}" ]]; then
+      gh secret set DATADOG_APP_KEY --body "${DATADOG_APP_KEY}" --repo "${GITHUB_REPO}"
+    fi
+    if [[ -n "${DATADOG_ACCESS_TOKEN}" ]]; then
+      gh secret set DATADOG_ACCESS_TOKEN --body "${DATADOG_ACCESS_TOKEN}" --repo "${GITHUB_REPO}"
     fi
   else
     echo "Warning: 'gh' CLI is not authenticated. Skipping automatic GitHub variable/secret setup."
@@ -530,5 +569,8 @@ if [[ -n "${ALERT_EMAIL}" ]]; then
 fi
 if [[ -n "${ALERT_PHONE_NUMBER}" ]]; then
   echo "Alert SMS       : ${ALERT_PHONE_NUMBER}"
+fi
+if [[ -n "${DATADOG_SITE}" ]]; then
+  echo "Datadog Site    : ${DATADOG_SITE}"
 fi
 echo "================================================================================"

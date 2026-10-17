@@ -9,7 +9,7 @@ output "ecs_service_name" {
 }
 
 output "cloudwatch_log_group" {
-  description = "CloudWatch Log Group for the personal-site and cloudflared containers"
+  description = "CloudWatch Log Group for the personal-site, cloudflared, and datadog-agent containers"
   value       = aws_cloudwatch_log_group.ecs.name
 }
 
@@ -41,5 +41,21 @@ output "sns_topic_arn" {
 output "cloudwatch_alarm_arn" {
   description = "ARN of the CloudWatch metric alarm monitoring the site health"
   value       = aws_cloudwatch_metric_alarm.site_down.arn
+}
+
+output "datadog_integration_role_arn" {
+  description = "ARN of the Datadog AWS integration IAM role"
+  value       = aws_iam_role.datadog_aws_integration.arn
+}
+
+output "datadog_integration_policy_arn" {
+  description = "ARN of the Datadog AWS integration IAM policy"
+  value       = aws_iam_policy.datadog_aws_integration.arn
+}
+
+output "datadog_external_id" {
+  description = "External ID that Datadog uses when assuming the AWS integration role"
+  value       = datadog_integration_aws_account.main.auth_config.aws_auth_config_role.external_id
+  sensitive   = true
 }
 

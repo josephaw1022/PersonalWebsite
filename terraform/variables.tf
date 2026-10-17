@@ -49,7 +49,7 @@ variable "task_cpu" {
 variable "task_memory" {
   description = "Fargate task memory in MiB"
   type        = number
-  default     = 512
+  default     = 1024
 }
 
 variable "desired_count" {
@@ -121,4 +121,50 @@ variable "alert_phone_number" {
   description = "Phone number in E.164 format (e.g. +12345678901) to receive SMS text alerts when the site goes down (leave empty or null to disable SMS alerts)"
   type        = string
   default     = null
+}
+
+variable "datadog_api_key" {
+  description = "Datadog API key for account integration and the ECS Fargate agent"
+  type        = string
+  sensitive   = true
+}
+
+variable "datadog_app_key" {
+  description = "Datadog Application key for managing the AWS account integration"
+  type        = string
+  sensitive   = true
+}
+
+variable "datadog_site" {
+  description = "Datadog site domain (e.g. us5.datadoghq.com)"
+  type        = string
+  default     = "us5.datadoghq.com"
+}
+
+variable "datadog_env" {
+  description = "Datadog environment tag for ECS tasks and containers"
+  type        = string
+  default     = "prod"
+}
+
+variable "datadog_agent_image" {
+  description = "Container image for the Datadog Agent sidecar"
+  type        = string
+  default     = "public.ecr.aws/datadog/agent:latest"
+}
+
+variable "datadog_role_name" {
+  description = "Name of the IAM role assumed by Datadog for the AWS account integration"
+  type        = string
+  default     = "DatadogIntegrationRole"
+}
+
+variable "datadog_account_tags" {
+  description = "Tags to associate with the Datadog AWS account integration"
+  type        = list(string)
+  default = [
+    "env:prod",
+    "account:personal-site",
+    "project:personal-site"
+  ]
 }

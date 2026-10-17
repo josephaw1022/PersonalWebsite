@@ -20,6 +20,10 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.6"
     }
+    datadog = {
+      source  = "DataDog/datadog"
+      version = "~> 3.71"
+    }
   }
 }
 
@@ -36,4 +40,10 @@ provider "aws" {
 
 provider "cloudflare" {
   api_token = var.cloudflare_api_token
+}
+
+provider "datadog" {
+  api_key = var.datadog_api_key
+  app_key = var.datadog_app_key
+  api_url = "https://api.${var.datadog_site}/"
 }
