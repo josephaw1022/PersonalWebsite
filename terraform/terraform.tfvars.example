@@ -11,3 +11,9 @@ create_www_record     = true
 # Route 53 Health Check & Alerts
 alert_email        = "you@example.com"
 alert_phone_number = "+12345678901" # E.164 format for SMS text alerts
+
+# Datadog AWS Account & ECS Fargate Agent Integration
+datadog_site    = "us5.datadoghq.com"
+datadog_api_key = "your-datadog-api-key"
+datadog_app_key = "your-datadog-app-key"
+
