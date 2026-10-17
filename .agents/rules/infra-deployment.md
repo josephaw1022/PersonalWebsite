@@ -8,7 +8,7 @@ description: "Infrastructure deployment guidelines distinguishing OpenShift home
 
 Deployments are divided into two distinct infrastructure environments:
 
-## OpenShift Infrastructure Agent
+## OpenShift Infrastructure
 
 Responsible for the primary homelab OpenShift cluster:
 
@@ -17,7 +17,7 @@ Responsible for the primary homelab OpenShift cluster:
 - Cluster workloads bootstrapped via `.github/workflows/bootstrap-cluster.yml`.
 - Deployments automated to dev (`personal-site-dev-envs`) via `.github/workflows/deploy-dev.yml` and production (`personal-site`) via `.github/workflows/deploy-prod.yml` using `.github/actions/deploy-workload`.
 
-## AWS Infrastructure Agent
+## AWS Infrastructure
 
 Responsible for temporary AWS ECS Fargate and Cloudflare fallback hosting:
 
