@@ -64,9 +64,45 @@ variable "task_memory" {
 }
 
 variable "desired_count" {
-  description = "Number of ECS tasks to run"
+  description = "Initial number of ECS tasks to run"
   type        = number
   default     = 1
+}
+
+variable "min_capacity" {
+  description = "Minimum number of tasks for ECS service autoscaling"
+  type        = number
+  default     = 1
+}
+
+variable "max_capacity" {
+  description = "Maximum number of tasks for ECS service autoscaling"
+  type        = number
+  default     = 5
+}
+
+variable "autoscaling_cpu_target" {
+  description = "Target average CPU utilization percentage for ECS service autoscaling"
+  type        = number
+  default     = 70.0
+}
+
+variable "autoscaling_memory_target" {
+  description = "Target average memory utilization percentage for ECS service autoscaling"
+  type        = number
+  default     = 80.0
+}
+
+variable "autoscaling_scale_out_cooldown" {
+  description = "Cooldown period in seconds after a scale-out activity"
+  type        = number
+  default     = 60
+}
+
+variable "autoscaling_scale_in_cooldown" {
+  description = "Cooldown period in seconds after a scale-in activity"
+  type        = number
+  default     = 300
 }
 
 variable "log_retention_days" {

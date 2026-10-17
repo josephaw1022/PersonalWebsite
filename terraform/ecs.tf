@@ -331,7 +331,55 @@ resource "aws_ecs_service" "personal_site" {
     assign_public_ip = true
   }
 
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
+
   depends_on = [
     cloudflare_zero_trust_tunnel_cloudflared_config.personal_site
   ]
+}
+
+resource "aws_appautoscaling_target" "personal_site" {
+  max_capacity       = var.max_capacity
+  min_capacity       = var.min_capacity
+  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.personal_site.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+resource "aws_appautoscaling_policy" "personal_site_cpu" {
+  name               = "${var.project_name}-cpu-autoscaling"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.personal_site.resource_id
+  scalable_dimension = aws_appautoscaling_target.personal_site.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.personal_site.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+
+    target_value       = var.autoscaling_cpu_target
+    scale_in_cooldown  = var.autoscaling_scale_in_cooldown
+    scale_out_cooldown = var.autoscaling_scale_out_cooldown
+  }
+}
+
+resource "aws_appautoscaling_policy" "personal_site_memory" {
+  name               = "${var.project_name}-memory-autoscaling"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.personal_site.resource_id
+  scalable_dimension = aws_appautoscaling_target.personal_site.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.personal_site.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+    }
+
+    target_value       = var.autoscaling_memory_target
+    scale_in_cooldown  = var.autoscaling_scale_in_cooldown
+    scale_out_cooldown = var.autoscaling_scale_out_cooldown
+  }
 }

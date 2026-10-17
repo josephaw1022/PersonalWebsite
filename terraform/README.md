@@ -15,15 +15,20 @@ This directory provisions a lightweight, serverless AWS ECS Fargate deployment f
    - Reduces CloudWatch log group retention to 1 day (`var.log_retention_days`) across both the ECS container log group and the Forwarder Lambda log group to minimize AWS storage costs while storing logs long-term in Datadog.
 3. **Zero Inbound Ports**:
    - The ECS security group has **no inbound rules**. All external traffic enters through Cloudflare's edge and is delivered over the outbound encrypted Cloudflare Tunnel connection.
-4. **Cloudflare Zero Trust & DNS**:
+4. **Application Auto Scaling & Multi-Replica Tunnel Routing**:
+   - Provisions AWS Application Auto Scaling (`aws_appautoscaling_target` and `aws_appautoscaling_policy`) targeting the ECS Fargate service, scaling dynamically between `min_capacity` (1) and `max_capacity` (5) tasks based on target tracking policies for CPU (70%) and Memory (80%).
+   - Because `cloudflared` runs as a sidecar container in each ECS task alongside `personal-site`, scaling the ECS service from 1 to N tasks automatically scales the active Cloudflare Tunnel connectors from 1 to N.
+   - All active `cloudflared` replicas authenticate with Cloudflare's edge using the shared tunnel token. Cloudflare's global Anycast edge automatically balances incoming traffic across all healthy connected replicas, with each replica routing directly to its co-located `personal-site` container over loopback (`http://localhost:3000`).
+   - Maintains zero inbound ports and eliminates the need for expensive AWS Application Load Balancers or NAT Gateways.
+5. **Cloudflare Zero Trust & DNS**:
    - Creates a managed Cloudflare Tunnel (`cloudflare_zero_trust_tunnel_cloudflared`).
    - Configures tunnel ingress rules routing `jwhiteaker22.com` and `www.jwhiteaker22.com` to `http://localhost:3000`.
    - Provisions proxied `CNAME` DNS records pointing `@` and `www` to `<tunnel-id>.cfargotunnel.com`.
-5. **Route 53 Health Check & Downtime Alerts**:
+6. **Route 53 Health Check & Downtime Alerts**:
    - Provisions an `HTTPS` Route 53 health check querying the public endpoint (`https://${var.domain_name}/`).
    - CloudWatch metric alarm evaluates `HealthCheckStatus < 1` in `us-east-1` (breaching if the site fails probes).
    - Triggers an AWS SNS topic configured with optional SMS text (`alert_phone_number`) and email (`alert_email`) subscriptions, notifying immediately on downtime and recovery.
-6. **S3 Remote State Backend**:
+7. **S3 Remote State Backend**:
    - Uses an encrypted S3 bucket with versioning and native S3 lockfiles (`use_lockfile = true`).
 
 ## 1. Bootstrap AWS S3 State Bucket & GitHub OIDC Role

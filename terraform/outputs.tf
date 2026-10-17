@@ -69,4 +69,20 @@ output "datadog_forwarder_lambda_arn" {
   value       = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
 }
 
+output "autoscaling_target_id" {
+  description = "Resource ID of the Application Auto Scaling target"
+  value       = aws_appautoscaling_target.personal_site.resource_id
+}
+
+output "autoscaling_min_capacity" {
+  description = "Configured minimum task capacity for autoscaling"
+  value       = aws_appautoscaling_target.personal_site.min_capacity
+}
+
+output "autoscaling_max_capacity" {
+  description = "Configured maximum task capacity for autoscaling"
+  value       = aws_appautoscaling_target.personal_site.max_capacity
+}
+
+
 
