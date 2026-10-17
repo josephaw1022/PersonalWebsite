@@ -25,7 +25,7 @@ variable "ghcr_image" {
 variable "ghcr_image_tag" {
   description = "Tag of the GHCR container image to deploy"
   type        = string
-  default     = "c950873"
+  default     = "3c60313"
 }
 
 variable "cloudflared_image" {
