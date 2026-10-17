@@ -1,4 +1,6 @@
 aws_region            = "us-east-1"
+aws_account_id        = "123456789012"
+aws_partition         = "aws"
 project_name          = "personal-site"
 ghcr_image            = "ghcr.io/josephaw1022/personalwebsite"
 ghcr_image_tag        = "latest"

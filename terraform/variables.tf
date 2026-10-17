@@ -10,6 +10,17 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
+variable "aws_account_id" {
+  description = "AWS Account ID for the Datadog AWS account integration"
+  type        = string
+}
+
+variable "aws_partition" {
+  description = "AWS partition (e.g. aws, aws-cn, aws-us-gov)"
+  type        = string
+  default     = "aws"
+}
+
 variable "vpc_cidr" {
   description = "CIDR block for the VPC"
   type        = string

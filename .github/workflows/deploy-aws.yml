@@ -35,6 +35,8 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
   TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET || secrets.TF_STATE_BUCKET }}
   TF_VAR_aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
+  TF_VAR_aws_account_id: ${{ vars.AWS_ACCOUNT_ID || secrets.AWS_ACCOUNT_ID }}
+  TF_VAR_aws_partition: ${{ vars.AWS_PARTITION || secrets.AWS_PARTITION || 'aws' }}
   TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
   TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
   TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID || vars.CLOUDFLARE_ZONE_ID }}
