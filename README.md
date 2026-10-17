@@ -15,7 +15,16 @@ A modern Next.js website containerized and hosted on a homelab OpenShift cluster
 
 ## Infrastructure Setup & Deployment
 
-### 1. Configure In-Cluster Runners (ARC)
+### Homelab OpenShift Cluster Instructions
+
+The instructions below describe how the primary homelab OpenShift cluster is provisioned and deployed.
+
+> [!NOTE]
+> **Homelab OpenShift Cluster Status: Temporarily Offline**
+>
+> The OpenShift cluster is currently down due to hardware issues, and I am not home to fix it. To keep the site up with zero downtime, I added a new workflow (`.github/workflows/build-and-push-ghcr.yaml`) to build and deploy the container image to GitHub Container Registry (GHCR), and wrote Terraform (`terraform/`) to provision AWS ECS and Cloudflare resources to deploy the site to ECS Fargate. This keeps hosting costs to a minimum for the weeks that it will be hosted on AWS until the homelab hardware can be repaired.
+
+#### 1. Configure In-Cluster Runners (ARC)
 
 Deploy the GitHub Actions Runner Controller (ARC) scale set to the cluster:
 
@@ -23,7 +32,7 @@ Deploy the GitHub Actions Runner Controller (ARC) scale set to the cluster:
 ./infra/arc-setup.sh
 ```
 
-### 2. Bootstrap Cluster Infrastructure
+#### 2. Bootstrap Cluster Infrastructure
 
 Trigger the cluster bootstrap workflow using the GitHub CLI to provision namespaces, quotas, image pull secrets, and initial Helm releases:
 
@@ -31,7 +40,7 @@ Trigger the cluster bootstrap workflow using the GitHub CLI to provision namespa
 gh workflow run bootstrap-cluster.yml
 ```
 
-### 3. Deploy to Environments
+#### 3. Deploy to Environments
 
 Deploy application releases to development or production using Helm workflows:
 
@@ -41,6 +50,18 @@ gh workflow run deploy-dev.yml
 
 # Deploy to Production (personal-site)
 gh workflow run deploy-prod.yml
+```
+
+### AWS ECS & Cloudflare Fallback Deployment
+
+While the homelab cluster is offline, deployments are managed through AWS ECS and Cloudflare:
+
+```bash
+# 1. Bootstrap AWS S3 state bucket and GitHub OIDC role (one-time)
+./infra/aws-setup.sh
+
+# 2. Deploy infrastructure and ECS tasks
+gh workflow run deploy-aws.yml -f action=apply
 ```
 
 ---
