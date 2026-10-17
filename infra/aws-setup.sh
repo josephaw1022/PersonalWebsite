@@ -423,29 +423,30 @@ PERMISSIONS_POLICY="$(cat <<EOF
       "Sid": "DatadogForwarderS3Access",
       "Effect": "Allow",
       "Action": [
-        "s3:CreateBucket",
-        "s3:DeleteBucket",
-        "s3:ListBucket",
-        "s3:GetBucketLocation",
-        "s3:GetBucketPolicy",
-        "s3:PutBucketPolicy",
-        "s3:DeleteBucketPolicy",
-        "s3:GetBucketVersioning",
-        "s3:PutBucketVersioning",
-        "s3:GetBucketPublicAccessBlock",
-        "s3:PutBucketPublicAccessBlock",
-        "s3:GetLifecycleConfiguration",
-        "s3:PutLifecycleConfiguration",
-        "s3:GetEncryptionConfiguration",
-        "s3:PutEncryptionConfiguration",
-        "s3:GetObject",
-        "s3:PutObject",
-        "s3:DeleteObject"
+        "s3:*"
       ],
       "Resource": [
         "arn:aws:s3:::*datadog*",
-        "arn:aws:s3:::*forwarder*"
+        "arn:aws:s3:::*datadog*/*",
+        "arn:aws:s3:::*forwarder*",
+        "arn:aws:s3:::*forwarder*/*",
+        "arn:aws:s3:::*personal-site*",
+        "arn:aws:s3:::*personal-site*/*"
       ]
+    },
+    {
+      "Sid": "SchedulerManagement",
+      "Effect": "Allow",
+      "Action": [
+        "scheduler:CreateSchedule",
+        "scheduler:DeleteSchedule",
+        "scheduler:GetSchedule",
+        "scheduler:UpdateSchedule",
+        "scheduler:TagResource",
+        "scheduler:UntagResource",
+        "scheduler:ListTagsForResource"
+      ],
+      "Resource": "*"
     },
     {
       "Sid": "SSMParameterStoreManagement",
@@ -490,13 +491,20 @@ PERMISSIONS_POLICY="$(cat <<EOF
         "iam:CreatePolicyVersion",
         "iam:DeletePolicyVersion",
         "iam:TagPolicy",
-        "iam:UntagPolicy"
+        "iam:UntagPolicy",
+        "iam:UpdateRoleDescription"
       ],
       "Resource": [
         "arn:aws:iam::${AWS_ACCOUNT_ID}:role/*personal-site*",
         "arn:aws:iam::${AWS_ACCOUNT_ID}:role/*Datadog*",
+        "arn:aws:iam::${AWS_ACCOUNT_ID}:role/*datadog*",
+        "arn:aws:iam::${AWS_ACCOUNT_ID}:role/*Forwarder*",
+        "arn:aws:iam::${AWS_ACCOUNT_ID}:role/*forwarder*",
         "arn:aws:iam::${AWS_ACCOUNT_ID}:policy/*personal-site*",
-        "arn:aws:iam::${AWS_ACCOUNT_ID}:policy/*Datadog*"
+        "arn:aws:iam::${AWS_ACCOUNT_ID}:policy/*Datadog*",
+        "arn:aws:iam::${AWS_ACCOUNT_ID}:policy/*datadog*",
+        "arn:aws:iam::${AWS_ACCOUNT_ID}:policy/*Forwarder*",
+        "arn:aws:iam::${AWS_ACCOUNT_ID}:policy/*forwarder*"
       ]
     },
     {
