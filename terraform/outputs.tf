@@ -48,14 +48,14 @@ output "datadog_integration_role_arn" {
   value       = aws_iam_role.datadog_aws_integration.arn
 }
 
-output "datadog_integration_policy_arn" {
-  description = "ARN of the Datadog AWS integration IAM policy"
-  value       = aws_iam_policy.datadog_aws_integration.arn
+output "datadog_integration_policy_arns" {
+  description = "ARNs of the chunked Datadog AWS integration IAM policies"
+  value       = aws_iam_policy.datadog_aws_integration[*].arn
 }
 
 output "datadog_external_id" {
   description = "External ID that Datadog uses when assuming the AWS integration role"
-  value       = datadog_integration_aws_account.main.auth_config.aws_auth_config_role.external_id
+  value       = datadog_integration_aws_account.datadog_integration.auth_config.aws_auth_config_role.external_id
   sensitive   = true
 }
 
