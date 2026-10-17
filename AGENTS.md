@@ -1,10 +1,16 @@
 # Personal Website
 
 This repository contains a modern, multi-page Next.js App Router application.
-It is containerized using a multi-stage Node.js build (Next.js standalone) and hosted on a homelab OpenShift cluster.
-Secure external access is provided via a Cloudflare Tunnel.
+It is containerized using a multi-stage Node.js build (Next.js standalone).
 
-**Deployment**:
+> [!NOTE]
+> **Temporary Hosting on AWS**:
+> The site is currently hosted on AWS ECS Fargate with Cloudflare Zero Trust Tunnel routing for the time being until the homelab OpenShift cluster is brought back up (the homelab cluster is temporarily offline due to hardware issues).
+>
+> - Container images are built and pushed to GitHub Container Registry (GHCR) via `.github/workflows/build-and-push-ghcr.yaml`.
+> - Cloud infrastructure and tunnel routing are managed via Terraform in `terraform/`, bootstrapped via `./infra/aws-setup.sh`, and deployed via `.github/workflows/deploy-aws.yml`.
+
+**Deployment (Homelab OpenShift - Primary)**:
 CI/CD runners on the cluster are configured via `./infra/arc-setup.sh`. Initial cluster workloads (deployment, service, image pull secret, dev ingress, pdb) are packaged via Helm (`charts/personal-site`) and bootstrapped via the GitHub Actions `Cluster Infrastructure - Bootstrap` workflow (`.github/workflows/bootstrap-cluster.yml`). Ongoing deployments to the dev environment (`personal-site-dev-envs`) are automated via `.github/workflows/deploy-dev.yml`, and production deployments (`personal-site`) are triggered via `.github/workflows/deploy-prod.yml`. Helm chart unit tests are executed using `helm-unittest`.
 
 **Development**:
