@@ -16,6 +16,11 @@ tasks:
     cmds:
       - npm run dev
 
+  build:
+    desc: Build Next.js production bundle
+    cmds:
+      - npm run build
+
   test:
     desc: Run Jest unit tests
     cmds:
@@ -42,6 +47,11 @@ tasks:
     cmds:
       - npm run lint
 
+  lint:fix:
+    desc: Run ESLint with automatic fixes
+    cmds:
+      - npx eslint --fix
+
   format:
     desc: Format codebase with Prettier
     cmds:
@@ -51,6 +61,48 @@ tasks:
     desc: Check formatting with Prettier
     cmds:
       - npm run format:check
+
+  format:all:
+    desc: Format both codebase with Prettier and Terraform configurations
+    cmds:
+      - npm run format
+      - task: tf:fmt
+
+  tf:fmt:
+    desc: Format Terraform configuration files
+    dir: terraform
+    cmds:
+      - terraform fmt
+
+  tf:fmt:check:
+    desc: Check Terraform configuration formatting
+    dir: terraform
+    cmds:
+      - terraform fmt -check
+
+  tf:init:
+    desc: Initialize Terraform providers and backend (backend-less for local validation)
+    dir: terraform
+    cmds:
+      - terraform init -backend=false
+
+  tf:validate:
+    desc: Validate Terraform configuration syntax and integrity
+    dir: terraform
+    cmds:
+      - terraform validate
+
+  tf:plan:
+    desc: Generate and show a Terraform execution plan
+    dir: terraform
+    cmds:
+      - terraform plan
+
+  tf:check:
+    desc: Check Terraform formatting and validate configuration
+    cmds:
+      - task: tf:fmt:check
+      - task: tf:validate
 
   test:helm:
     desc: Run Helm unit tests using helm-unittest
@@ -67,15 +119,30 @@ tasks:
     cmds:
       - helm unittest charts/personal-site
 
+  pr:check:
+    desc: Run essential pre-PR checks (format check, lint, unit tests, Next.js build, and Terraform validate)
+    cmds:
+      - npm run format:check
+      - npm run lint
+      - npm run test
+      - npm run build
+      - task: tf:check
+
   check:
-    desc: Run all quality checks (formatting check, lint, unit tests, Helm unit tests, and E2E tests)
+    desc: Run all quality checks (formatting check, lint, unit tests, Helm unit tests, Terraform validation, and E2E tests)
     cmds:
       - npm run format:check
       - npm run lint
       - npm run test
       - helm lint charts/personal-site
       - helm unittest charts/personal-site
+      - task: tf:check
       - npm run test:e2e
+
+  clean:
+    desc: Clean build artifacts and temporary test output
+    cmds:
+      - rm -rf .next coverage test-results playwright-report
 
   build-container:
     desc: Build the Next.js production container image using Podman
