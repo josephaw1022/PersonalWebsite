@@ -30,6 +30,6 @@
       ]
     }
   },
-  "postCreateCommand": "npm install && (helm plugin install https://github.com/helm-unittest/helm-unittest.git || true)",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
   "forwardPorts": [3000]
 }
