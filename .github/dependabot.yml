@@ -14,6 +14,9 @@ updates:
       - "dependencies"
       - "javascript"
     open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
