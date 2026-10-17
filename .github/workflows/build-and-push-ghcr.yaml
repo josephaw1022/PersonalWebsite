@@ -1,0 +1,81 @@
+name: Container Image - Build & Push (GHCR)
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "package.json"
+      - "package-lock.json"
+      - "next.config.ts"
+      - "tsconfig.json"
+      - "postcss.config.mjs"
+      - "Containerfile"
+      - ".github/workflows/build-and-push-ghcr.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    name: Build & Push Container Image to GHCR
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.build-push.outputs.tag }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Restore Next.js Build Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: Build Next.js Application
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build and Push Image
+        id: build-push
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE="ghcr.io/${OWNER}/personalwebsite"
+          SHA="${{ github.sha }}"
+          SHORT_SHA="${SHA:0:7}"
+
+          podman build -f Containerfile \
+            --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
+            -t "${IMAGE}:${SHORT_SHA}" \
+            -t "${IMAGE}:${SHA}" .
+
+          if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
+            podman tag "${IMAGE}:${SHORT_SHA}" "${IMAGE}:latest"
+          fi
+
+          podman push "${IMAGE}:${SHORT_SHA}"
+          podman push "${IMAGE}:${SHA}"
+          if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
+            podman push "${IMAGE}:latest"
+          fi
+
+          echo "tag=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
