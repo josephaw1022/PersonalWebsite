@@ -33,7 +33,7 @@ export default function RootLayout({
       className={`${inter.variable} ${firaCode.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground selection:bg-emerald-500/30">
+      <body className="min-h-screen flex flex-col bg-background text-foreground selection:bg-emerald-500/30">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -53,7 +53,9 @@ export default function RootLayout({
 
           <Header />
 
-          <main className="flex-grow z-10 relative">{children}</main>
+          <main className="flex-grow flex flex-col z-10 relative">
+            {children}
+          </main>
 
           <Footer />
         </ThemeProvider>

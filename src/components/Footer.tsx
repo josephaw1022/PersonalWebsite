@@ -2,7 +2,7 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-zinc-200 dark:border-zinc-800 mt-20 py-8 z-10 bg-zinc-100/50 dark:bg-zinc-950/50 backdrop-blur-sm transition-colors">
+    <footer className="border-t border-zinc-200 dark:border-zinc-800 mt-auto py-5 sm:py-6 z-10 bg-zinc-100/50 dark:bg-zinc-950/50 backdrop-blur-sm transition-colors">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="font-mono text-sm text-zinc-600 dark:text-zinc-400">
           {year} © Joseph Whiteaker

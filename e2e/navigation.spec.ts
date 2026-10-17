@@ -56,4 +56,15 @@ test.describe("Site Navigation", () => {
     await page.click("text=./view_homelab.sh");
     await expect(page).toHaveURL(/.*\/homelab/);
   });
+
+  test("footer is visible within viewport on desktop without scrolling", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    const footer = page.locator("footer");
+    await expect(footer).toBeInViewport();
+  });
 });
