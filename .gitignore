@@ -28,6 +28,8 @@
 .DS_Store
 *.pem
 pr-body.md
+pr-body.txt
+pr_body.txt
 
 # debug
 npm-debug.log*
