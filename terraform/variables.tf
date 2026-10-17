@@ -70,10 +70,11 @@ variable "desired_count" {
 }
 
 variable "log_retention_days" {
-  description = "CloudWatch log retention in days"
+  description = "CloudWatch log retention in days (reduced to 1 day to minimize AWS storage costs as logs are forwarded to Datadog for long-term retention)"
   type        = number
-  default     = 14
+  default     = 1
 }
+
 
 variable "cloudflare_api_token" {
   description = "Cloudflare API token with Cloudflare Tunnel:Edit and DNS:Edit permissions (can also be set via CLOUDFLARE_API_TOKEN env var)"
@@ -179,3 +180,10 @@ variable "datadog_account_tags" {
     "project:personal-site"
   ]
 }
+
+variable "datadog_forwarder_template_url" {
+  description = "S3 URL of the official Datadog Forwarder CloudFormation template"
+  type        = string
+  default     = "https://datadog-cloudformation-template.s3.amazonaws.com/aws/forwarder/latest.yaml"
+}
+

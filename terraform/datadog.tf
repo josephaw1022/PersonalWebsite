@@ -81,6 +81,21 @@ resource "aws_iam_role_policy_attachment" "datadog_aws_integration_security_audi
   policy_arn = "arn:${var.aws_partition}:iam::aws:policy/SecurityAudit"
 }
 
+resource "aws_cloudformation_stack" "datadog_forwarder" {
+  name             = "${var.project_name}-datadog-forwarder"
+  template_url     = var.datadog_forwarder_template_url
+  capabilities     = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
+  disable_rollback = false
+
+  parameters = {
+    DdApiKey           = var.datadog_api_key
+    DdSite             = var.datadog_site
+    FunctionName       = "${var.project_name}-datadog-forwarder"
+    LogRetentionInDays = var.log_retention_days
+    DdTags             = join(",", var.datadog_account_tags)
+  }
+}
+
 resource "datadog_integration_aws_account" "datadog_integration" {
   account_tags   = var.datadog_account_tags
   aws_account_id = var.aws_account_id
@@ -106,7 +121,11 @@ resource "datadog_integration_aws_account" "datadog_integration" {
   }
 
   logs_config {
-    lambda_forwarder {}
+    lambda_forwarder {
+      lambdas = [
+        aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
+      ]
+    }
   }
 
   metrics_config {
