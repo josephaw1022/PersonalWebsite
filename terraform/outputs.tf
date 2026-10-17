@@ -84,5 +84,21 @@ output "autoscaling_max_capacity" {
   value       = aws_appautoscaling_target.personal_site.max_capacity
 }
 
+output "cloudwatch_container_insights_log_group" {
+  description = "CloudWatch Log Group for ECS cluster container insights"
+  value       = aws_cloudwatch_log_group.ecs_container_insights.name
+}
+
+output "ecs_task_events_rule_arn" {
+  description = "ARN of the EventBridge rule routing ECS task state changes to Datadog Forwarder"
+  value       = aws_cloudwatch_event_rule.ecs_task_events.arn
+}
+
+output "site_health_alarm_rule_arn" {
+  description = "ARN of the EventBridge rule routing Route 53 health check alarm state changes to Datadog Forwarder"
+  value       = aws_cloudwatch_event_rule.site_health_alarm_events.arn
+}
+
+
 
 
