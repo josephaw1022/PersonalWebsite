@@ -78,6 +78,15 @@ jobs:
         if: ${{ inputs.image_tag != '' }}
         run: echo "TF_VAR_ghcr_image_tag=${{ inputs.image_tag }}" >> "$GITHUB_ENV"
 
+      - name: Set Alert Configuration Overrides
+        run: |
+          if [[ -n "${{ vars.ALERT_EMAIL || secrets.ALERT_EMAIL }}" ]]; then
+            echo "TF_VAR_alert_email=${{ vars.ALERT_EMAIL || secrets.ALERT_EMAIL }}" >> "$GITHUB_ENV"
+          fi
+          if [[ -n "${{ vars.ALERT_PHONE_NUMBER || secrets.ALERT_PHONE_NUMBER }}" ]]; then
+            echo "TF_VAR_alert_phone_number=${{ vars.ALERT_PHONE_NUMBER || secrets.ALERT_PHONE_NUMBER }}" >> "$GITHUB_ENV"
+          fi
+
       - name: Terraform Plan
         if: ${{ github.event.inputs.action != 'destroy' }}
         run: terraform plan -input=false -out=tfplan

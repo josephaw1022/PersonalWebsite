@@ -7,3 +7,7 @@ cloudflare_zone_id    = "your-cloudflare-zone-id"
 cloudflare_api_token  = "your-cloudflare-api-token"
 domain_name           = "jwhiteaker22.com"
 create_www_record     = true
+
+# Route 53 Health Check & Alerts
+alert_email        = "you@example.com"
+alert_phone_number = "+12345678901" # E.164 format for SMS text alerts
