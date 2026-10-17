@@ -36,6 +36,11 @@ tasks:
     cmds:
       - npm run test:e2e
 
+  playwright:install:
+    desc: Install Playwright browser binaries
+    cmds:
+      - npx playwright install chromium
+
   test:all:
     desc: Run all unit and E2E tests
     cmds:
