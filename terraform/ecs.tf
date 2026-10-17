@@ -16,7 +16,7 @@ resource "aws_ssm_parameter" "cloudflared_tunnel_token" {
   name        = "/${var.project_name}/cloudflared/tunnel-token"
   description = "Cloudflare Zero Trust Tunnel token for ${var.project_name}"
   type        = "SecureString"
-  value       = cloudflare_zero_trust_tunnel_cloudflared.personal_site.tunnel_token
+  value       = data.cloudflare_zero_trust_tunnel_cloudflared_token.personal_site.token
 }
 
 data "aws_iam_policy_document" "ecs_task_assume_role" {
