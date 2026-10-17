@@ -103,6 +103,10 @@ resource "aws_ecs_task_definition" "personal_site" {
         retries     = 3
         startPeriod = 15
       }
+      restartPolicy = {
+        enabled              = true
+        restartAttemptPeriod = 300
+      }
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -118,6 +122,8 @@ resource "aws_ecs_task_definition" "personal_site" {
       essential = true
       command = [
         "tunnel",
+        "--metrics",
+        "127.0.0.1:2000",
         "--no-autoupdate",
         "run"
       ]
@@ -133,6 +139,24 @@ resource "aws_ecs_task_definition" "personal_site" {
           condition     = "HEALTHY"
         }
       ]
+      healthCheck = {
+        command = [
+          "CMD",
+          "cloudflared",
+          "tunnel",
+          "--metrics",
+          "127.0.0.1:2000",
+          "ready"
+        ]
+        interval    = 15
+        timeout     = 5
+        retries     = 3
+        startPeriod = 15
+      }
+      restartPolicy = {
+        enabled              = true
+        restartAttemptPeriod = 300
+      }
       logConfiguration = {
         logDriver = "awslogs"
         options = {
