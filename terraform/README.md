@@ -9,7 +9,7 @@ This directory provisions a lightweight, serverless AWS ECS Fargate deployment f
    - **`cloudflared` sidecar container**: Waits for the `personal-site` health check to pass, authenticates using the tunnel token stored in AWS SSM Parameter Store (`SecureString`), and proxies incoming Cloudflare Tunnel requests directly to `http://localhost:3000` while exposing Prometheus metrics on `127.0.0.1:2000/metrics`.
    - **`datadog-agent` sidecar container**: Runs the Datadog Agent in ECS Fargate mode (`ECS_FARGATE=true`), authenticates using `DD_API_KEY` from AWS SSM Parameter Store (`SecureString`), and monitors both `personal-site` (via `http_check` autodiscovery) and `cloudflared` (via `openmetrics` autodiscovery on `http://127.0.0.1:2000/metrics`).
 2. **Datadog AWS Account Integration**:
-   - Provisions `datadog_integration_aws_account` along with the `DatadogIntegrationRole` IAM role, `DatadogAWSIntegrationPolicy`, and AWS `SecurityAudit` managed policy attachment for full account-level cloud observability and CSPM.
+   - Provisions `datadog_integration_aws_account` along with the `DatadogIntegrationRole` IAM role, dynamically chunked `DatadogAWSIntegrationPolicy-*` policies (sourced from `datadog_integration_aws_iam_permissions`), and AWS `SecurityAudit` managed policy attachment for full account-level cloud observability and CSPM.
 3. **Zero Inbound Ports**:
    - The ECS security group has **no inbound rules**. All external traffic enters through Cloudflare's edge and is delivered over the outbound encrypted Cloudflare Tunnel connection.
 4. **Cloudflare Zero Trust & DNS**:
