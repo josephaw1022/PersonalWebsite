@@ -23,10 +23,16 @@ resource "aws_cloudwatch_log_subscription_filter" "ecs_datadog_forwarder" {
   ]
 }
 
+import {
+  to = aws_cloudwatch_log_group.ecs_container_insights
+  id = "/aws/ecs/containerinsights/${var.project_name}-cluster/performance"
+}
+
 resource "aws_cloudwatch_log_group" "ecs_container_insights" {
   name              = "/aws/ecs/containerinsights/${var.project_name}-cluster/performance"
   retention_in_days = var.log_retention_days
 }
+
 
 resource "aws_lambda_permission" "ecs_container_insights_datadog_forwarder" {
   statement_id  = "AllowCloudWatchLogs-${var.project_name}-container-insights"
