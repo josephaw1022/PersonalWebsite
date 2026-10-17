@@ -71,15 +71,22 @@ find_env_file() {
 load_env_file() {
   local target_env
   target_env="$(find_env_file)"
-  if [[ ! -f "${target_env}" ]]; then
-    return 0
+  if [[ -f "${target_env}" ]]; then
+    echo "==> Loading defaults from ${target_env}..."
+    set -a
+    # shellcheck disable=SC1090
+    source "${target_env}"
+    set +a
   fi
 
-  echo "==> Loading defaults from ${target_env}..."
-  set -a
-  # shellcheck disable=SC1090
-  source "${target_env}"
-  set +a
+  # Fall back to ~/.bashrc.d/flarectl-config.sh for Cloudflare credentials if not set
+  if [[ -z "${CLOUDFLARE_API_TOKEN:-}" && -z "${CF_API_TOKEN:-}" && -f "${HOME}/.bashrc.d/flarectl-config.sh" ]]; then
+    echo "==> Loading Cloudflare credentials from ~/.bashrc.d/flarectl-config.sh..."
+    set -a
+    # shellcheck disable=SC1090
+    source "${HOME}/.bashrc.d/flarectl-config.sh"
+    set +a
+  fi
 }
 
 # Pre-parse --env-file before loading env
@@ -98,9 +105,9 @@ AWS_ROLE_NAME="${AWS_ROLE_NAME:-personal-site-github-actions-terraform}"
 AWS_POLICY_NAME="${AWS_POLICY_NAME:-personal-site-terraform-deployer-policy}"
 GITHUB_REPO="${GITHUB_REPO:-josephaw1022/PersonalWebsite}"
 DOMAIN_NAME="${DOMAIN_NAME:-jwhiteaker22.com}"
-CLOUDFLARE_ACCOUNT_ID="${CLOUDFLARE_ACCOUNT_ID:-}"
+CLOUDFLARE_ACCOUNT_ID="${CLOUDFLARE_ACCOUNT_ID:-${CF_ACCOUNT_ID:-}}"
 CLOUDFLARE_ZONE_ID="${CLOUDFLARE_ZONE_ID:-}"
-CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN:-}"
+CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN:-${CF_API_TOKEN:-}}"
 ALERT_EMAIL="${ALERT_EMAIL:-}"
 ALERT_PHONE_NUMBER="${ALERT_PHONE_NUMBER:-}"
 SKIP_GH_CONFIG="false"
@@ -443,6 +450,30 @@ aws iam put-role-policy \
   --role-name "${AWS_ROLE_NAME}" \
   --policy-name "${AWS_POLICY_NAME}" \
   --policy-document "${PERMISSIONS_POLICY}"
+
+# Validate Cloudflare API token before discovery or syncing
+if [[ -n "${CLOUDFLARE_API_TOKEN}" ]] && command -v curl &>/dev/null; then
+  echo "==> Validating Cloudflare API token..."
+  TOKEN_VERIFY_RESP=""
+  if [[ -n "${CLOUDFLARE_ACCOUNT_ID}" ]]; then
+    TOKEN_VERIFY_RESP="$(curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/tokens/verify" \
+      -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" || true)"
+  fi
+
+  if [[ -z "${TOKEN_VERIFY_RESP}" ]] || ! echo "${TOKEN_VERIFY_RESP}" | grep -q '"success":true'; then
+    TOKEN_VERIFY_RESP="$(curl -s -X GET "https://api.cloudflare.com/client/v4/user/tokens/verify" \
+      -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" || true)"
+  fi
+
+  if ! echo "${TOKEN_VERIFY_RESP}" | grep -q '"success":true'; then
+    echo "Error: Cloudflare API token validation failed. The provided token is invalid or expired." >&2
+    if [[ -n "${TOKEN_VERIFY_RESP}" ]]; then
+      echo "Cloudflare API response: ${TOKEN_VERIFY_RESP}" >&2
+    fi
+    exit 1
+  fi
+  echo "    Cloudflare API token is valid."
+fi
 
 # Auto-discover Cloudflare Zone ID if token is provided and zone ID is omitted
 if [[ -n "${CLOUDFLARE_API_TOKEN}" && -z "${CLOUDFLARE_ZONE_ID}" ]] && command -v curl &>/dev/null && command -v jq &>/dev/null; then
