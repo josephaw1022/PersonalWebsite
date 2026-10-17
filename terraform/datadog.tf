@@ -96,6 +96,27 @@ resource "aws_cloudformation_stack" "datadog_forwarder" {
   }
 }
 
+resource "aws_lambda_permission" "forwarder_logs_datadog_forwarder" {
+  statement_id  = "AllowCloudWatchLogs-${var.project_name}-forwarder-logs"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
+  principal     = "logs.${var.aws_region}.amazonaws.com"
+  source_arn    = "arn:${var.aws_partition}:logs:${var.aws_region}:${var.aws_account_id}:log-group:/aws/lambda/${var.project_name}-datadog-forwarder:*"
+}
+
+resource "aws_cloudwatch_log_subscription_filter" "forwarder_datadog_forwarder" {
+  name            = "${var.project_name}-forwarder-datadog-logs"
+  log_group_name  = "/aws/lambda/${var.project_name}-datadog-forwarder"
+  filter_pattern  = "?\"ERROR\" ?\"WARN\" ?\"Error\" ?\"Exception\""
+  destination_arn = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
+
+  depends_on = [
+    aws_cloudformation_stack.datadog_forwarder,
+    aws_lambda_permission.forwarder_logs_datadog_forwarder
+  ]
+}
+
+
 resource "datadog_integration_aws_account" "datadog_integration" {
   account_tags   = var.datadog_account_tags
   aws_account_id = var.aws_account_id
@@ -125,8 +146,10 @@ resource "datadog_integration_aws_account" "datadog_integration" {
       lambdas = [
         aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
       ]
+      sources = ["s3", "cloudwatch", "lambda", "ecs"]
     }
   }
+
 
   metrics_config {
     namespace_filters {}
