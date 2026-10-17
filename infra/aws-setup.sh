@@ -381,6 +381,7 @@ PERMISSIONS_POLICY="$(cat <<EOF
         "iam:DeleteRole",
         "iam:GetRole",
         "iam:UpdateRole",
+        "iam:UpdateRoleDescription",
         "iam:UpdateAssumeRolePolicy",
         "iam:TagRole",
         "iam:UntagRole",
