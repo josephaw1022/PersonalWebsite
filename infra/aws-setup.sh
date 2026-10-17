@@ -13,12 +13,14 @@ Bootstraps the AWS S3 Terraform state bucket, GitHub Actions OIDC identity provi
 IAM Role, and least-privilege IAM Policy required by the AWS Terraform deployment workflow.
 
 Options:
+  --profile <AWS_PROFILE>               AWS CLI profile to use (e.g., personal-site)
   --region <AWS_REGION>                 AWS region (default: us-east-1 or AWS_REGION from .env)
   --bucket <TF_STATE_BUCKET>            S3 bucket name for Terraform state (default: personal-site-tfstate-<ACCOUNT_ID>)
   --role-name <AWS_ROLE_NAME>           IAM role name for GitHub Actions OIDC (default: personal-site-github-actions-terraform)
   --repo <OWNER/REPO>                   GitHub repository slug (default: josephaw1022/PersonalWebsite)
-  --cloudflare-account-id <ACCOUNT_ID>  Optional: sync CLOUDFLARE_ACCOUNT_ID to GitHub repository variables/secrets
-  --cloudflare-zone-id <ZONE_ID>        Optional: sync CLOUDFLARE_ZONE_ID to GitHub repository variables/secrets
+  --domain <DOMAIN_NAME>                Domain name in Cloudflare for auto-discovering Zone ID (default: jwhiteaker22.com)
+  --cloudflare-account-id <ACCOUNT_ID>  Optional: sync CLOUDFLARE_ACCOUNT_ID to GitHub repository secrets
+  --cloudflare-zone-id <ZONE_ID>        Optional: sync CLOUDFLARE_ZONE_ID to GitHub repository secrets (auto-detected if token is given)
   --cloudflare-api-token <API_TOKEN>    Optional: sync CLOUDFLARE_API_TOKEN to GitHub repository secrets
   --skip-gh-config                      Do not set GitHub repository variables/secrets via gh CLI
   -h, --help                            Show this help message
@@ -40,11 +42,13 @@ load_env_file() {
 
 load_env_file
 
+AWS_PROFILE_ARG="${AWS_PROFILE:-}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
 TF_STATE_BUCKET="${TF_STATE_BUCKET:-}"
 AWS_ROLE_NAME="${AWS_ROLE_NAME:-personal-site-github-actions-terraform}"
 AWS_POLICY_NAME="${AWS_POLICY_NAME:-personal-site-terraform-deployer-policy}"
 GITHUB_REPO="${GITHUB_REPO:-josephaw1022/PersonalWebsite}"
+DOMAIN_NAME="${DOMAIN_NAME:-jwhiteaker22.com}"
 CLOUDFLARE_ACCOUNT_ID="${CLOUDFLARE_ACCOUNT_ID:-}"
 CLOUDFLARE_ZONE_ID="${CLOUDFLARE_ZONE_ID:-}"
 CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN:-}"
@@ -52,10 +56,12 @@ SKIP_GH_CONFIG="false"
 
 while [[ "$#" -gt 0 ]]; do
   case "$1" in
+    --profile) AWS_PROFILE_ARG="$2"; shift ;;
     --region) AWS_REGION="$2"; shift ;;
     --bucket) TF_STATE_BUCKET="$2"; shift ;;
     --role-name) AWS_ROLE_NAME="$2"; shift ;;
     --repo) GITHUB_REPO="$2"; shift ;;
+    --domain) DOMAIN_NAME="$2"; shift ;;
     --cloudflare-account-id) CLOUDFLARE_ACCOUNT_ID="$2"; shift ;;
     --cloudflare-zone-id) CLOUDFLARE_ZONE_ID="$2"; shift ;;
     --cloudflare-api-token) CLOUDFLARE_API_TOKEN="$2"; shift ;;
@@ -66,12 +72,16 @@ while [[ "$#" -gt 0 ]]; do
   shift
 done
 
+if [[ -n "${AWS_PROFILE_ARG}" ]]; then
+  export AWS_PROFILE="${AWS_PROFILE_ARG}"
+fi
+
 if ! command -v aws &>/dev/null; then
   echo "Error: 'aws' CLI is required but not installed." >&2
   exit 1
 fi
 
-echo "==> Verifying AWS credentials..."
+echo "==> Verifying AWS credentials${AWS_PROFILE:+ (profile: ${AWS_PROFILE})}..."
 AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
 echo "    AWS Account ID: ${AWS_ACCOUNT_ID}"
 echo "    AWS Region:     ${AWS_REGION}"
@@ -333,6 +343,16 @@ aws iam put-role-policy \
   --policy-name "${AWS_POLICY_NAME}" \
   --policy-document "${PERMISSIONS_POLICY}"
 
+# Auto-discover Cloudflare Zone ID if token is provided and zone ID is omitted
+if [[ -n "${CLOUDFLARE_API_TOKEN}" && -z "${CLOUDFLARE_ZONE_ID}" ]] && command -v curl &>/dev/null && command -v jq &>/dev/null; then
+  echo "==> Discovering Cloudflare Zone ID for '${DOMAIN_NAME}'..."
+  CLOUDFLARE_ZONE_ID="$(curl -fsSL "https://api.cloudflare.com/client/v4/zones?name=${DOMAIN_NAME}" \
+    -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" | jq -r '.result[0].id // empty')"
+  if [[ -n "${CLOUDFLARE_ZONE_ID}" ]]; then
+    echo "    Found Cloudflare Zone ID: ${CLOUDFLARE_ZONE_ID}"
+  fi
+fi
+
 # 5. Optionally configure GitHub variables/secrets if gh CLI is available
 if [[ "${SKIP_GH_CONFIG}" == "false" ]] && command -v gh &>/dev/null; then
   if gh auth status >/dev/null 2>&1; then
@@ -362,9 +382,7 @@ echo "==========================================================================
 echo "S3 State Bucket : ${TF_STATE_BUCKET}"
 echo "AWS Region      : ${AWS_REGION}"
 echo "IAM Role ARN    : ${AWS_ROLE_ARN}"
-echo ""
-echo "Ensure the following secrets are configured in ${GITHUB_REPO}:"
-echo "  - CLOUDFLARE_API_TOKEN"
-echo "  - CLOUDFLARE_ACCOUNT_ID"
-echo "  - CLOUDFLARE_ZONE_ID"
+if [[ -n "${CLOUDFLARE_ZONE_ID}" ]]; then
+  echo "CF Zone ID      : ${CLOUDFLARE_ZONE_ID} (${DOMAIN_NAME})"
+fi
 echo "================================================================================"
