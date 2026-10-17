@@ -13,6 +13,7 @@ import {
   Globe,
   Share2,
   FolderGit2,
+  Cloud,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -160,6 +161,15 @@ const linkSections: LinkSection[] = [
         badge: "route: /homelab",
         isExternal: false,
         icon: Server,
+      },
+      {
+        title: "Cloud Infrastructure",
+        description:
+          "Temporary cloud fallback architecture on AWS ECS Fargate with Cloudflare Tunnels and Datadog monitoring.",
+        href: "/cloud",
+        badge: "route: /cloud",
+        isExternal: false,
+        icon: Cloud,
       },
     ],
   },

@@ -28,6 +28,13 @@ test.describe("Site Navigation", () => {
       "Enterprise Homelab Infrastructure",
     );
 
+    // Click on Cloud navigation link
+    await page.click("nav >> text=Cloud");
+    await expect(page).toHaveURL(/.*\/cloud/);
+    await expect(page.locator("h1")).toContainText(
+      "Cloud Infrastructure & Temporary Hosting",
+    );
+
     // Click on Links navigation link
     await page.click("nav >> text=Links");
     await expect(page).toHaveURL(/.*\/links/);
