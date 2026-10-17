@@ -1,0 +1,38 @@
+version: "3"
+
+tasks:
+  default:
+    silent: true
+    cmds:
+      - task --list-all
+
+  fmt:
+    desc: Format Terraform configuration files
+    cmds:
+      - terraform fmt
+
+  fmt:check:
+    desc: Check Terraform configuration formatting
+    cmds:
+      - terraform fmt -check
+
+  init:
+    desc: Initialize Terraform providers and backend (backend-less for local validation)
+    cmds:
+      - terraform init -backend=false
+
+  validate:
+    desc: Validate Terraform configuration syntax and integrity
+    cmds:
+      - terraform validate
+
+  plan:
+    desc: Generate and show a Terraform execution plan
+    cmds:
+      - terraform plan
+
+  check:
+    desc: Check Terraform formatting and validate configuration
+    cmds:
+      - task: fmt:check
+      - task: validate

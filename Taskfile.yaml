@@ -5,6 +5,11 @@ vars:
   CONTAINER_NAME: personal-site-dev
   PORT: "3000"
 
+includes:
+  tf:
+    taskfile: ./terraform/Taskfile.yaml
+    dir: ./terraform
+
 tasks:
   default:
     silent: true
@@ -15,6 +20,11 @@ tasks:
     desc: Run Next.js local development server
     cmds:
       - npm run dev
+
+  build:
+    desc: Build Next.js production bundle
+    cmds:
+      - npm run build
 
   test:
     desc: Run Jest unit tests
@@ -42,6 +52,11 @@ tasks:
     cmds:
       - npm run lint
 
+  lint:fix:
+    desc: Run ESLint with automatic fixes
+    cmds:
+      - npx eslint --fix
+
   format:
     desc: Format codebase with Prettier
     cmds:
@@ -51,6 +66,12 @@ tasks:
     desc: Check formatting with Prettier
     cmds:
       - npm run format:check
+
+  format:all:
+    desc: Format both codebase with Prettier and Terraform configurations
+    cmds:
+      - npm run format
+      - task: tf:fmt
 
   test:helm:
     desc: Run Helm unit tests using helm-unittest
@@ -67,15 +88,30 @@ tasks:
     cmds:
       - helm unittest charts/personal-site
 
+  pr:check:
+    desc: Run essential pre-PR checks (format check, lint, unit tests, Next.js build, and Terraform validate)
+    cmds:
+      - npm run format:check
+      - npm run lint
+      - npm run test
+      - npm run build
+      - task: tf:check
+
   check:
-    desc: Run all quality checks (formatting check, lint, unit tests, Helm unit tests, and E2E tests)
+    desc: Run all quality checks (formatting check, lint, unit tests, Helm unit tests, Terraform validation, and E2E tests)
     cmds:
       - npm run format:check
       - npm run lint
       - npm run test
       - helm lint charts/personal-site
       - helm unittest charts/personal-site
+      - task: tf:check
       - npm run test:e2e
+
+  clean:
+    desc: Clean build artifacts and temporary test output
+    cmds:
+      - rm -rf .next coverage test-results playwright-report
 
   build-container:
     desc: Build the Next.js production container image using Podman
