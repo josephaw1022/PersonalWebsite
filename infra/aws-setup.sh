@@ -3,46 +3,95 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-ENV_FILE="${REPO_ROOT}/.env"
+CUSTOM_ENV_FILE=""
 
 usage() {
   cat <<EOF
 Usage: $0 [options]
 
 Bootstraps the AWS S3 Terraform state bucket, GitHub Actions OIDC identity provider,
-IAM Role, and least-privilege IAM Policy required by the AWS Terraform deployment workflow.
+IAM Role, least-privilege IAM Policy, and GitHub Actions secrets/variables required
+by the AWS Terraform deployment workflow.
+
+Flags are optional when .env defines:
+  AWS_PROFILE, AWS_REGION, AWS_ACCOUNT_ID, TF_STATE_BUCKET, AWS_ROLE_NAME,
+  AWS_POLICY_NAME, GITHUB_REPO, DOMAIN_NAME, CLOUDFLARE_ACCOUNT_ID,
+  CLOUDFLARE_ZONE_ID, CLOUDFLARE_API_TOKEN, ALERT_EMAIL, ALERT_PHONE_NUMBER
+
+CLI flags override values from .env.
 
 Options:
-  --profile <AWS_PROFILE>               AWS CLI profile to use (e.g., personal-site)
-  --region <AWS_REGION>                 AWS region (default: us-east-1 or AWS_REGION from .env)
+  --profile <AWS_PROFILE>               AWS CLI profile to use (default: personal-site or from .env)
+  --region <AWS_REGION>                 AWS region (default: us-east-1 or from .env)
   --bucket <TF_STATE_BUCKET>            S3 bucket name for Terraform state (default: personal-site-tfstate-<ACCOUNT_ID>)
   --role-name <AWS_ROLE_NAME>           IAM role name for GitHub Actions OIDC (default: personal-site-github-actions-terraform)
+  --policy-name <AWS_POLICY_NAME>       IAM inline policy name (default: personal-site-terraform-deployer-policy)
   --repo <OWNER/REPO>                   GitHub repository slug (default: josephaw1022/PersonalWebsite)
   --domain <DOMAIN_NAME>                Domain name in Cloudflare for auto-discovering Zone ID (default: jwhiteaker22.com)
   --cloudflare-account-id <ACCOUNT_ID>  Optional: sync CLOUDFLARE_ACCOUNT_ID to GitHub repository secrets
   --cloudflare-zone-id <ZONE_ID>        Optional: sync CLOUDFLARE_ZONE_ID to GitHub repository secrets (auto-detected if token is given)
   --cloudflare-api-token <API_TOKEN>    Optional: sync CLOUDFLARE_API_TOKEN to GitHub repository secrets
+  --alert-email <EMAIL>                 Optional: sync ALERT_EMAIL to GitHub repository secrets
+  --alert-phone <PHONE_NUMBER>          Optional: sync ALERT_PHONE_NUMBER to GitHub repository secrets
+  --env-file <PATH>                     Path to custom .env file
   --skip-gh-config                      Do not set GitHub repository variables/secrets via gh CLI
   -h, --help                            Show this help message
 EOF
   exit 1
 }
 
+find_env_file() {
+  if [[ -n "${CUSTOM_ENV_FILE}" && -f "${CUSTOM_ENV_FILE}" ]]; then
+    echo "${CUSTOM_ENV_FILE}"
+    return 0
+  fi
+  if [[ -n "${ENV_FILE:-}" && -f "${ENV_FILE}" ]]; then
+    echo "${ENV_FILE}"
+    return 0
+  fi
+  if [[ -f "${REPO_ROOT}/.env" ]]; then
+    echo "${REPO_ROOT}/.env"
+    return 0
+  fi
+  if command -v git &>/dev/null; then
+    local git_common_dir
+    git_common_dir="$(git rev-parse --git-common-dir 2>/dev/null || true)"
+    if [[ -n "${git_common_dir}" ]]; then
+      local main_repo_env
+      main_repo_env="$(cd "${git_common_dir}/.." && pwd)/.env"
+      if [[ -f "${main_repo_env}" ]]; then
+        echo "${main_repo_env}"
+        return 0
+      fi
+    fi
+  fi
+  echo "${REPO_ROOT}/.env"
+}
+
 load_env_file() {
-  if [[ ! -f "${ENV_FILE}" ]]; then
+  local target_env
+  target_env="$(find_env_file)"
+  if [[ ! -f "${target_env}" ]]; then
     return 0
   fi
 
-  echo "==> Loading defaults from ${ENV_FILE}..."
+  echo "==> Loading defaults from ${target_env}..."
   set -a
   # shellcheck disable=SC1090
-  source "${ENV_FILE}"
+  source "${target_env}"
   set +a
 }
 
+# Pre-parse --env-file before loading env
+for arg in "$@"; do
+  if [[ "${arg}" == "--env-file="* ]]; then
+    CUSTOM_ENV_FILE="${arg#*=}"
+  fi
+done
+
 load_env_file
 
-AWS_PROFILE_ARG="${AWS_PROFILE:-}"
+AWS_PROFILE_ARG="${AWS_PROFILE:-personal-site}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
 TF_STATE_BUCKET="${TF_STATE_BUCKET:-}"
 AWS_ROLE_NAME="${AWS_ROLE_NAME:-personal-site-github-actions-terraform}"
@@ -52,6 +101,8 @@ DOMAIN_NAME="${DOMAIN_NAME:-jwhiteaker22.com}"
 CLOUDFLARE_ACCOUNT_ID="${CLOUDFLARE_ACCOUNT_ID:-}"
 CLOUDFLARE_ZONE_ID="${CLOUDFLARE_ZONE_ID:-}"
 CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN:-}"
+ALERT_EMAIL="${ALERT_EMAIL:-}"
+ALERT_PHONE_NUMBER="${ALERT_PHONE_NUMBER:-}"
 SKIP_GH_CONFIG="false"
 
 while [[ "$#" -gt 0 ]]; do
@@ -60,11 +111,15 @@ while [[ "$#" -gt 0 ]]; do
     --region) AWS_REGION="$2"; shift ;;
     --bucket) TF_STATE_BUCKET="$2"; shift ;;
     --role-name) AWS_ROLE_NAME="$2"; shift ;;
+    --policy-name) AWS_POLICY_NAME="$2"; shift ;;
     --repo) GITHUB_REPO="$2"; shift ;;
     --domain) DOMAIN_NAME="$2"; shift ;;
     --cloudflare-account-id) CLOUDFLARE_ACCOUNT_ID="$2"; shift ;;
     --cloudflare-zone-id) CLOUDFLARE_ZONE_ID="$2"; shift ;;
     --cloudflare-api-token) CLOUDFLARE_API_TOKEN="$2"; shift ;;
+    --alert-email) ALERT_EMAIL="$2"; shift ;;
+    --alert-phone|--alert-phone-number) ALERT_PHONE_NUMBER="$2"; shift ;;
+    --env-file) CUSTOM_ENV_FILE="$2"; shift ;;
     --skip-gh-config) SKIP_GH_CONFIG="true" ;;
     -h|--help) usage ;;
     *) echo "Error: Unknown parameter passed: $1" >&2; usage ;;
@@ -331,6 +386,52 @@ PERMISSIONS_POLICY="$(cat <<EOF
           "iam:AWSServiceName": "ecs.amazonaws.com"
         }
       }
+    },
+    {
+      "Sid": "Route53HealthCheckManagement",
+      "Effect": "Allow",
+      "Action": [
+        "route53:CreateHealthCheck",
+        "route53:DeleteHealthCheck",
+        "route53:GetHealthCheck",
+        "route53:GetHealthCheckStatus",
+        "route53:UpdateHealthCheck",
+        "route53:ChangeTagsForResource",
+        "route53:ListTagsForResource"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudWatchAlarmsManagement",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:PutMetricAlarm",
+        "cloudwatch:DeleteAlarms",
+        "cloudwatch:DescribeAlarms",
+        "cloudwatch:ListTagsForResource",
+        "cloudwatch:TagResource",
+        "cloudwatch:UntagResource"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SNSAlertsManagement",
+      "Effect": "Allow",
+      "Action": [
+        "sns:CreateTopic",
+        "sns:DeleteTopic",
+        "sns:GetTopicAttributes",
+        "sns:SetTopicAttributes",
+        "sns:Subscribe",
+        "sns:Unsubscribe",
+        "sns:GetSubscriptionAttributes",
+        "sns:SetSubscriptionAttributes",
+        "sns:ListSubscriptionsByTopic",
+        "sns:ListTagsForResource",
+        "sns:TagResource",
+        "sns:UntagResource"
+      ],
+      "Resource": "*"
     }
   ]
 }
@@ -370,6 +471,12 @@ if [[ "${SKIP_GH_CONFIG}" == "false" ]] && command -v gh &>/dev/null; then
     if [[ -n "${CLOUDFLARE_API_TOKEN}" ]]; then
       gh secret set CLOUDFLARE_API_TOKEN --body "${CLOUDFLARE_API_TOKEN}" --repo "${GITHUB_REPO}"
     fi
+    if [[ -n "${ALERT_EMAIL}" ]]; then
+      gh secret set ALERT_EMAIL --body "${ALERT_EMAIL}" --repo "${GITHUB_REPO}"
+    fi
+    if [[ -n "${ALERT_PHONE_NUMBER}" ]]; then
+      gh secret set ALERT_PHONE_NUMBER --body "${ALERT_PHONE_NUMBER}" --repo "${GITHUB_REPO}"
+    fi
   else
     echo "Warning: 'gh' CLI is not authenticated. Skipping automatic GitHub variable/secret setup."
   fi
@@ -379,10 +486,18 @@ echo ""
 echo "================================================================================"
 echo "AWS Terraform Backend & GitHub OIDC Role Bootstrap Complete!"
 echo "================================================================================"
+echo "AWS Profile     : ${AWS_PROFILE_ARG}"
+echo "AWS Account ID  : ${AWS_ACCOUNT_ID}"
 echo "S3 State Bucket : ${TF_STATE_BUCKET}"
 echo "AWS Region      : ${AWS_REGION}"
 echo "IAM Role ARN    : ${AWS_ROLE_ARN}"
 if [[ -n "${CLOUDFLARE_ZONE_ID}" ]]; then
   echo "CF Zone ID      : ${CLOUDFLARE_ZONE_ID} (${DOMAIN_NAME})"
+fi
+if [[ -n "${ALERT_EMAIL}" ]]; then
+  echo "Alert Email     : ${ALERT_EMAIL}"
+fi
+if [[ -n "${ALERT_PHONE_NUMBER}" ]]; then
+  echo "Alert SMS       : ${ALERT_PHONE_NUMBER}"
 fi
 echo "================================================================================"

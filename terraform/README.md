@@ -13,7 +13,11 @@ This directory provisions a lightweight, serverless AWS ECS Fargate deployment f
    - Creates a managed Cloudflare Tunnel (`cloudflare_zero_trust_tunnel_cloudflared`).
    - Configures tunnel ingress rules routing `jwhiteaker22.com` and `www.jwhiteaker22.com` to `http://localhost:3000`.
    - Provisions proxied `CNAME` DNS records pointing `@` and `www` to `<tunnel-id>.cfargotunnel.com`.
-4. **S3 Remote State Backend**:
+4. **Route 53 Health Check & Downtime Alerts**:
+   - Provisions an `HTTPS` Route 53 health check querying the public endpoint (`https://${var.domain_name}/`).
+   - CloudWatch metric alarm evaluates `HealthCheckStatus < 1` in `us-east-1` (breaching if the site fails probes).
+   - Triggers an AWS SNS topic configured with optional SMS text (`alert_phone_number`) and email (`alert_email`) subscriptions, notifying immediately on downtime and recovery.
+5. **S3 Remote State Backend**:
    - Uses an encrypted S3 bucket with versioning and native S3 lockfiles (`use_lockfile = true`).
 
 ## 1. Bootstrap AWS S3 State Bucket & GitHub OIDC Role

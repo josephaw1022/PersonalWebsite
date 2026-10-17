@@ -92,3 +92,33 @@ variable "create_www_record" {
   type        = bool
   default     = true
 }
+
+variable "health_check_path" {
+  description = "URL path for the Route 53 health check"
+  type        = string
+  default     = "/"
+}
+
+variable "health_check_request_interval" {
+  description = "The number of seconds between Route 53 health check probes (30 for standard, 10 for fast)"
+  type        = number
+  default     = 30
+}
+
+variable "health_check_failure_threshold" {
+  description = "The number of consecutive health check probe failures before marking the endpoint unhealthy"
+  type        = number
+  default     = 3
+}
+
+variable "alert_email" {
+  description = "Email address to receive alerts when the site goes down (leave empty or null to disable email alerts)"
+  type        = string
+  default     = null
+}
+
+variable "alert_phone_number" {
+  description = "Phone number in E.164 format (e.g. +12345678901) to receive SMS text alerts when the site goes down (leave empty or null to disable SMS alerts)"
+  type        = string
+  default     = null
+}
