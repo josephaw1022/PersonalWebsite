@@ -47,22 +47,48 @@ These workflows run on GitHub-hosted runners (`ubuntu-latest`) to test and valid
 
 ## State Toggle Scripts
 
-Use these scripts to toggle homelab workflows en masse:
+Use these scripts to toggle workflow categories en masse:
 
-### Disable Homelab Workflows
+### Homelab Workflows
 
+#### Disable Homelab Workflows
 Disables all OpenShift self-hosted runner workflows idempotently using `gh workflow disable`:
-
 ```bash
 bash .agents/skills/manage-workflows/scripts/disable-homelab-workflows.sh
 ```
 
-### Enable Homelab Workflows
-
-Re-enables all OpenShift self-hosted runner workflows using `gh workflow enable` once the homelab cluster is back online:
-
+#### Enable Homelab Workflows
+Re-enables all OpenShift self-hosted runner workflows using `gh workflow enable`:
 ```bash
 bash .agents/skills/manage-workflows/scripts/enable-homelab-workflows.sh
+```
+
+### AWS Terraform Workflows
+
+#### Disable AWS Terraform Workflows
+Disables `deploy-aws.yml` using `gh workflow disable`:
+```bash
+bash .agents/skills/manage-workflows/scripts/disable-aws-terraform-workflows.sh
+```
+
+#### Enable AWS Terraform Workflows
+Re-enables `deploy-aws.yml` using `gh workflow enable`:
+```bash
+bash .agents/skills/manage-workflows/scripts/enable-aws-terraform-workflows.sh
+```
+
+### GHCR Container Image Build Workflows
+
+#### Disable GHCR Build Workflows
+Disables `build-and-push-ghcr.yaml` using `gh workflow disable`:
+```bash
+bash .agents/skills/manage-workflows/scripts/disable-ghcr-build-workflows.sh
+```
+
+#### Enable GHCR Build Workflows
+Re-enables `build-and-push-ghcr.yaml` using `gh workflow enable`:
+```bash
+bash .agents/skills/manage-workflows/scripts/enable-ghcr-build-workflows.sh
 ```
 
 ---
