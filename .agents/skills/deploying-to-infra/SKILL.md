@@ -1,9 +1,6 @@
 ---
 name: deploying-to-infra
 description: Configure cluster runner infrastructure with arc-setup.sh and bootstrap/deploy workloads on OKD/OpenShift with Helm. Use when working with runner infrastructure or deploying cluster workloads.
-paths:
-  - "infra/**"
-  - "charts/**"
 ---
 
 ## Deploying to Infrastructure
