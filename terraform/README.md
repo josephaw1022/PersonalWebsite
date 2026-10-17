@@ -14,6 +14,7 @@ This directory provisions a lightweight, serverless AWS ECS Fargate deployment f
    - Provisions CloudWatch Logs Subscription Filters with explicit Lambda resource-based permissions (`aws_lambda_permission`) for both the application container logs (`/ecs/${var.project_name}`) and cluster performance logs (`/aws/ecs/containerinsights/${var.project_name}-cluster/performance`), ensuring logs stream continuously to Datadog and appear as configured triggers in the AWS Lambda console.
    - Provisions EventBridge rules and Lambda permissions routing AWS events to the Datadog Forwarder:
      - **ECS Task State Changes**: Captures task and container stop/failure events on the ECS cluster.
+     - **ECS Container Insights Events**: Routes Container Insights performance log group events from CloudWatch to the Datadog Forwarder via EventBridge.
      - **Route 53 Health Check Alarms**: Captures CloudWatch Alarm state changes for the Route 53 health check (`site_down` alarm).
    - Subscribes the Datadog Forwarder Lambda directly to the `site_alerts` SNS topic with `aws_lambda_permission`, ensuring Route 53 health check alert state transitions trigger Datadog events alongside SMS/email notifications.
    - Enforces a 1-day retention policy (`var.log_retention_days`) across CloudWatch log groups (`/ecs/${var.project_name}`, `/aws/ecs/containerinsights/...`, and `/aws/lambda/...`) to eliminate unnecessary AWS storage costs while archiving logs in Datadog.

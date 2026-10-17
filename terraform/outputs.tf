@@ -99,6 +99,11 @@ output "site_health_alarm_rule_arn" {
   value       = aws_cloudwatch_event_rule.site_health_alarm_events.arn
 }
 
+output "ecs_container_insights_events_rule_arn" {
+  description = "ARN of the EventBridge rule routing ECS Container Insights events to Datadog Forwarder"
+  value       = aws_cloudwatch_event_rule.ecs_container_insights_events.arn
+}
+
 
 
 
