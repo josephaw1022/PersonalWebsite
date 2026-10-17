@@ -370,6 +370,11 @@ if [[ "${SKIP_GH_CONFIG}" == "false" ]] && command -v gh &>/dev/null; then
     if [[ -n "${CLOUDFLARE_API_TOKEN}" ]]; then
       gh secret set CLOUDFLARE_API_TOKEN --body "${CLOUDFLARE_API_TOKEN}" --repo "${GITHUB_REPO}"
     fi
+
+    echo "==> Ensuring GitHub Actions workflow permissions allow creating pull requests..."
+    gh api -X PUT "repos/${GITHUB_REPO}/actions/permissions/workflow" \
+      -F default_workflow_permissions=read \
+      -F can_approve_pull_request_reviews=true >/dev/null 2>&1 || true
   else
     echo "Warning: 'gh' CLI is not authenticated. Skipping automatic GitHub variable/secret setup."
   fi

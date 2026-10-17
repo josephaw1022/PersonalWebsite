@@ -29,7 +29,7 @@ These workflows run on GitHub-hosted runners (`ubuntu-latest`) and manage the te
 
 - `.github/workflows/build-and-push-ghcr.yaml` (**Container Image - Build & Push (GHCR)**): Builds and pushes images to GHCR.
 - `.github/workflows/deploy-aws.yml` (**Deploy Personal Site - AWS (Terraform)**): Provisions AWS ECS Fargate and Cloudflare Tunnel resources.
-- `.github/workflows/update-ecs-image-tag.yml` (**Deploy Personal Site - Update ECS Image Tag**): Automatically opens a pull request updating the ECS image tag in Terraform when a GHCR container build finishes.
+- `.github/workflows/update-ecs-image-tag.yml` (**Deploy Personal Site - Update ECS Image Tag**): Automatically opens a pull request updating the ECS image tag in Terraform when a GHCR container build finishes (requires "Allow GitHub Actions to create and approve pull requests" enabled in repo settings or configured via `aws-setup.sh`).
 
 #### Pull Request & CI Verification Workflows
 

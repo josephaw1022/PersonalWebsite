@@ -26,7 +26,7 @@ Run the bootstrap script to create the S3 state bucket, GitHub Actions OIDC iden
 
 ## 2. Deploy via GitHub Actions
 
-- Container builds pushed to GHCR automatically trigger `.github/workflows/update-ecs-image-tag.yml`, which opens a pull request updating `ghcr_image_tag` in `terraform/variables.tf`.
+- Container builds pushed to GHCR automatically trigger `.github/workflows/update-ecs-image-tag.yml`, which opens a pull request updating `ghcr_image_tag` in `terraform/variables.tf`. Note: In GitHub repository settings under **Actions > General > Workflow permissions**, ensure **Allow GitHub Actions to create and approve pull requests** is checked (this is automatically configured by `./infra/aws-setup.sh`).
 - Once merged, `.github/workflows/deploy-aws.yml` automatically triggers and applies the updated task definition to the ECS cluster.
 - Alternatively, trigger the workflow manually using GitHub CLI:
 

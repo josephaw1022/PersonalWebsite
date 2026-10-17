@@ -89,7 +89,7 @@ jobs:
         if: steps.update-tf.outputs.changed == 'true'
         env:
           NEW_TAG: ${{ steps.determine-tag.outputs.tag }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
         run: |
           BRANCH_NAME="chore/update-ecs-image-tag-${NEW_TAG}"
 
@@ -105,7 +105,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           # Switch to new branch
-          git checkout -b "${BRANCH_NAME}"
+          git checkout -B "${BRANCH_NAME}"
           git add terraform/variables.tf
           git commit -m "chore(infra): update ECS image tag to ${NEW_TAG}"
           git push origin "${BRANCH_NAME}" --force
@@ -140,10 +140,13 @@ jobs:
 
           sed -i 's/^[[:space:]]\{10\}//' /tmp/pr-body.md
 
-          PR_URL=$(gh pr create \
+          if ! PR_URL=$(gh pr create \
             --title "chore(infra): update ECS container image tag to ${NEW_TAG}" \
             --body-file /tmp/pr-body.md \
             --base main \
-            --head "${BRANCH_NAME}")
+            --head "${BRANCH_NAME}"); then
+            echo "::error::Failed to create pull request. Ensure 'Allow GitHub Actions to create and approve pull requests' is enabled under Repository Settings -> Actions -> General -> Workflow permissions (or provide a GH_PAT secret)."
+            exit 1
+          fi
 
           echo "Created pull request: ${PR_URL}"
