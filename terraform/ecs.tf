@@ -103,6 +103,10 @@ resource "aws_ecs_task_definition" "personal_site" {
         retries     = 3
         startPeriod = 15
       }
+      restartPolicy = {
+        enabled              = true
+        restartAttemptPeriod = 300
+      }
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -133,6 +137,10 @@ resource "aws_ecs_task_definition" "personal_site" {
           condition     = "HEALTHY"
         }
       ]
+      restartPolicy = {
+        enabled              = true
+        restartAttemptPeriod = 300
+      }
       logConfiguration = {
         logDriver = "awslogs"
         options = {
