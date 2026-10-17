@@ -1,6 +1,6 @@
 ---
 name: manage-workflows
-description: Manage GitHub Actions workflow states (enable/disable) for PersonalWebsite. Use when toggling homelab OpenShift cluster workflows on or off during temporary hosting transitions (such as running on AWS ECS Fargate while the homelab cluster is offline), or when inspecting and managing workflow availability using the GitHub CLI.
+description: Manage GitHub Actions workflow states (enable/disable) and manually dispatch workflow runs for PersonalWebsite. Use when toggling homelab OpenShift workflows on or off during temporary hosting transitions (such as running on AWS ECS Fargate while the homelab cluster is offline), inspecting workflow availability, or running manual workflow dispatch scripts using the GitHub CLI.
 paths:
   - ".github/workflows/**"
   - ".agents/skills/manage-workflows/**"
@@ -8,7 +8,7 @@ paths:
 
 ## Workflow Management
 
-Manage GitHub Actions workflow activation states using the GitHub CLI (`gh`). This is primarily used to toggle off homelab OpenShift workflows while the site is temporarily hosted on AWS ECS Fargate, preventing failed or stuck job runs on offline self-hosted runners.
+Manage GitHub Actions workflow activation states and manually trigger workflows using the GitHub CLI (`gh`).
 
 ### Workflow Categories
 
@@ -30,27 +30,110 @@ These workflows run on GitHub-hosted runners (`ubuntu-latest`) and manage the te
 - `.github/workflows/build-and-push-ghcr.yaml` (**Container Image - Build & Push (GHCR)**): Builds and pushes images to GHCR.
 - `.github/workflows/deploy-aws.yml` (**Deploy Personal Site - AWS (Terraform)**): Provisions AWS ECS Fargate and Cloudflare Tunnel resources.
 
-### Scripts
+#### Pull Request & CI Verification Workflows
 
-The skill provides scripts to toggle all homelab workflows:
+These workflows run on GitHub-hosted runners (`ubuntu-latest`) to test and validate PRs:
 
-#### Disable Homelab Workflows
+- `.github/workflows/pr-build.yaml` (**Pull Request - Build Check**): Validates Next.js build.
+- `.github/workflows/pr-codeql.yaml` (**Pull Request - CodeQL Scan**): Performs security analysis.
+- `.github/workflows/pr-e2e-tests.yaml` (**Pull Request - E2E Tests**): Runs Playwright end-to-end tests.
+- `.github/workflows/pr-format.yaml` (**Pull Request - Format Check**): Validates Prettier and ESLint formatting.
+- `.github/workflows/pr-gitleaks.yaml` (**Pull Request - GitLeaks Scan**): Scans for hardcoded secrets.
+- `.github/workflows/pr-helm-unit-tests.yaml` (**Pull Request - Helm Unit Tests**): Lints and tests Helm charts.
+- `.github/workflows/pr-trivy.yaml` (**Pull Request - Trivy Security Scan**): Scans repository vulnerabilities.
+- `.github/workflows/pr-unit-tests.yaml` (**Pull Request - Unit Tests**): Runs Jest unit tests.
 
-Disables all OpenShift and self-hosted runner workflows idempotently using `gh workflow disable`:
+---
+
+## State Toggle Scripts
+
+Use these scripts to toggle homelab workflows en masse:
+
+### Disable Homelab Workflows
+
+Disables all OpenShift self-hosted runner workflows idempotently using `gh workflow disable`:
 
 ```bash
 bash .agents/skills/manage-workflows/scripts/disable-homelab-workflows.sh
 ```
 
-#### Enable Homelab Workflows
+### Enable Homelab Workflows
 
-Re-enables all OpenShift and self-hosted runner workflows using `gh workflow enable` once the homelab cluster is back online:
+Re-enables all OpenShift self-hosted runner workflows using `gh workflow enable` once the homelab cluster is back online:
 
 ```bash
 bash .agents/skills/manage-workflows/scripts/enable-homelab-workflows.sh
 ```
 
-### Manual Inspection & Management
+---
+
+## Manual Workflow Dispatch Scripts
+
+Per the project rule, every workflow supporting `workflow_dispatch` has a corresponding runner script in `.agents/skills/manage-workflows/scripts/`:
+
+### Cloud & Deployment Workflows
+
+#### `run-deploy-aws.sh`
+Dispatches `deploy-aws.yml`.
+```bash
+# Usage: run-deploy-aws.sh [action: apply|plan|destroy] [image_tag] [ref]
+bash .agents/skills/manage-workflows/scripts/run-deploy-aws.sh apply latest
+```
+
+#### `run-build-and-push-ghcr.sh`
+Dispatches `build-and-push-ghcr.yaml`.
+```bash
+# Usage: run-build-and-push-ghcr.sh [ref]
+bash .agents/skills/manage-workflows/scripts/run-build-and-push-ghcr.sh
+```
+
+#### `run-deploy-dev.sh`
+Dispatches `deploy-dev.yml`.
+```bash
+# Usage: run-deploy-dev.sh [tag] [ref]
+bash .agents/skills/manage-workflows/scripts/run-deploy-dev.sh
+```
+
+#### `run-deploy-prod.sh`
+Dispatches `deploy-prod.yml`.
+```bash
+# Usage: run-deploy-prod.sh [tag] [ref]
+bash .agents/skills/manage-workflows/scripts/run-deploy-prod.sh
+```
+
+#### `run-bootstrap-cluster.sh`
+Dispatches `bootstrap-cluster.yml`.
+```bash
+# Usage: run-bootstrap-cluster.sh [target_env: all|production|development|runners] [tag] [secret_name] [ref]
+bash .agents/skills/manage-workflows/scripts/run-bootstrap-cluster.sh all latest quay-pull-secret
+```
+
+#### `run-build-and-push.sh`
+Dispatches `build-and-push.yaml`.
+```bash
+# Usage: run-build-and-push.sh [ref]
+bash .agents/skills/manage-workflows/scripts/run-build-and-push.sh
+```
+
+### PR & Quality Check Workflows
+
+Trigger PR workflows on-demand against any branch or commit ref:
+
+```bash
+# Usage: <script> [ref]
+bash .agents/skills/manage-workflows/scripts/run-pr-build.sh [ref]
+bash .agents/skills/manage-workflows/scripts/run-pr-codeql.sh [ref]
+bash .agents/skills/manage-workflows/scripts/run-pr-e2e-tests.sh [ref]
+bash .agents/skills/manage-workflows/scripts/run-pr-format.sh [ref]
+bash .agents/skills/manage-workflows/scripts/run-pr-gitleaks.sh [ref]
+bash .agents/skills/manage-workflows/scripts/run-pr-helm-unit-tests.sh [ref]
+bash .agents/skills/manage-workflows/scripts/run-pr-trivy.sh [ref]
+bash .agents/skills/manage-workflows/scripts/run-pr-unit-tests.sh [ref]
+```
+
+---
+
+## Manual Inspection & Management
 
 To view current workflow states:
 
