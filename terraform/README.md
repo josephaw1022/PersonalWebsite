@@ -13,15 +13,35 @@ This directory provisions a lightweight, serverless AWS ECS Fargate deployment f
    - Creates a managed Cloudflare Tunnel (`cloudflare_zero_trust_tunnel_cloudflared`).
    - Configures tunnel ingress rules routing `jwhiteaker22.com` and `www.jwhiteaker22.com` to `http://localhost:3000`.
    - Provisions proxied `CNAME` DNS records pointing `@` and `www` to `<tunnel-id>.cfargotunnel.com`.
+4. **S3 Remote State Backend**:
+   - Uses an encrypted S3 bucket with versioning and native S3 lockfiles (`use_lockfile = true`).
 
-## Usage
+## 1. Bootstrap AWS S3 State Bucket & GitHub OIDC Role
+
+Run the bootstrap script to create the S3 state bucket, GitHub Actions OIDC identity provider, IAM role, and least-privilege IAM policy (and automatically sync `AWS_ROLE_ARN`, `AWS_REGION`, and `TF_STATE_BUCKET` to GitHub repository variables):
+
+```bash
+./infra/aws-setup.sh
+```
+
+## 2. Deploy via GitHub Actions
+
+Ensure `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and `CLOUDFLARE_ZONE_ID` are set in GitHub repository secrets, then trigger the workflow:
+
+```bash
+gh workflow run deploy-aws.yml -f action=apply
+```
+
+## Local Usage
 
 ```bash
 cd terraform
 cp terraform.tfvars.example terraform.tfvars
 # Edit terraform.tfvars with your Cloudflare Account ID, Zone ID, and API Token
 
-terraform init
+terraform init \
+  -backend-config="bucket=personal-site-tfstate-<AWS_ACCOUNT_ID>" \
+  -backend-config="region=us-east-1"
 terraform plan
 terraform apply
 ```
