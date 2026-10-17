@@ -1,4 +1,18 @@
 {
+  "enforce-taskfile": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/enforce-taskfile.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
   "format-repo": {
     "PostToolUse": [
       {
