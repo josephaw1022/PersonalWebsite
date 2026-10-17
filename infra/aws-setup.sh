@@ -158,7 +158,9 @@ fi
 
 echo "==> Verifying AWS credentials${AWS_PROFILE:+ (profile: ${AWS_PROFILE})}..."
 AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
+AWS_PARTITION="${AWS_PARTITION:-$(aws sts get-caller-identity --query Arn --output text | cut -d: -f2)}"
 echo "    AWS Account ID: ${AWS_ACCOUNT_ID}"
+echo "    AWS Partition:  ${AWS_PARTITION}"
 echo "    AWS Region:     ${AWS_REGION}"
 
 if [[ -z "${TF_STATE_BUCKET}" ]]; then
@@ -517,6 +519,8 @@ if [[ "${SKIP_GH_CONFIG}" == "false" ]] && command -v gh &>/dev/null; then
   if gh auth status >/dev/null 2>&1; then
     echo "==> Syncing AWS configuration to GitHub repository variables (${GITHUB_REPO})..."
     gh variable set AWS_REGION --body "${AWS_REGION}" --repo "${GITHUB_REPO}"
+    gh variable set AWS_ACCOUNT_ID --body "${AWS_ACCOUNT_ID}" --repo "${GITHUB_REPO}"
+    gh variable set AWS_PARTITION --body "${AWS_PARTITION}" --repo "${GITHUB_REPO}"
     gh variable set TF_STATE_BUCKET --body "${TF_STATE_BUCKET}" --repo "${GITHUB_REPO}"
     gh variable set AWS_ROLE_ARN --body "${AWS_ROLE_ARN}" --repo "${GITHUB_REPO}"
     if [[ -n "${DATADOG_SITE}" ]]; then
@@ -558,6 +562,7 @@ echo "AWS Terraform Backend & GitHub OIDC Role Bootstrap Complete!"
 echo "================================================================================"
 echo "AWS Profile     : ${AWS_PROFILE_ARG}"
 echo "AWS Account ID  : ${AWS_ACCOUNT_ID}"
+echo "AWS Partition   : ${AWS_PARTITION}"
 echo "S3 State Bucket : ${TF_STATE_BUCKET}"
 echo "AWS Region      : ${AWS_REGION}"
 echo "IAM Role ARN    : ${AWS_ROLE_ARN}"

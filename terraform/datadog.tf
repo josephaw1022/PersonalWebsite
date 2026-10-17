@@ -1,7 +1,3 @@
-data "aws_caller_identity" "current" {}
-
-data "aws_partition" "current" {}
-
 locals {
   datadog_integration_actions = [
     "apigateway:GET",
@@ -229,8 +225,8 @@ locals {
 
 resource "datadog_integration_aws_account" "main" {
   account_tags   = var.datadog_account_tags
-  aws_account_id = data.aws_caller_identity.current.account_id
-  aws_partition  = data.aws_partition.current.partition
+  aws_account_id = var.aws_account_id
+  aws_partition  = var.aws_partition
 
   aws_regions {
     include_all = true
@@ -266,7 +262,7 @@ data "aws_iam_policy_document" "datadog_aws_integration_assume_role" {
 
     principals {
       type        = "AWS"
-      identifiers = ["arn:${data.aws_partition.current.partition}:iam::464622532012:root"]
+      identifiers = ["arn:${var.aws_partition}:iam::464622532012:root"]
     }
 
     condition {
@@ -304,5 +300,5 @@ resource "aws_iam_role_policy_attachment" "datadog_aws_integration" {
 
 resource "aws_iam_role_policy_attachment" "datadog_aws_integration_security_audit" {
   role       = aws_iam_role.datadog_aws_integration.name
-  policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/SecurityAudit"
+  policy_arn = "arn:${var.aws_partition}:iam::aws:policy/SecurityAudit"
 }
