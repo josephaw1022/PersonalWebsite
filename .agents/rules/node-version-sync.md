@@ -1,7 +1,7 @@
 ---
 trigger: glob
-globs: ".nvmrc, .devcontainer/devcontainer.json, .github/workflows/*.yaml, .github/workflows/*.yml, package.json"
-description: "Guidelines to keep .nvmrc, GitHub Actions workflows, devcontainer configuration, and package.json synchronized with the Node.js version."
+globs: ".nvmrc, .devcontainer/devcontainer.json, .github/workflows/*.yaml, .github/workflows/*.yml, package.json, Containerfile"
+description: "Guidelines to keep .nvmrc, GitHub Actions workflows, devcontainer configuration, package.json, and Containerfile synchronized with the Node.js version."
 ---
 
 # Node.js Version Synchronization
@@ -17,6 +17,8 @@ This repository standardizes on Node.js 26 (active LTS). Whenever the Node.js ru
 4. **Package Configuration (`package.json`)**:
    - The `engines.node` field must require the appropriate Node.js runtime (e.g., `">=26"`).
    - `@types/node` under `devDependencies` should align with the runtime major version (`^26`).
+5. **Containerfile (`Containerfile`)**:
+   - The production container base image must specify the corresponding Node.js version using the official Node Docker Hub Alpine image (e.g., `FROM node:26-alpine AS runner`).
 
 ## Verification Checklist
 
@@ -25,3 +27,4 @@ When updating the Node.js runtime version:
 - Run `npm test` and `npm run build` to confirm test suite and Next.js production builds succeed.
 - Run `npm run lint` and `npm run format:check` to ensure code styling and lint rules pass.
 - Verify all CI workflow definitions in `.github/workflows/` match the target Node.js version.
+- Verify the `Containerfile` base image matches the target Node.js version and can be built via `task build-container` (or `podman build -t personal-site -f Containerfile .`).

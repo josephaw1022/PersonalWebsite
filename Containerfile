@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/nodejs-22-minimal:latest AS runner
+FROM node:26-alpine AS runner
 WORKDIR /opt/app-root/src
 
 ENV NODE_ENV=production
