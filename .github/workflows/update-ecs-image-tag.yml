@@ -1,0 +1,149 @@
+name: Deploy Personal Site - Update ECS Image Tag
+
+on:
+  workflow_run:
+    workflows: ["Container Image - Build & Push (GHCR)"]
+    types:
+      - completed
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Container image tag to update in Terraform (leave blank to use latest commit short SHA)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-ecs-tag:
+    name: Update ECS Image Tag in Terraform
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Determine Target Image Tag
+        id: determine-tag
+        run: |
+          if [ -n "${{ inputs.image_tag }}" ]; then
+            TAG="${{ inputs.image_tag }}"
+          elif [ -n "${{ github.event.workflow_run.head_sha }}" ]; then
+            HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
+            TAG="${HEAD_SHA:0:7}"
+          else
+            TAG=$(git rev-parse --short HEAD)
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Target image tag: ${TAG}"
+
+      - name: Check Current Image Tag in Terraform
+        id: check-current
+        run: |
+          CURRENT_TAG=$(python3 -c '
+          import re, sys
+          with open("terraform/variables.tf", "r") as f:
+              content = f.read()
+          match = re.search(r"variable\s+\"ghcr_image_tag\"\s*\{[\s\S]*?default\s*=\s*\"([^\"]*)\"", content)
+          if match:
+              print(match.group(1))
+          else:
+              sys.exit("ghcr_image_tag default not found")
+          ')
+          echo "current_tag=${CURRENT_TAG}" >> "$GITHUB_OUTPUT"
+          echo "Current image tag in Terraform: ${CURRENT_TAG}"
+
+      - name: Update Terraform Configuration
+        id: update-tf
+        env:
+          NEW_TAG: ${{ steps.determine-tag.outputs.tag }}
+          CURRENT_TAG: ${{ steps.check-current.outputs.current_tag }}
+        run: |
+          if [ "${NEW_TAG}" = "${CURRENT_TAG}" ]; then
+            echo "Terraform ghcr_image_tag is already set to ${NEW_TAG}. No changes required."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          python3 -c '
+          import os, re
+          new_tag = os.environ["NEW_TAG"]
+          path = "terraform/variables.tf"
+          with open(path, "r") as f:
+              content = f.read()
+          pattern = r"(variable\s+\"ghcr_image_tag\"\s*\{[\s\S]*?default\s*=\s*\")[^\"]*(\")"
+          new_content = re.sub(pattern, rf"\g<1>{new_tag}\g<2>", content)
+          with open(path, "w") as f:
+              f.write(new_content)
+          '
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create Pull Request
+        if: steps.update-tf.outputs.changed == 'true'
+        env:
+          NEW_TAG: ${{ steps.determine-tag.outputs.tag }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH_NAME="chore/update-ecs-image-tag-${NEW_TAG}"
+
+          # Check if an open PR for this branch already exists
+          EXISTING_PR=$(gh pr list --head "${BRANCH_NAME}" --state open --json number --jq '.[0].number')
+          if [ -n "${EXISTING_PR}" ]; then
+            echo "An open PR (#${EXISTING_PR}) already exists for ${BRANCH_NAME}."
+            exit 0
+          fi
+
+          # Setup git identity
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Switch to new branch
+          git checkout -b "${BRANCH_NAME}"
+          git add terraform/variables.tf
+          git commit -m "chore(infra): update ECS image tag to ${NEW_TAG}"
+          git push origin "${BRANCH_NAME}" --force
+
+          # Generate PR body using repository PR template format
+          cat <<EOF > /tmp/pr-body.md
+          ## Description
+
+          Updates the default GHCR container image tag in Terraform for the AWS ECS Fargate deployment to \`${NEW_TAG}\` following completion of the container image build workflow (\`build-and-push-ghcr.yaml\`).
+
+          ## Type of Change
+
+          - [x] Infrastructure change
+          - [x] CI/CD pipeline change
+
+          ## Changes Made
+
+          - Updated \`ghcr_image_tag\` default in \`terraform/variables.tf\` to \`${NEW_TAG}\`.
+
+          ## Testing
+
+          - [x] Relevant workflows passed in CI
+          - [x] Terraform \`validate\` and \`fmt\` passed (if applicable)
+
+          ## Checklist
+
+          - [x] My changes follow the coding conventions and style of this project
+          - [x] I have updated relevant documentation
+          - [x] I have not committed any secrets or sensitive values
+          - [x] I have reviewed my own diff before requesting review
+          EOF
+
+          sed -i 's/^[[:space:]]\{10\}//' /tmp/pr-body.md
+
+          PR_URL=$(gh pr create \
+            --title "chore(infra): update ECS container image tag to ${NEW_TAG}" \
+            --body-file /tmp/pr-body.md \
+            --base main \
+            --head "${BRANCH_NAME}")
+
+          echo "Created pull request: ${PR_URL}"

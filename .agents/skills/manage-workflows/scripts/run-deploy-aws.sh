@@ -7,14 +7,19 @@ if ! command -v gh &>/dev/null; then
 fi
 
 ACTION="${1:-apply}"
-IMAGE_TAG="${2:-latest}"
+IMAGE_TAG="${2:-}"
 REF="${3:-}"
 
 echo "Dispatching 'Deploy Personal Site - AWS (Terraform)' (deploy-aws.yml)..."
 echo "  Action:    $ACTION"
-echo "  Image Tag: $IMAGE_TAG"
+if [ -n "$IMAGE_TAG" ]; then
+  echo "  Image Tag: $IMAGE_TAG"
+fi
 
-ARGS=(-f "action=$ACTION" -f "image_tag=$IMAGE_TAG")
+ARGS=(-f "action=$ACTION")
+if [ -n "$IMAGE_TAG" ]; then
+  ARGS+=(-f "image_tag=$IMAGE_TAG")
+fi
 if [ -n "$REF" ]; then
   ARGS+=(--ref "$REF")
 fi
