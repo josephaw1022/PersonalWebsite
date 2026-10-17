@@ -1,0 +1,9 @@
+aws_region            = "us-east-1"
+project_name          = "personal-site"
+ghcr_image            = "ghcr.io/josephaw1022/personalwebsite"
+ghcr_image_tag        = "latest"
+cloudflare_account_id = "your-cloudflare-account-id"
+cloudflare_zone_id    = "your-cloudflare-zone-id"
+cloudflare_api_token  = "your-cloudflare-api-token"
+domain_name           = "jwhiteaker22.com"
+create_www_record     = true
