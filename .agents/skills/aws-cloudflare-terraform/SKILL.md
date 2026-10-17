@@ -1,11 +1,6 @@
 ---
 name: aws-cloudflare-terraform
 description: Provision and manage AWS ECS Fargate, Cloudflare Zero Trust Tunnel, and S3 backend infrastructure using Terraform and GitHub Actions.
-paths:
-  - "terraform/**"
-  - "infra/aws-setup.sh"
-  - ".github/workflows/deploy-aws.yml"
-  - ".github/workflows/build-and-push-ghcr.yaml"
 ---
 
 ## AWS & Cloudflare Terraform Infrastructure

@@ -1,8 +1,6 @@
 ---
 name: site-development
 description: Personal site development and content.
-paths:
-  - "src/**"
 ---
 
 # Site Development
