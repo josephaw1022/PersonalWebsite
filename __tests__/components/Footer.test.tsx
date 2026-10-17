@@ -21,6 +21,10 @@ describe("Footer", () => {
       "href",
       "https://github.com/josephaw1022",
     );
+    expect(screen.getByRole("link", { name: /contact/i })).toHaveAttribute(
+      "href",
+      "/contact",
+    );
     expect(screen.getByRole("link", { name: /medium/i })).toHaveAttribute(
       "href",
       "https://medium.com/@josephsims1",

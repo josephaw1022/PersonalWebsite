@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Footer() {
   const year = new Date().getFullYear();
 
@@ -8,6 +10,12 @@ export default function Footer() {
           {year} © Joseph Whiteaker
         </p>
         <div className="flex gap-6 font-mono text-sm text-zinc-600 dark:text-zinc-400">
+          <Link
+            href="/contact"
+            className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+          >
+            Contact
+          </Link>
           <a
             href="https://www.linkedin.com/in/joseph-whiteaker-iii-02482a198/"
             target="_blank"
