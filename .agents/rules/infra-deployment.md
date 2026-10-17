@@ -1,5 +1,7 @@
 ---
-globs: "{infra/**,charts/**}"
+trigger: glob
+globs: "infra/**, charts/**"
+description: "Runner and workload infrastructure deployment guidelines for cluster components and Helm charts."
 ---
 
 # Infrastructure Deployment

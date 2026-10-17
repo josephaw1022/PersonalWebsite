@@ -1,5 +1,7 @@
 ---
-globs: ".github/workflows/*.{yaml,yml}"
+trigger: glob
+globs: ".github/workflows/*.yaml, .github/workflows/*.yml"
+description: "GitHub Actions workflow naming conventions requiring a consistent <Category> - <Action> format."
 ---
 
 # GitHub Workflows Naming Convention
