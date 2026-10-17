@@ -67,4 +67,24 @@ test.describe("Site Navigation", () => {
     const footer = page.locator("footer");
     await expect(footer).toBeInViewport();
   });
+
+  test("renders custom favicon and icon links correctly", async ({
+    page,
+    request,
+  }) => {
+    await page.goto("/");
+
+    // Verify SVG icon link is present
+    const svgIcon = page.locator('link[rel="icon"][type="image/svg+xml"]');
+    await expect(svgIcon).toBeAttached();
+    const svgHref = await svgIcon.getAttribute("href");
+    expect(svgHref).toBeTruthy();
+
+    const svgResponse = await request.get(svgHref!);
+    expect(svgResponse.status()).toBe(200);
+
+    // Verify favicon.ico is accessible
+    const icoResponse = await request.get("/favicon.ico");
+    expect(icoResponse.status()).toBe(200);
+  });
 });
