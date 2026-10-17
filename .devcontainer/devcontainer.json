@@ -2,17 +2,34 @@
   "name": "PersonalWebsite",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:26",
   "features": {
-    "ghcr.io/devcontainers/features/github-cli:1": {}
+    "ghcr.io/devcontainers/features/terraform:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "minikube": "none"
+    },
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/go-task:1": {}
   },
+  "overrideFeatureInstallOrder": [
+    "ghcr.io/devcontainers/features/terraform",
+    "ghcr.io/devcontainers/features/github-cli",
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube",
+    "ghcr.io/devcontainers/features/aws-cli",
+    "ghcr.io/devcontainers-extra/features/go-task"
+  ],
   "customizations": {
     "vscode": {
       "extensions": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "hashicorp.terraform",
+        "amazonwebservices.aws-toolkit-vscode",
+        "task.vscode-task",
+        "ms-kubernetes-tools.vscode-kubernetes-tools"
       ]
     }
   },
-  "postCreateCommand": "npm install",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
   "forwardPorts": [3000]
 }
