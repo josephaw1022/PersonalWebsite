@@ -59,3 +59,14 @@ output "datadog_external_id" {
   sensitive   = true
 }
 
+output "datadog_forwarder_stack_id" {
+  description = "CloudFormation stack ID of the Datadog Forwarder"
+  value       = aws_cloudformation_stack.datadog_forwarder.id
+}
+
+output "datadog_forwarder_lambda_arn" {
+  description = "ARN of the Datadog Forwarder Lambda function"
+  value       = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
+}
+
+

@@ -8,8 +8,11 @@ This directory provisions a lightweight, serverless AWS ECS Fargate deployment f
    - **`personal-site` container**: Pulls the public container image from GitHub Container Registry (`ghcr.io/josephaw1022/personalwebsite:latest`) and listens on `localhost:3000`.
    - **`cloudflared` sidecar container**: Waits for the `personal-site` health check to pass, authenticates using the tunnel token stored in AWS SSM Parameter Store (`SecureString`), and proxies incoming Cloudflare Tunnel requests directly to `http://localhost:3000` while exposing Prometheus metrics on `127.0.0.1:2000/metrics`.
    - **`datadog-agent` sidecar container**: Runs the Datadog Agent in ECS Fargate mode (`ECS_FARGATE=true`), authenticates using `DD_API_KEY` from AWS SSM Parameter Store (`SecureString`), and monitors both `personal-site` (via `http_check` autodiscovery) and `cloudflared` (via `openmetrics` autodiscovery on `http://127.0.0.1:2000/metrics`).
-2. **Datadog AWS Account Integration**:
+2. **Datadog AWS Account Integration & Log Forwarding**:
    - Provisions `datadog_integration_aws_account` along with the `DatadogIntegrationRole` IAM role, dynamically chunked `DatadogAWSIntegrationPolicy-*` policies (sourced from `datadog_integration_aws_iam_permissions`), and AWS `SecurityAudit` managed policy attachment for full account-level cloud observability and CSPM.
+   - Deploys the official Datadog Forwarder Lambda function (`aws_cloudformation_stack.datadog_forwarder`) using Datadog's official CloudFormation template (`https://datadog-cloudformation-template.s3.amazonaws.com/aws/forwarder/latest.yaml`), registered with `datadog_integration_aws_account` via `logs_config.lambda_forwarder`.
+   - Provisions a CloudWatch Logs Subscription Filter (`aws_cloudwatch_log_subscription_filter.ecs_datadog_forwarder`) that streams all ECS container logs from `/ecs/${var.project_name}` directly to the Datadog Forwarder Lambda function for centralized ingestion into Datadog Logs.
+   - Reduces CloudWatch log group retention to 1 day (`var.log_retention_days`) across both the ECS container log group and the Forwarder Lambda log group to minimize AWS storage costs while storing logs long-term in Datadog.
 3. **Zero Inbound Ports**:
    - The ECS security group has **no inbound rules**. All external traffic enters through Cloudflare's edge and is delivered over the outbound encrypted Cloudflare Tunnel connection.
 4. **Cloudflare Zero Trust & DNS**:

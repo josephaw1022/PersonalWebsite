@@ -3,6 +3,18 @@ resource "aws_cloudwatch_log_group" "ecs" {
   retention_in_days = var.log_retention_days
 }
 
+resource "aws_cloudwatch_log_subscription_filter" "ecs_datadog_forwarder" {
+  name            = "${var.project_name}-ecs-datadog-logs"
+  log_group_name  = aws_cloudwatch_log_group.ecs.name
+  filter_pattern  = ""
+  destination_arn = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
+
+  depends_on = [
+    aws_cloudformation_stack.datadog_forwarder
+  ]
+}
+
+
 resource "aws_ecs_cluster" "main" {
   name = "${var.project_name}-cluster"
 
