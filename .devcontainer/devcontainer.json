@@ -1,18 +1,21 @@
 {
   "name": "PersonalWebsite",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:26",
-  "features": {
-    "ghcr.io/devcontainers/features/github-cli:1": {}
+  "build": {
+    "dockerfile": "Dockerfile"
   },
   "customizations": {
     "vscode": {
       "extensions": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "hashicorp.terraform",
+        "amazonwebservices.aws-toolkit-vscode",
+        "task.vscode-task",
+        "ms-kubernetes-tools.vscode-kubernetes-tools"
       ]
     }
   },
-  "postCreateCommand": "npm install",
+  "postCreateCommand": "npm install && (helm plugin install https://github.com/helm-unittest/helm-unittest.git || true)",
   "forwardPorts": [3000]
 }
