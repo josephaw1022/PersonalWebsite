@@ -51,3 +51,43 @@ resource "aws_cloudwatch_metric_alarm" "site_down" {
   alarm_actions = [aws_sns_topic.site_alerts.arn]
   ok_actions    = [aws_sns_topic.site_alerts.arn]
 }
+
+resource "aws_sns_topic_subscription" "datadog_forwarder" {
+  topic_arn = aws_sns_topic.site_alerts.arn
+  protocol  = "lambda"
+  endpoint  = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
+}
+
+resource "aws_lambda_permission" "sns_datadog_forwarder" {
+  statement_id  = "AllowSNS-${var.project_name}-site-alerts"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.site_alerts.arn
+}
+
+resource "aws_cloudwatch_event_rule" "site_health_alarm_events" {
+  name        = "${var.project_name}-site-health-alarm-events"
+  description = "Routes Route 53 health check CloudWatch Alarm state changes to the Datadog Forwarder Lambda"
+
+  event_pattern = jsonencode({
+    source      = ["aws.cloudwatch"]
+    detail-type = ["CloudWatch Alarm State Change"]
+    resources   = [aws_cloudwatch_metric_alarm.site_down.arn]
+  })
+}
+
+resource "aws_cloudwatch_event_target" "site_health_alarm_datadog_forwarder" {
+  rule      = aws_cloudwatch_event_rule.site_health_alarm_events.name
+  target_id = "${var.project_name}-site-health-alarm-forwarder"
+  arn       = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
+}
+
+resource "aws_lambda_permission" "site_health_alarm_datadog_forwarder" {
+  statement_id  = "AllowEventBridge-${var.project_name}-site-health-alarm"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.site_health_alarm_events.arn
+}
+
