@@ -18,7 +18,7 @@ This repository standardizes on Node.js 26 (active LTS). Whenever the Node.js ru
    - The `engines.node` field must require the appropriate Node.js runtime (e.g., `">=26"`).
    - `@types/node` under `devDependencies` should align with the runtime major version (`^26`).
 5. **Containerfile (`Containerfile`)**:
-   - The production container base image must specify the corresponding Node.js version using the official Node Docker Hub Alpine image (e.g., `FROM node:26-alpine AS runner`).
+   - The production container base image must specify the corresponding Node.js version using Red Hat's Node.js image (e.g., `FROM registry.access.redhat.com/hi/nodejs:26.11 AS runner`).
 
 ## Verification Checklist
 

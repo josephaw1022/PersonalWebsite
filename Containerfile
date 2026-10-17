@@ -1,4 +1,4 @@
-FROM node:26-alpine AS runner
+FROM registry.access.redhat.com/hi/nodejs:26.11 AS runner
 WORKDIR /opt/app-root/src
 
 ENV NODE_ENV=production
