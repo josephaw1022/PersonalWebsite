@@ -5,6 +5,11 @@ vars:
   CONTAINER_NAME: personal-site-dev
   PORT: "3000"
 
+includes:
+  tf:
+    taskfile: ./terraform/Taskfile.yaml
+    dir: ./terraform
+
 tasks:
   default:
     silent: true
@@ -67,42 +72,6 @@ tasks:
     cmds:
       - npm run format
       - task: tf:fmt
-
-  tf:fmt:
-    desc: Format Terraform configuration files
-    dir: terraform
-    cmds:
-      - terraform fmt
-
-  tf:fmt:check:
-    desc: Check Terraform configuration formatting
-    dir: terraform
-    cmds:
-      - terraform fmt -check
-
-  tf:init:
-    desc: Initialize Terraform providers and backend (backend-less for local validation)
-    dir: terraform
-    cmds:
-      - terraform init -backend=false
-
-  tf:validate:
-    desc: Validate Terraform configuration syntax and integrity
-    dir: terraform
-    cmds:
-      - terraform validate
-
-  tf:plan:
-    desc: Generate and show a Terraform execution plan
-    dir: terraform
-    cmds:
-      - terraform plan
-
-  tf:check:
-    desc: Check Terraform formatting and validate configuration
-    cmds:
-      - task: tf:fmt:check
-      - task: tf:validate
 
   test:helm:
     desc: Run Helm unit tests using helm-unittest
