@@ -28,6 +28,11 @@ test.describe("Site Navigation", () => {
       "Enterprise Homelab Infrastructure",
     );
 
+    // Click on Links navigation link
+    await page.click("nav >> text=Links");
+    await expect(page).toHaveURL(/.*\/links/);
+    await expect(page.locator("h1")).toContainText("Links & Directory");
+
     // Click on Overview navigation link to go back home
     await page.click("nav >> text=Overview");
     await expect(page).toHaveURL(/.*\//);

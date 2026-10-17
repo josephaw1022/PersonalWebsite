@@ -5,6 +5,7 @@ const pages = [
   { name: "about", path: "/about" },
   { name: "skills", path: "/skills" },
   { name: "homelab", path: "/homelab" },
+  { name: "links", path: "/links" },
 ];
 
 test.describe("UI Screenshot Capture", () => {
