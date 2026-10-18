@@ -202,6 +202,10 @@ resource "aws_iam_role_policy" "datadog_agent_ecs_task" {
   name   = "fargate-task-role-default-policy"
   role   = aws_iam_role.datadog_agent.id
   policy = data.aws_iam_policy_document.ecs_task_policy.json
+
+  depends_on = [
+    data.aws_iam_policy_document.ecs_task_policy
+  ]
 }
 
 resource "aws_ecs_task_definition" "personal_site" {

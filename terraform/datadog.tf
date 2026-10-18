@@ -62,6 +62,10 @@ data "aws_iam_policy_document" "datadog_aws_integration" {
     actions   = local.permission_chunks[count.index]
     resources = ["*"]
   }
+
+  depends_on = [
+    data.datadog_integration_aws_iam_permissions.datadog_permissions
+  ]
 }
 
 resource "aws_iam_policy" "datadog_aws_integration" {
@@ -69,6 +73,11 @@ resource "aws_iam_policy" "datadog_aws_integration" {
 
   name   = "DatadogAWSIntegrationPolicy-${count.index + 1}"
   policy = data.aws_iam_policy_document.datadog_aws_integration[count.index].json
+
+  depends_on = [
+    data.datadog_integration_aws_iam_permissions.datadog_permissions,
+    data.aws_iam_policy_document.datadog_aws_integration
+  ]
 }
 
 data "aws_iam_policy_document" "datadog_extra_permissions" {
@@ -77,18 +86,31 @@ data "aws_iam_policy_document" "datadog_extra_permissions" {
     actions   = local.extra_permissions
     resources = ["*"]
   }
+
+  depends_on = [
+    data.datadog_integration_aws_iam_permissions.datadog_permissions
+  ]
 }
 
 resource "aws_iam_policy" "datadog_extra_permissions" {
   name        = "DatadogAWSIntegrationExtraPolicy"
   description = "Additional IAM permissions for Datadog AWS integration and Datadog Agent"
   policy      = data.aws_iam_policy_document.datadog_extra_permissions.json
+
+  depends_on = [
+    data.datadog_integration_aws_iam_permissions.datadog_permissions,
+    data.aws_iam_policy_document.datadog_extra_permissions
+  ]
 }
 
 resource "aws_iam_role" "datadog_aws_integration" {
   name               = var.datadog_role_name
   description        = "Role for Datadog AWS Integration"
   assume_role_policy = data.aws_iam_policy_document.datadog_aws_integration_assume_role.json
+
+  depends_on = [
+    data.aws_iam_policy_document.datadog_aws_integration_assume_role
+  ]
 }
 
 resource "aws_iam_role_policy_attachment" "datadog_aws_integration" {
@@ -96,11 +118,20 @@ resource "aws_iam_role_policy_attachment" "datadog_aws_integration" {
 
   role       = aws_iam_role.datadog_aws_integration.name
   policy_arn = aws_iam_policy.datadog_aws_integration[count.index].arn
+
+  depends_on = [
+    data.datadog_integration_aws_iam_permissions.datadog_permissions,
+    data.aws_iam_policy_document.datadog_aws_integration
+  ]
 }
 
 resource "aws_iam_role_policy_attachment" "datadog_aws_integration_extra" {
   role       = aws_iam_role.datadog_aws_integration.name
   policy_arn = aws_iam_policy.datadog_extra_permissions.arn
+
+  depends_on = [
+    data.aws_iam_policy_document.datadog_extra_permissions
+  ]
 }
 
 resource "aws_iam_role_policy_attachment" "datadog_aws_integration_security_audit" {
@@ -112,6 +143,11 @@ resource "aws_iam_role" "datadog_agent" {
   name               = var.datadog_agent_role_name
   description        = "Role for Datadog Agent ECS container with Datadog AWS integration permissions"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_assume_role.json
+
+  depends_on = [
+    data.aws_iam_policy_document.ecs_task_assume_role,
+    data.datadog_integration_aws_iam_permissions.datadog_permissions
+  ]
 }
 
 resource "aws_iam_role_policy_attachment" "datadog_agent_aws_integration" {
@@ -119,11 +155,20 @@ resource "aws_iam_role_policy_attachment" "datadog_agent_aws_integration" {
 
   role       = aws_iam_role.datadog_agent.name
   policy_arn = aws_iam_policy.datadog_aws_integration[count.index].arn
+
+  depends_on = [
+    data.datadog_integration_aws_iam_permissions.datadog_permissions,
+    data.aws_iam_policy_document.datadog_aws_integration
+  ]
 }
 
 resource "aws_iam_role_policy_attachment" "datadog_agent_extra" {
   role       = aws_iam_role.datadog_agent.name
   policy_arn = aws_iam_policy.datadog_extra_permissions.arn
+
+  depends_on = [
+    data.aws_iam_policy_document.datadog_extra_permissions
+  ]
 }
 
 resource "aws_iam_role_policy_attachment" "datadog_agent_security_audit" {
