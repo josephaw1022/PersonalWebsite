@@ -23,14 +23,13 @@ locals {
 # ==============================================================================
 
 resource "datadog_monitor" "ecs_fargate_cpu_utilization" {
-  name                = "[ECS Fargate] AWS ECS Task CPU utilization is high"
-  type                = "query alert"
-  query               = "avg(last_15m):sum:ecs.fargate.cpu.usage{*} by {ecs_cluster,task_arn,ecs_service} / sum:ecs.fargate.cpu.task.limit{*} by {ecs_cluster,task_arn,ecs_service} * 100 > 80"
-  include_tags        = true
-  new_group_delay     = 300
-  notify_audit        = false
-  on_missing_data     = "default"
-  require_full_window = false
+  name            = "[ECS Fargate] AWS ECS Task CPU utilization is high"
+  type            = "query alert"
+  query           = "avg(last_15m):sum:ecs.fargate.cpu.usage{*} by {ecs_cluster,task_arn,ecs_service} / sum:ecs.fargate.cpu.task.limit{*} by {ecs_cluster,task_arn,ecs_service} * 100 > 80"
+  include_tags    = true
+  new_group_delay = 300
+  notify_audit    = false
+  on_missing_data = "default"
 
   monitor_thresholds {
     critical = 80
@@ -52,14 +51,13 @@ resource "datadog_monitor" "ecs_fargate_cpu_utilization" {
 }
 
 resource "datadog_monitor" "ecs_fargate_memory_utilization" {
-  name                = "[ECS Fargate] AWS ECS Task Memory utilization is high"
-  type                = "query alert"
-  query               = "avg(last_15m):sum:ecs.fargate.mem.usage{*} by {ecs_cluster,task_arn,ecs_service} / sum:ecs.fargate.mem.task.limit{*} by {ecs_cluster,task_arn,ecs_service} * 100 > 80"
-  include_tags        = true
-  new_group_delay     = 300
-  notify_audit        = false
-  on_missing_data     = "default"
-  require_full_window = false
+  name            = "[ECS Fargate] AWS ECS Task Memory utilization is high"
+  type            = "query alert"
+  query           = "avg(last_15m):sum:ecs.fargate.mem.usage{*} by {ecs_cluster,task_arn,ecs_service} / sum:ecs.fargate.mem.task.limit{*} by {ecs_cluster,task_arn,ecs_service} * 100 > 80"
+  include_tags    = true
+  new_group_delay = 300
+  notify_audit    = false
+  on_missing_data = "default"
 
   monitor_thresholds {
     critical = 80
@@ -81,14 +79,13 @@ resource "datadog_monitor" "ecs_fargate_memory_utilization" {
 }
 
 resource "datadog_monitor" "ecs_fargate_ephemeral_storage_utilization" {
-  name                = "[ECS Fargate] Ephemeral storage utilization is high for task {{task_arn.name}} in service {{ecs_service.name}} (cluster {{ecs_cluster.name}})"
-  type                = "query alert"
-  query               = "avg(last_15m):sum:ecs.fargate.ephemeral_storage.utilized{*} by {ecs_cluster,task_arn,ecs_service} / sum:ecs.fargate.ephemeral_storage.reserved{*} by {ecs_cluster,task_arn,ecs_service} * 100 > 80"
-  include_tags        = true
-  new_group_delay     = 300
-  notify_audit        = false
-  on_missing_data     = "default"
-  require_full_window = false
+  name            = "[ECS Fargate] Ephemeral storage utilization is high for task {{task_arn.name}} in service {{ecs_service.name}} (cluster {{ecs_cluster.name}})"
+  type            = "query alert"
+  query           = "avg(last_15m):sum:ecs.fargate.ephemeral_storage.utilized{*} by {ecs_cluster,task_arn,ecs_service} / sum:ecs.fargate.ephemeral_storage.reserved{*} by {ecs_cluster,task_arn,ecs_service} * 100 > 80"
+  include_tags    = true
+  new_group_delay = 300
+  notify_audit    = false
+  on_missing_data = "default"
 
   monitor_thresholds {
     critical = 80
@@ -114,14 +111,13 @@ resource "datadog_monitor" "ecs_fargate_ephemeral_storage_utilization" {
 }
 
 resource "datadog_monitor" "ecs_fargate_network_received_error_rate" {
-  name                = "[ECS Fargate] Network received error rate is high for service: {{ecs_service.name}} in cluster: {{ecs_cluster.name}}"
-  type                = "query alert"
-  query               = "sum(last_5m):sum:ecs.fargate.net.rcvd_errors{*} by {ecs_service,ecs_cluster} / sum:ecs.fargate.net.bytes_rcvd{*} by {ecs_service,ecs_cluster} * 100 > 5"
-  include_tags        = true
-  new_group_delay     = 60
-  notify_audit        = false
-  on_missing_data     = "default"
-  require_full_window = false
+  name            = "[ECS Fargate] Network received error rate is high for service: {{ecs_service.name}} in cluster: {{ecs_cluster.name}}"
+  type            = "query alert"
+  query           = "sum(last_5m):sum:ecs.fargate.net.rcvd_errors{*} by {ecs_service,ecs_cluster} / sum:ecs.fargate.net.bytes_rcvd{*} by {ecs_service,ecs_cluster} * 100 > 5"
+  include_tags    = true
+  new_group_delay = 60
+  notify_audit    = false
+  on_missing_data = "default"
 
   monitor_thresholds {
     critical = 5
@@ -137,14 +133,13 @@ resource "datadog_monitor" "ecs_fargate_network_received_error_rate" {
 }
 
 resource "datadog_monitor" "ecs_fargate_network_sent_error_rate" {
-  name                = "[ECS Fargate] Network sent error rate is high for service: {{ecs_service.name}} in cluster: {{ecs_cluster.name}}"
-  type                = "query alert"
-  query               = "sum(last_5m):sum:ecs.fargate.net.sent_errors{*} by {ecs_service,ecs_cluster} / sum:ecs.fargate.net.bytes_sent{*} by {ecs_service,ecs_cluster} * 100 > 5"
-  include_tags        = true
-  new_group_delay     = 60
-  notify_audit        = false
-  on_missing_data     = "default"
-  require_full_window = false
+  name            = "[ECS Fargate] Network sent error rate is high for service: {{ecs_service.name}} in cluster: {{ecs_cluster.name}}"
+  type            = "query alert"
+  query           = "sum(last_5m):sum:ecs.fargate.net.sent_errors{*} by {ecs_service,ecs_cluster} / sum:ecs.fargate.net.bytes_sent{*} by {ecs_service,ecs_cluster} * 100 > 5"
+  include_tags    = true
+  new_group_delay = 60
+  notify_audit    = false
+  on_missing_data = "default"
 
   monitor_thresholds {
     critical = 5
@@ -166,12 +161,13 @@ resource "datadog_monitor" "ecs_fargate_network_sent_error_rate" {
 resource "datadog_monitor" "ecs_cpu_reservation" {
   name                = "[AWS] ECS CPU Reservation Exceeds Threshold"
   type                = "query alert"
-  query               = "min(last_30m):avg:aws.ecs.cpuutilization{*} by {clustername,aws_account,region} > 90"
+  query               = "min(last_30m):sum:aws.ecs.cpureservation{*} by {clustername,aws_account,region} > 90"
   evaluation_delay    = 900
   include_tags        = true
   new_group_delay     = 60
   notify_audit        = false
-  on_missing_data     = "default"
+  on_missing_data     = "show_no_data"
+  renotify_interval   = 0
   require_full_window = false
 
   monitor_thresholds {
@@ -195,15 +191,19 @@ resource "datadog_monitor" "ecs_cpu_reservation" {
 }
 
 resource "datadog_monitor" "ecs_memory_reservation" {
-  name                = "[AWS] ECS Memory Reservation Exceeds Threshold"
-  type                = "query alert"
-  query               = "min(last_30m):avg:aws.ecs.memory_utilization{*} by {clustername,aws_account,region} > 90"
-  evaluation_delay    = 900
-  include_tags        = true
-  new_group_delay     = 60
-  notify_audit        = false
-  on_missing_data     = "default"
-  require_full_window = false
+  name                 = "[AWS] ECS Memory Reservation Exceeds Threshold"
+  type                 = "query alert"
+  query                = "min(last_30m):sum:aws.ecs.memory_reservation{*} by {clustername,aws_account,region} > 90"
+  escalation_message   = ""
+  evaluation_delay     = 900
+  include_tags         = true
+  new_group_delay      = 60
+  notify_audit         = false
+  on_missing_data      = "show_no_data"
+  renotify_interval    = 1440
+  renotify_occurrences = 0
+  renotify_statuses    = ["alert"]
+  require_full_window  = false
 
   monitor_thresholds {
     warning  = 80
@@ -226,14 +226,15 @@ resource "datadog_monitor" "ecs_memory_reservation" {
 }
 
 resource "datadog_monitor" "ecs_running_task_count_differs_from_desired" {
-  name                = "[AWS] ECS Running Task Count Differs from Desired Count"
+  name                = "[AWS] ECS Running Task Count differs from Desired Count"
   type                = "query alert"
   query               = "min(last_1h):sum:aws.ecs.service.desired{*} by {servicename,clustername,aws_account,region} - sum:aws.ecs.service.running{*} by {servicename,clustername,aws_account,region} >= 1"
   evaluation_delay    = 900
   include_tags        = true
   new_group_delay     = 60
   notify_audit        = false
-  on_missing_data     = "default"
+  on_missing_data     = "show_no_data"
+  renotify_interval   = 0
   require_full_window = false
 
   monitor_thresholds {
@@ -254,16 +255,18 @@ resource "datadog_monitor" "ecs_running_task_count_differs_from_desired" {
 resource "datadog_monitor" "ecs_task_placement_failed" {
   name                   = "[AWS] ECS Task Placement Failed"
   type                   = "event-v2 alert"
-  query                  = "events(\"source:amazon_ecs \\\"unable to place a task\\\"\").rollup(\"count\").by(\"servicename,clustername,aws_account,region\").last(\"5m\") > 0"
+  query                  = "events(\"source:amazon_ecs \\\"was unable to place a task\\\"\").rollup(\"count\").by(\"servicename,clustername,aws_account,region\").last(\"30m\") > 1"
+  evaluation_delay       = 900
   groupby_simple_monitor = false
   include_tags           = true
   new_group_delay        = 60
   notify_audit           = false
-  on_missing_data        = "default"
+  on_missing_data        = "show_no_data"
+  renotify_interval      = 0
   require_full_window    = false
 
   monitor_thresholds {
-    critical = 0
+    critical = 1
   }
 
   message = <<-EOT
@@ -280,16 +283,18 @@ resource "datadog_monitor" "ecs_task_placement_failed" {
 resource "datadog_monitor" "ecs_tasks_failed_to_start" {
   name                   = "[AWS] ECS Tasks Failed to Start Successfully"
   type                   = "event-v2 alert"
-  query                  = "events(\"source:amazon_ecs \\\"unable to consistently start tasks successfully\\\"\").rollup(\"count\").by(\"servicename,clustername,aws_account,region\").last(\"5m\") > 0"
+  query                  = "events(\"source:amazon_ecs \\\"unable to consistently start tasks successfully\\\"\").rollup(\"count\").by(\"servicename,clustername,aws_account,region\").last(\"30m\") > 1"
+  evaluation_delay       = 900
   groupby_simple_monitor = false
   include_tags           = true
   new_group_delay        = 60
   notify_audit           = false
-  on_missing_data        = "default"
+  on_missing_data        = "show_no_data"
+  renotify_interval      = 0
   require_full_window    = false
 
   monitor_thresholds {
-    critical = 0
+    critical = 1
   }
 
   message = <<-EOT
@@ -297,7 +302,7 @@ resource "datadog_monitor" "ecs_tasks_failed_to_start" {
     ECS service:{{servicename.name}} (cluster:{{clustername.name}}) was unable to start successfully.
     {{/is_alert}}
 
-    To investigate further, view the affected service in the [ECS Explorer](/orchestration/explorer/ecsService?query=ecs_service:{{servicename.name}}+ecs_cluster:{{clustername.name}}+aws_account:{{aws_account.name}}+region:{{region.name}})${local.monitor_notification_suffix}
+    To investigate further, view the affected service in the ECS Explorer](/orchestration/explorer/ecsService?query=ecs_service:{{servicename.name}}+ecs_cluster:{{clustername.name}}+aws_account:{{aws_account.name}}+region:{{region.name}})${local.monitor_notification_suffix}
   EOT
 
   tags = concat(local.ecs_monitor_tags, ["integration:amazon_ecs"])
