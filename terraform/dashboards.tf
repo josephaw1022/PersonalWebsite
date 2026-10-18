@@ -174,15 +174,6 @@ resource "datadog_dashboard" "personal_site" {
         }
       }
 
-      widget {
-        check_status_definition {
-          title    = "Container HTTP Check Status"
-          check    = "http.can_connect"
-          grouping = "check"
-          group_by = ["instance", "env"]
-          tags     = ["service:${local.dd_service}"]
-        }
-      }
     }
   }
 
@@ -217,18 +208,29 @@ resource "datadog_dashboard" "personal_site" {
 
       widget {
         timeseries_definition {
-          title = "Cloudflare Tunnel Active TCP Streams"
+          title = "Cloudflare Tunnel Active HA Connections"
           request {
-            q            = "sum:cloudflared.cloudflared_tcp_active_sessions{*}"
+            q            = "avg:cloudflared.cloudflared_tunnel_ha_connections{*}"
             display_type = "line"
           }
         }
       }
+    }
+  }
+
+  # ----------------------------------------------------------------------------
+  # Group: Personal Site Monitors & Service Health
+  # ----------------------------------------------------------------------------
+  widget {
+    group_definition {
+      title            = "Personal Site Monitors & Service Health"
+      layout_type      = "ordered"
+      background_color = "vivid_purple"
 
       widget {
         manage_status_definition {
           title               = "Monitors Status"
-          query               = "type:monitor (service:${local.dd_service} OR clustername:${aws_ecs_cluster.main.name})"
+          query               = "service:${local.dd_service}"
           sort                = "status,asc"
           display_format      = "countsAndList"
           color_preference    = "text"
