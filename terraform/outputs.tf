@@ -117,3 +117,13 @@ output "datadog_ci_pipeline_monitor_ids" {
     deploy_aws_terraform = datadog_monitor.gh_workflow_deploy_aws_terraform.id
   }
 }
+
+output "datadog_dashboard_id" {
+  description = "ID of the unified Datadog service and infrastructure dashboard"
+  value       = datadog_dashboard.personal_site.id
+}
+
+output "datadog_dashboard_url" {
+  description = "URL to access the unified Datadog service and infrastructure dashboard"
+  value       = "https://app.${var.datadog_site}/dashboard/${datadog_dashboard.personal_site.id}"
+}

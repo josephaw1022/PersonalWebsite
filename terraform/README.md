@@ -33,7 +33,11 @@ This directory provisions a lightweight, serverless AWS ECS Fargate deployment f
    - Provisions the 10 recommended Datadog ECS & Fargate monitors (`terraform/monitors.tf`) covering Fargate task CPU, memory, ephemeral storage, and network error rates (`integration:ecs_fargate`), as well as ECS cluster CPU/memory reservation, running vs. desired task count, task placement failures, and task startup failures (`integration:amazon_ecs`).
    - Provisions Datadog CI Pipeline monitors (`type = "ci-pipelines alert"`) watching the `main` branch for failures in the `Container Image - Build & Push (GHCR)` and `Deploy Personal Site - AWS (Terraform)` GitHub Actions workflows.
    - Automatically routes alert notifications to `@${var.alert_email}` when configured.
-7. **S3 Remote State Backend**:
+7. **Datadog Service & Infrastructure Dashboard**:
+   - Provisions a unified Datadog dashboard (`terraform/dashboards.tf`) tagged with the canonical unified service tags (`env`, `service`, `version`).
+   - Features template variables for dynamic filtering across environments and versions.
+   - Includes widgets organized into logical groups: APM & Next.js runtime performance (hits, errors, latency percentiles, heap usage, event loop lag, process CPU), ECS Fargate resource utilization (task CPU, memory, ephemeral storage, network I/O, desired vs running tasks, container health check status), and Ingress & Cloudflare Tunnel status (Synthetics latency, tunnel request volume, active TCP streams, and monitors status).
+8. **S3 Remote State Backend**:
    - Uses an encrypted S3 bucket with versioning and native S3 lockfiles (`use_lockfile = true`).
 
 ## 1. Bootstrap AWS S3 State Bucket & GitHub OIDC Role
