@@ -9,8 +9,13 @@ output "ecs_service_name" {
 }
 
 output "cloudwatch_log_group" {
-  description = "CloudWatch Log Group for the personal-site, cloudflared, and datadog-agent containers"
+  description = "CloudWatch Log Group for the ECS task and FireLens log router"
   value       = aws_cloudwatch_log_group.ecs.name
+}
+
+output "ecs_task_role_arn" {
+  description = "ARN of the ECS Task IAM role used by the Datadog Agent"
+  value       = aws_iam_role.ecs_task.arn
 }
 
 output "cloudflare_tunnel_id" {

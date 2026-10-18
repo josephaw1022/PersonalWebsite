@@ -10,7 +10,7 @@ Manages temporary cloud infrastructure powering the website on AWS ECS Fargate w
 ### Directory Structure
 
 - `terraform/network.tf`: VPC, subnets, route tables, and ECS security groups.
-- `terraform/ecs.tf`: ECS cluster, task definitions (`personal-site`, `cloudflared`, and `datadog-agent` sidecars), service, Application Auto Scaling target and policies (CPU and memory target tracking up to 5 tasks), CloudWatch subscription filters and Lambda permissions for container and Container Insights logs, and EventBridge rule routing ECS task state changes to Datadog Forwarder.
+- `terraform/ecs.tf`: ECS cluster, task execution and task IAM roles, task definitions (`personal-site`, `cloudflared`, `datadog-log-router` FireLens Fluent Bit sidecar, and `datadog-agent` sidecar with shared `dd-sockets` volume), service, Application Auto Scaling target and policies (CPU and memory target tracking up to 5 tasks), CloudWatch subscription filters and Lambda permissions for FireLens router and Container Insights logs, and EventBridge rule routing ECS task state changes to Datadog Forwarder.
 - `terraform/datadog.tf`: Datadog AWS account-level integration (`datadog_integration_aws_account`), IAM integration role/policies, and Datadog Forwarder CloudFormation stack (`aws_cloudformation_stack.datadog_forwarder`).
 - `terraform/cloudflare.tf`: Zero Trust Tunnel, ingress rules, and DNS records.
 - `terraform/health_check.tf`: Route 53 health check, CloudWatch alarm, SNS topic/subscriptions (including Datadog Forwarder), and EventBridge rule routing Route 53 health alarm events to Datadog Forwarder.
