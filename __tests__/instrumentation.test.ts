@@ -1,6 +1,3 @@
-import { register } from "@/instrumentation";
-import tracer from "dd-trace";
-
 jest.mock("dd-trace", () => ({
   __esModule: true,
   default: {
@@ -12,6 +9,7 @@ describe("instrumentation", () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
+    jest.resetModules();
     jest.clearAllMocks();
     process.env = { ...originalEnv };
   });
@@ -22,11 +20,13 @@ describe("instrumentation", () => {
 
   it("initializes dd-trace when NEXT_RUNTIME is nodejs", async () => {
     process.env.NEXT_RUNTIME = "nodejs";
+    const { register: freshRegister } = await import("@/instrumentation");
+    const freshTracer = (await import("dd-trace")).default;
 
-    await register();
+    await freshRegister();
 
-    expect(tracer.init).toHaveBeenCalledTimes(1);
-    expect(tracer.init).toHaveBeenCalledWith({
+    expect(freshTracer.init).toHaveBeenCalledTimes(1);
+    expect(freshTracer.init).toHaveBeenCalledWith({
       logInjection: true,
       runtimeMetrics: true,
     });
@@ -34,9 +34,11 @@ describe("instrumentation", () => {
 
   it("does not initialize dd-trace when NEXT_RUNTIME is not nodejs", async () => {
     process.env.NEXT_RUNTIME = "edge";
+    const { register: freshRegister } = await import("@/instrumentation");
+    const freshTracer = (await import("dd-trace")).default;
 
-    await register();
+    await freshRegister();
 
-    expect(tracer.init).not.toHaveBeenCalled();
+    expect(freshTracer.init).not.toHaveBeenCalled();
   });
 });
