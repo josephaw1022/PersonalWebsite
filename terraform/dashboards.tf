@@ -89,7 +89,7 @@ resource "datadog_dashboard" "personal_site" {
         timeseries_definition {
           title = "Node.js Event Loop Lag"
           request {
-            q            = "avg:runtime.node.event_loop.lag.avg{$service, $env}"
+            q            = "avg:runtime.node.event_loop.delay.avg{$service, $env} / 1000000"
             display_type = "line"
           }
         }
@@ -99,7 +99,7 @@ resource "datadog_dashboard" "personal_site" {
         timeseries_definition {
           title = "Node.js Process CPU Utilization"
           request {
-            q            = "avg:runtime.node.cpu.utilization{$service, $env}"
+            q            = "avg:runtime.node.cpu.total{$service, $env}"
             display_type = "line"
           }
         }
@@ -199,7 +199,7 @@ resource "datadog_dashboard" "personal_site" {
         timeseries_definition {
           title = "Synthetics Uptime & Response Time"
           request {
-            q            = "avg:datadog.synthetics.test.response_time{test_id:${datadog_synthetics_test.site_health.id}}"
+            q            = "avg:synthetics.http.response.time{check_id:${datadog_synthetics_test.site_health.id}}"
             display_type = "line"
           }
         }
@@ -209,7 +209,7 @@ resource "datadog_dashboard" "personal_site" {
         timeseries_definition {
           title = "Cloudflare Tunnel Requests & Status"
           request {
-            q            = "sum:cloudflared.tunnel_total_requests{*} by {user_agent}"
+            q            = "sum:cloudflared.cloudflared_tunnel_total_requests.count{*} by {user_hostname}"
             display_type = "line"
           }
         }
@@ -219,7 +219,7 @@ resource "datadog_dashboard" "personal_site" {
         timeseries_definition {
           title = "Cloudflare Tunnel Active TCP Streams"
           request {
-            q            = "sum:cloudflared.tcp_active_streams{*}"
+            q            = "sum:cloudflared.cloudflared_tcp_active_sessions{*}"
             display_type = "line"
           }
         }
@@ -228,7 +228,7 @@ resource "datadog_dashboard" "personal_site" {
       widget {
         manage_status_definition {
           title               = "Monitors Status"
-          query               = "service:${local.dd_service} OR clustername:${aws_ecs_cluster.main.name}"
+          query               = "type:monitor (service:${local.dd_service} OR clustername:${aws_ecs_cluster.main.name})"
           sort                = "status,asc"
           display_format      = "countsAndList"
           color_preference    = "text"
