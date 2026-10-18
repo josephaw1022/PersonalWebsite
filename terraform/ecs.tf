@@ -333,9 +333,8 @@ resource "aws_ecs_task_definition" "personal_site" {
         }
       ]
       dockerLabels = {
-        "com.datadoghq.tags.env"     = local.dd_env
+        "com.datadoghq.tags.env"     = var.datadog_env
         "com.datadoghq.tags.service" = "cloudflared"
-        "com.datadoghq.tags.version" = local.dd_version
         "com.datadoghq.ad.checks" = jsonencode({
           openmetrics = {
             init_config = {}
@@ -348,21 +347,11 @@ resource "aws_ecs_task_definition" "personal_site" {
             ]
           }
         })
-        "com.datadoghq.ad.logs" = jsonencode([
-          {
-            source  = "cloudflared"
-            service = "cloudflared"
-          }
-        ])
       }
       dependsOn = [
         {
           containerName = "personal-site"
           condition     = "HEALTHY"
-        },
-        {
-          containerName = "datadog-log-router"
-          condition     = "START"
         }
       ]
       healthCheck = {
@@ -392,7 +381,7 @@ resource "aws_ecs_task_definition" "personal_site" {
           provider   = "ecs"
           dd_service = "cloudflared"
           dd_source  = "cloudflared"
-          dd_tags    = "env:${local.dd_env},service:cloudflared,version:${local.dd_version}"
+          dd_tags    = "env:${var.datadog_env}"
         }
         secretOptions = [
           {
