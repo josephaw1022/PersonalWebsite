@@ -15,7 +15,12 @@ output "cloudwatch_log_group" {
 
 output "ecs_task_role_arn" {
   description = "ARN of the ECS Task IAM role used by the Datadog Agent"
-  value       = aws_iam_role.ecs_task.arn
+  value       = aws_iam_role.datadog_agent.arn
+}
+
+output "datadog_agent_role_arn" {
+  description = "ARN of the Datadog Agent ECS IAM role"
+  value       = aws_iam_role.datadog_agent.arn
 }
 
 output "cloudflare_tunnel_id" {
@@ -50,7 +55,7 @@ output "datadog_integration_role_arn" {
 
 output "datadog_integration_policy_arns" {
   description = "ARNs of the chunked Datadog AWS integration IAM policies"
-  value       = aws_iam_policy.datadog_aws_integration[*].arn
+  value       = concat(aws_iam_policy.datadog_aws_integration[*].arn, [aws_iam_policy.datadog_extra_permissions.arn])
 }
 
 output "datadog_external_id" {
