@@ -219,6 +219,12 @@ variable "datadog_agent_image" {
   default     = "public.ecr.aws/datadog/agent:latest"
 }
 
+variable "datadog_log_router_image" {
+  description = "Container image for the AWS FireLens Fluent Bit log router sidecar"
+  type        = string
+  default     = "public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"
+}
+
 variable "datadog_role_name" {
   description = "Name of the IAM role assumed by Datadog for the AWS account integration"
   type        = string

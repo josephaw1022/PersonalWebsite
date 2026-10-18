@@ -175,6 +175,29 @@ resource "aws_iam_role_policy" "ecs_ssm_access" {
   policy = data.aws_iam_policy_document.ecs_ssm_access.json
 }
 
+resource "aws_iam_role" "ecs_task" {
+  name               = "${var.project_name}-ecs-task-role"
+  assume_role_policy = data.aws_iam_policy_document.ecs_task_assume_role.json
+}
+
+data "aws_iam_policy_document" "ecs_task_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecs:ListClusters",
+      "ecs:ListContainerInstances",
+      "ecs:DescribeContainerInstances"
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "ecs_task" {
+  name   = "fargate-task-role-default-policy"
+  role   = aws_iam_role.ecs_task.id
+  policy = data.aws_iam_policy_document.ecs_task_policy.json
+}
+
 resource "aws_ecs_task_definition" "personal_site" {
   family                   = var.project_name
   network_mode             = "awsvpc"
@@ -182,6 +205,11 @@ resource "aws_ecs_task_definition" "personal_site" {
   cpu                      = tostring(var.task_cpu)
   memory                   = tostring(var.task_memory)
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
+  task_role_arn            = aws_iam_role.ecs_task.arn
+
+  volume {
+    name = "dd-sockets"
+  }
 
   container_definitions = jsonencode([
     {
@@ -219,6 +247,20 @@ resource "aws_ecs_task_definition" "personal_site" {
         {
           name  = "DD_VERSION"
           value = var.ghcr_image_tag
+        },
+        {
+          name  = "DD_TRACE_AGENT_URL"
+          value = "unix:///var/run/datadog/apm.socket"
+        },
+        {
+          name  = "DD_PROFILING_ENABLED"
+          value = "true"
+        }
+      ]
+      mountPoints = [
+        {
+          containerPath = "/var/run/datadog"
+          sourceVolume  = "dd-sockets"
         }
       ]
       dockerLabels = {
@@ -254,12 +296,22 @@ resource "aws_ecs_task_definition" "personal_site" {
         restartAttemptPeriod = 300
       }
       logConfiguration = {
-        logDriver = "awslogs"
+        logDriver = "awsfirelens"
         options = {
-          awslogs-group         = aws_cloudwatch_log_group.ecs.name
-          awslogs-region        = var.aws_region
-          awslogs-stream-prefix = "personal-site"
+          Name       = "datadog"
+          Host       = "http-intake.logs.${var.datadog_site}"
+          TLS        = "on"
+          provider   = "ecs"
+          dd_service = var.project_name
+          dd_source  = "nextjs"
+          dd_tags    = "env:${var.datadog_env},version:${var.ghcr_image_tag}"
         }
+        secretOptions = [
+          {
+            name      = "apikey"
+            valueFrom = aws_ssm_parameter.datadog_api_key.arn
+          }
+        ]
       }
     },
     {
@@ -320,11 +372,44 @@ resource "aws_ecs_task_definition" "personal_site" {
         restartAttemptPeriod = 300
       }
       logConfiguration = {
+        logDriver = "awsfirelens"
+        options = {
+          Name       = "datadog"
+          Host       = "http-intake.logs.${var.datadog_site}"
+          TLS        = "on"
+          provider   = "ecs"
+          dd_service = "cloudflared"
+          dd_source  = "cloudflared"
+          dd_tags    = "env:${var.datadog_env}"
+        }
+        secretOptions = [
+          {
+            name      = "apikey"
+            valueFrom = aws_ssm_parameter.datadog_api_key.arn
+          }
+        ]
+      }
+    },
+    {
+      name      = "datadog-log-router"
+      image     = var.datadog_log_router_image
+      essential = true
+      firelensConfiguration = {
+        type = "fluentbit"
+        options = {
+          enable-ecs-log-metadata = "true"
+        }
+      }
+      restartPolicy = {
+        enabled              = true
+        restartAttemptPeriod = 300
+      }
+      logConfiguration = {
         logDriver = "awslogs"
         options = {
           awslogs-group         = aws_cloudwatch_log_group.ecs.name
           awslogs-region        = var.aws_region
-          awslogs-stream-prefix = "cloudflared"
+          awslogs-stream-prefix = "datadog-log-router"
         }
       }
     },
@@ -388,6 +473,12 @@ resource "aws_ecs_task_definition" "personal_site" {
           valueFrom = aws_ssm_parameter.datadog_api_key.arn
         }
       ]
+      mountPoints = [
+        {
+          containerPath = "/var/run/datadog"
+          sourceVolume  = "dd-sockets"
+        }
+      ]
       dockerLabels = {
         "com.datadoghq.tags.env"     = var.datadog_env
         "com.datadoghq.tags.service" = "datadog-agent"
@@ -407,12 +498,22 @@ resource "aws_ecs_task_definition" "personal_site" {
         restartAttemptPeriod = 300
       }
       logConfiguration = {
-        logDriver = "awslogs"
+        logDriver = "awsfirelens"
         options = {
-          awslogs-group         = aws_cloudwatch_log_group.ecs.name
-          awslogs-region        = var.aws_region
-          awslogs-stream-prefix = "datadog-agent"
+          Name       = "datadog"
+          Host       = "http-intake.logs.${var.datadog_site}"
+          TLS        = "on"
+          provider   = "ecs"
+          dd_service = "datadog-agent"
+          dd_source  = "datadog-agent"
+          dd_tags    = "env:${var.datadog_env}"
         }
+        secretOptions = [
+          {
+            name      = "apikey"
+            valueFrom = aws_ssm_parameter.datadog_api_key.arn
+          }
+        ]
       }
     }
   ])
