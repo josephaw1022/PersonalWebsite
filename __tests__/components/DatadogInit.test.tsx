@@ -106,7 +106,7 @@ describe("DatadogInit", () => {
           applicationId: "598f7204-f0eb-4d7c-b368-f4667519c778",
           clientToken: "pub65b5dd43ebefdb14d6de68b1d72d6869",
           site: "us5.datadoghq.com",
-          service: "personal-website",
+          service: "personal-site",
           env: "production",
           allowedTracingUrls: [
             expect.objectContaining({
