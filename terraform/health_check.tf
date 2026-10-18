@@ -1,93 +1,41 @@
-resource "aws_route53_health_check" "site" {
-  fqdn              = var.domain_name
-  port              = 443
-  type              = "HTTPS"
-  resource_path     = var.health_check_path
-  failure_threshold = var.health_check_failure_threshold
-  request_interval  = var.health_check_request_interval
-  enable_sni        = true
+resource "datadog_synthetics_test" "site_health" {
+  name      = "${var.project_name} HTTPS Health Check"
+  type      = "api"
+  subtype   = "http"
+  status    = "live"
+  message   = var.alert_email != null && var.alert_email != "" ? "Site https://${var.domain_name}${var.health_check_path} is unreachable or failing health checks. @${var.alert_email}" : "Site https://${var.domain_name}${var.health_check_path} is unreachable or failing health checks."
+  locations = var.health_check_locations
 
-  tags = {
-    Name = "${var.project_name}-health-check"
-  }
-}
+  tags = [
+    "env:${coalesce(var.env, var.datadog_env, "prod")}",
+    "service:${coalesce(var.service, var.project_name)}",
+    "managed_by:terraform"
+  ]
 
-resource "aws_sns_topic" "site_alerts" {
-  name         = "${var.project_name}-health-alerts"
-  display_name = "SiteAlerts"
-}
-
-
-resource "aws_sns_topic_subscription" "email" {
-  count     = var.alert_email != null && var.alert_email != "" ? 1 : 0
-  topic_arn = aws_sns_topic.site_alerts.arn
-  protocol  = "email"
-  endpoint  = var.alert_email
-}
-
-resource "aws_sns_topic_subscription" "sms" {
-  count     = var.alert_phone_number != null && var.alert_phone_number != "" ? 1 : 0
-  topic_arn = aws_sns_topic.site_alerts.arn
-  protocol  = "sms"
-  endpoint  = var.alert_phone_number
-}
-
-resource "aws_cloudwatch_metric_alarm" "site_down" {
-  alarm_name          = "${var.project_name}-site-down"
-  comparison_operator = "LessThanThreshold"
-  evaluation_periods  = 1
-  metric_name         = "HealthCheckStatus"
-  namespace           = "AWS/Route53"
-  period              = 60
-  statistic           = "Minimum"
-  threshold           = 1
-  alarm_description   = "Triggered when Route 53 health check fails for ${var.domain_name} (site is down)."
-  treat_missing_data  = "breaching"
-
-  dimensions = {
-    HealthCheckId = aws_route53_health_check.site.id
+  request_definition {
+    method  = "GET"
+    url     = "https://${var.domain_name}${var.health_check_path}"
+    timeout = 10
   }
 
-  alarm_actions = [aws_sns_topic.site_alerts.arn]
-  ok_actions    = [aws_sns_topic.site_alerts.arn]
+  assertion {
+    type     = "statusCode"
+    operator = "is"
+    target   = "200"
+  }
+
+  options_list {
+    tick_every           = var.health_check_request_interval
+    min_failure_duration = 0
+    min_location_failed  = 1
+
+    retry {
+      count    = var.health_check_failure_threshold - 1
+      interval = 1000
+    }
+
+    monitor_options {
+      renotify_interval = 0
+    }
+  }
 }
-
-resource "aws_sns_topic_subscription" "datadog_forwarder" {
-  topic_arn = aws_sns_topic.site_alerts.arn
-  protocol  = "lambda"
-  endpoint  = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
-}
-
-resource "aws_lambda_permission" "sns_datadog_forwarder" {
-  statement_id  = "AllowSNS-${var.project_name}-site-alerts"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
-  principal     = "sns.amazonaws.com"
-  source_arn    = aws_sns_topic.site_alerts.arn
-}
-
-resource "aws_cloudwatch_event_rule" "site_health_alarm_events" {
-  name        = "${var.project_name}-site-health-alarm-events"
-  description = "Routes Route 53 health check CloudWatch Alarm state changes to the Datadog Forwarder Lambda"
-
-  event_pattern = jsonencode({
-    source      = ["aws.cloudwatch"]
-    detail-type = ["CloudWatch Alarm State Change"]
-    resources   = [aws_cloudwatch_metric_alarm.site_down.arn]
-  })
-}
-
-resource "aws_cloudwatch_event_target" "site_health_alarm_datadog_forwarder" {
-  rule      = aws_cloudwatch_event_rule.site_health_alarm_events.name
-  target_id = "${var.project_name}-site-health-alarm-forwarder"
-  arn       = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
-}
-
-resource "aws_lambda_permission" "site_health_alarm_datadog_forwarder" {
-  statement_id  = "AllowEventBridge-${var.project_name}-site-health-alarm"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.site_health_alarm_events.arn
-}
-

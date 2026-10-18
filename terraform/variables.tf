@@ -160,31 +160,31 @@ variable "create_www_record" {
 }
 
 variable "health_check_path" {
-  description = "URL path for the Route 53 health check"
+  description = "URL path for the Datadog Synthetics HTTP health check"
   type        = string
   default     = "/"
 }
 
 variable "health_check_request_interval" {
-  description = "The number of seconds between Route 53 health check probes (30 for standard, 10 for fast)"
+  description = "The number of seconds between Datadog Synthetics health check probes"
   type        = number
-  default     = 30
+  default     = 60
 }
 
 variable "health_check_failure_threshold" {
-  description = "The number of consecutive health check probe failures before marking the endpoint unhealthy"
+  description = "The number of consecutive health check probe attempts before marking the endpoint unhealthy"
   type        = number
   default     = 3
 }
 
-variable "alert_email" {
-  description = "Email address to receive alerts when the site goes down (leave empty or null to disable email alerts)"
-  type        = string
-  default     = null
+variable "health_check_locations" {
+  description = "Datadog Synthetics managed locations used to probe the public site URL"
+  type        = list(string)
+  default     = ["aws:us-east-1"]
 }
 
-variable "alert_phone_number" {
-  description = "Phone number in E.164 format (e.g. +12345678901) to receive SMS text alerts when the site goes down (leave empty or null to disable SMS alerts)"
+variable "alert_email" {
+  description = "Email address or Datadog notification handle to receive alerts when the site goes down (leave empty or null to disable email notifications)"
   type        = string
   default     = null
 }

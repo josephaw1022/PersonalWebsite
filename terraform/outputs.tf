@@ -33,19 +33,14 @@ output "site_url" {
   value       = "https://${var.domain_name}"
 }
 
-output "route53_health_check_id" {
-  description = "ID of the Route 53 health check"
-  value       = aws_route53_health_check.site.id
+output "datadog_synthetics_test_id" {
+  description = "Public ID of the Datadog Synthetics HTTP health check test"
+  value       = datadog_synthetics_test.site_health.id
 }
 
-output "sns_topic_arn" {
-  description = "ARN of the SNS topic for site down alerts"
-  value       = aws_sns_topic.site_alerts.arn
-}
-
-output "cloudwatch_alarm_arn" {
-  description = "ARN of the CloudWatch metric alarm monitoring the site health"
-  value       = aws_cloudwatch_metric_alarm.site_down.arn
+output "datadog_synthetics_monitor_id" {
+  description = "Monitor ID associated with the Datadog Synthetics HTTP health check"
+  value       = datadog_synthetics_test.site_health.monitor_id
 }
 
 output "datadog_integration_role_arn" {
@@ -89,26 +84,7 @@ output "autoscaling_max_capacity" {
   value       = aws_appautoscaling_target.personal_site.max_capacity
 }
 
-output "cloudwatch_container_insights_log_group" {
-  description = "CloudWatch Log Group for ECS cluster container insights"
-  value       = aws_cloudwatch_log_group.ecs_container_insights.name
-}
-
 output "ecs_task_events_rule_arn" {
-  description = "ARN of the EventBridge rule routing ECS task state changes to Datadog Forwarder"
+  description = "ARN of the EventBridge rule routing ECS task, service, and deployment state changes to Datadog Forwarder"
   value       = aws_cloudwatch_event_rule.ecs_task_events.arn
 }
-
-output "site_health_alarm_rule_arn" {
-  description = "ARN of the EventBridge rule routing Route 53 health check alarm state changes to Datadog Forwarder"
-  value       = aws_cloudwatch_event_rule.site_health_alarm_events.arn
-}
-
-output "ecs_container_insights_events_rule_arn" {
-  description = "ARN of the EventBridge rule routing ECS Container Insights events to Datadog Forwarder"
-  value       = aws_cloudwatch_event_rule.ecs_container_insights_events.arn
-}
-
-
-
-

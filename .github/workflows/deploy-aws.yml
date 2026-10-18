@@ -88,9 +88,6 @@ jobs:
           if [[ -n "${{ vars.ALERT_EMAIL || secrets.ALERT_EMAIL }}" ]]; then
             echo "TF_VAR_alert_email=${{ vars.ALERT_EMAIL || secrets.ALERT_EMAIL }}" >> "$GITHUB_ENV"
           fi
-          if [[ -n "${{ vars.ALERT_PHONE_NUMBER || secrets.ALERT_PHONE_NUMBER }}" ]]; then
-            echo "TF_VAR_alert_phone_number=${{ vars.ALERT_PHONE_NUMBER || secrets.ALERT_PHONE_NUMBER }}" >> "$GITHUB_ENV"
-          fi
 
       - name: Terraform Plan
         if: ${{ github.event.inputs.action != 'destroy' }}
