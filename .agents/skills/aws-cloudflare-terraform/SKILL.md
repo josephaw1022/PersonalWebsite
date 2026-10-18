@@ -14,6 +14,7 @@ Manages temporary cloud infrastructure powering the website on AWS ECS Fargate w
 - `terraform/datadog.tf`: Datadog AWS account-level integration (`datadog_integration_aws_account`), IAM integration role/policies, and Datadog Forwarder CloudFormation stack (`aws_cloudformation_stack.datadog_forwarder`).
 - `terraform/cloudflare.tf`: Zero Trust Tunnel, ingress rules, and DNS records.
 - `terraform/health_check.tf`: Datadog Synthetics HTTP API test (`datadog_synthetics_test.site_health`) monitoring the public HTTPS endpoint and alerting via Datadog monitor notifications.
+- `terraform/monitors.tf`: Datadog monitors (`datadog_monitor`) for ECS Fargate (`integration:ecs_fargate`), Amazon ECS (`integration:amazon_ecs`), and GitHub Actions CI/CD workflows on `main` (`ci-pipelines alert`).
 - `terraform/versions.tf`: Provider requirements and S3 remote backend configuration.
 - `terraform/variables.tf` / `outputs.tf`: Variable definitions and output values.
 
