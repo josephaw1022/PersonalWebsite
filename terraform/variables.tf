@@ -4,6 +4,24 @@ variable "project_name" {
   default     = "personal-site"
 }
 
+variable "env" {
+  description = "Deployment environment name tag for AWS resources (e.g. prod, dev; defaults to datadog_env)"
+  type        = string
+  default     = null
+}
+
+variable "service" {
+  description = "Service name tag for AWS resources (defaults to project_name)"
+  type        = string
+  default     = null
+}
+
+variable "app_version" {
+  description = "Application version tag for AWS resources (defaults to ghcr_image_tag)"
+  type        = string
+  default     = null
+}
+
 variable "aws_region" {
   description = "AWS region to deploy ECS resources into"
   type        = string
