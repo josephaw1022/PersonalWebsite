@@ -147,10 +147,17 @@ resource "aws_iam_role_policy" "datadog_agent_ecs_task" {
   policy = data.aws_iam_policy_document.ecs_task_policy.json
 }
 
+locals {
+  dd_env     = coalesce(var.env, var.datadog_env, "prod")
+  dd_service = coalesce(var.service, var.project_name)
+  dd_version = coalesce(var.app_version, var.ghcr_image_tag)
+}
+
 resource "aws_ecs_task_definition" "personal_site" {
   family                   = var.project_name
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
+  pid_mode                 = "task"
   cpu                      = tostring(var.task_cpu)
   memory                   = tostring(var.task_memory)
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
@@ -172,64 +179,95 @@ resource "aws_ecs_task_definition" "personal_site" {
           protocol      = "tcp"
         }
       ]
-      environment = [
-        {
-          name  = "NODE_ENV"
-          value = "production"
-        },
-        {
-          name  = "PORT"
-          value = tostring(var.container_port)
-        },
-        {
-          name  = "HOSTNAME"
-          value = "0.0.0.0"
-        },
-        {
-          name  = "DD_ENV"
-          value = var.datadog_env
-        },
-        {
-          name  = "DD_SERVICE"
-          value = var.project_name
-        },
-        {
-          name  = "DD_VERSION"
-          value = var.ghcr_image_tag
-        },
-        {
-          name  = "DD_TRACE_AGENT_URL"
-          value = "unix:///var/run/datadog/apm.socket"
-        },
-        {
-          name  = "DD_PROFILING_ENABLED"
-          value = "true"
-        },
-        {
-          name  = "DD_RUNTIME_METRICS_ENABLED"
-          value = "true"
-        },
-        {
-          name  = "DD_LOGS_INJECTION"
-          value = "true"
-        }
-      ]
+      environment = concat(
+        [
+          {
+            name  = "NODE_ENV"
+            value = "production"
+          },
+          {
+            name  = "PORT"
+            value = tostring(var.container_port)
+          },
+          {
+            name  = "HOSTNAME"
+            value = "0.0.0.0"
+          },
+          {
+            name  = "DD_ENV"
+            value = local.dd_env
+          },
+          {
+            name  = "DD_SERVICE"
+            value = local.dd_service
+          },
+          {
+            name  = "DD_VERSION"
+            value = local.dd_version
+          },
+          {
+            name  = "DD_TRACE_ENABLED"
+            value = "true"
+          },
+          {
+            name  = "DD_TRACE_AGENT_URL"
+            value = "unix:///var/run/datadog/apm.socket"
+          },
+          {
+            name  = "DD_DOGSTATSD_URL"
+            value = "unix:///var/run/datadog/dsd.socket"
+          },
+          {
+            name  = "DD_PROFILING_ENABLED"
+            value = "true"
+          },
+          {
+            name  = "DD_RUNTIME_METRICS_ENABLED"
+            value = "true"
+          },
+          {
+            name  = "DD_LOGS_INJECTION"
+            value = "true"
+          },
+          {
+            name  = "DD_GIT_REPOSITORY_URL"
+            value = "https://${var.github_repository_id}"
+          }
+        ],
+        var.git_commit_sha != null && var.git_commit_sha != "" ? [
+          {
+            name  = "DD_GIT_COMMIT_SHA"
+            value = var.git_commit_sha
+          }
+        ] : []
+      )
       mountPoints = [
         {
           containerPath = "/var/run/datadog"
           sourceVolume  = "dd-sockets"
+          readOnly      = false
+        }
+      ]
+      dependsOn = [
+        {
+          containerName = "datadog-agent"
+          condition     = "START"
+        },
+        {
+          containerName = "datadog-log-router"
+          condition     = "START"
         }
       ]
       dockerLabels = {
-        "com.datadoghq.tags.env"     = var.datadog_env
-        "com.datadoghq.tags.service" = var.project_name
-        "com.datadoghq.tags.version" = var.ghcr_image_tag
+        "com.datadoghq.tags.env"     = local.dd_env
+        "com.datadoghq.tags.service" = local.dd_service
+        "com.datadoghq.tags.version" = local.dd_version
         "com.datadoghq.ad.checks" = jsonencode({
           http_check = {
             init_config = {}
             instances = [
               {
-                name                  = var.project_name
+                name                  = local.dd_service
                 url                   = "http://127.0.0.1:${var.container_port}/"
                 timeout               = 5
                 collect_response_time = true
@@ -237,6 +275,12 @@ resource "aws_ecs_task_definition" "personal_site" {
             ]
           }
         })
+        "com.datadoghq.ad.logs" = jsonencode([
+          {
+            source  = "nextjs"
+            service = local.dd_service
+          }
+        ])
       }
       healthCheck = {
         command = [
@@ -259,9 +303,9 @@ resource "aws_ecs_task_definition" "personal_site" {
           Host       = "http-intake.logs.${var.datadog_site}"
           TLS        = "on"
           provider   = "ecs"
-          dd_service = var.project_name
+          dd_service = local.dd_service
           dd_source  = "nextjs"
-          dd_tags    = "env:${var.datadog_env},version:${var.ghcr_image_tag}"
+          dd_tags    = "env:${local.dd_env},service:${local.dd_service},version:${local.dd_version}"
         }
         secretOptions = [
           {
@@ -289,8 +333,9 @@ resource "aws_ecs_task_definition" "personal_site" {
         }
       ]
       dockerLabels = {
-        "com.datadoghq.tags.env"     = var.datadog_env
+        "com.datadoghq.tags.env"     = local.dd_env
         "com.datadoghq.tags.service" = "cloudflared"
+        "com.datadoghq.tags.version" = local.dd_version
         "com.datadoghq.ad.checks" = jsonencode({
           openmetrics = {
             init_config = {}
@@ -303,11 +348,21 @@ resource "aws_ecs_task_definition" "personal_site" {
             ]
           }
         })
+        "com.datadoghq.ad.logs" = jsonencode([
+          {
+            source  = "cloudflared"
+            service = "cloudflared"
+          }
+        ])
       }
       dependsOn = [
         {
           containerName = "personal-site"
           condition     = "HEALTHY"
+        },
+        {
+          containerName = "datadog-log-router"
+          condition     = "START"
         }
       ]
       healthCheck = {
@@ -337,7 +392,7 @@ resource "aws_ecs_task_definition" "personal_site" {
           provider   = "ecs"
           dd_service = "cloudflared"
           dd_source  = "cloudflared"
-          dd_tags    = "env:${var.datadog_env}"
+          dd_tags    = "env:${local.dd_env},service:cloudflared,version:${local.dd_version}"
         }
         secretOptions = [
           {
@@ -396,12 +451,8 @@ resource "aws_ecs_task_definition" "personal_site" {
           value = var.datadog_site
         },
         {
-          name  = "DD_ENV"
-          value = var.datadog_env
-        },
-        {
-          name  = "DD_SERVICE"
-          value = var.project_name
+          name  = "DD_TAGS"
+          value = "env:${local.dd_env}"
         },
         {
           name  = "DD_DOGSTATSD_NON_LOCAL_TRAFFIC"
@@ -410,6 +461,14 @@ resource "aws_ecs_task_definition" "personal_site" {
         {
           name  = "DD_DOGSTATSD_SOCKET"
           value = "/var/run/datadog/dsd.socket"
+        },
+        {
+          name  = "DD_DOGSTATSD_ORIGIN_DETECTION"
+          value = "true"
+        },
+        {
+          name  = "DD_DOGSTATSD_ORIGIN_DETECTION_CLIENT"
+          value = "true"
         },
         {
           name  = "DD_APM_ENABLED"
@@ -442,12 +501,15 @@ resource "aws_ecs_task_definition" "personal_site" {
         {
           containerPath = "/var/run/datadog"
           sourceVolume  = "dd-sockets"
+          readOnly      = false
         }
       ]
-      dockerLabels = {
-        "com.datadoghq.tags.env"     = var.datadog_env
-        "com.datadoghq.tags.service" = "datadog-agent"
-      }
+      dependsOn = [
+        {
+          containerName = "datadog-log-router"
+          condition     = "START"
+        }
+      ]
       healthCheck = {
         command = [
           "CMD-SHELL",
@@ -471,7 +533,7 @@ resource "aws_ecs_task_definition" "personal_site" {
           provider   = "ecs"
           dd_service = "datadog-agent"
           dd_source  = "datadog-agent"
-          dd_tags    = "env:${var.datadog_env}"
+          dd_tags    = "env:${local.dd_env}"
         }
         secretOptions = [
           {

@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "NODE_OPTIONS='--require dd-trace/init' next start",
     "lint": "eslint",
     "test": "jest",
     "test:watch": "jest --watch",

@@ -254,8 +254,14 @@ variable "datadog_forwarder_template_url" {
 }
 
 variable "github_repository_id" {
-  description = "GitHub repository ID (v2) used in Datadog CI Visibility pipeline monitors"
+  description = "GitHub repository ID (v2) used in Datadog CI Visibility pipeline monitors and Source Code Integration"
   type        = string
   default     = "github.com/josephaw1022/personalwebsite"
+}
+
+variable "git_commit_sha" {
+  description = "Optional full 40-character Git commit SHA for Datadog Source Code Integration (when null, inherits DD_GIT_COMMIT_SHA baked into the container image)"
+  type        = string
+  default     = null
 }
 
