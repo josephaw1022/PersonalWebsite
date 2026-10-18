@@ -231,6 +231,12 @@ variable "datadog_role_name" {
   default     = "DatadogIntegrationRole"
 }
 
+variable "datadog_agent_role_name" {
+  description = "Name of the IAM role assigned to the Datadog Agent ECS container"
+  type        = string
+  default     = "DatadogAgentRole"
+}
+
 variable "datadog_account_tags" {
   description = "Tags to associate with the Datadog AWS account integration"
   type        = list(string)

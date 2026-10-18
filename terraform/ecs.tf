@@ -198,6 +198,12 @@ resource "aws_iam_role_policy" "ecs_task" {
   policy = data.aws_iam_policy_document.ecs_task_policy.json
 }
 
+resource "aws_iam_role_policy" "datadog_agent_ecs_task" {
+  name   = "fargate-task-role-default-policy"
+  role   = aws_iam_role.datadog_agent.id
+  policy = data.aws_iam_policy_document.ecs_task_policy.json
+}
+
 resource "aws_ecs_task_definition" "personal_site" {
   family                   = var.project_name
   network_mode             = "awsvpc"
@@ -205,7 +211,7 @@ resource "aws_ecs_task_definition" "personal_site" {
   cpu                      = tostring(var.task_cpu)
   memory                   = tostring(var.task_memory)
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
-  task_role_arn            = aws_iam_role.ecs_task.arn
+  task_role_arn            = aws_iam_role.datadog_agent.arn
 
   volume {
     name = "dd-sockets"
