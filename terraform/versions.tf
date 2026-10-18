@@ -34,6 +34,9 @@ provider "aws" {
     tags = {
       Project   = var.project_name
       ManagedBy = "terraform"
+      env       = coalesce(var.env, var.datadog_env, "prod")
+      service   = coalesce(var.service, var.project_name)
+      version   = coalesce(var.app_version, var.ghcr_image_tag)
     }
   }
 }
