@@ -23,72 +23,17 @@ resource "aws_cloudwatch_log_subscription_filter" "ecs_datadog_forwarder" {
   ]
 }
 
-import {
-  to = aws_cloudwatch_log_group.ecs_container_insights
-  id = "/aws/ecs/containerinsights/${var.project_name}-cluster/performance"
-}
-
-resource "aws_cloudwatch_log_group" "ecs_container_insights" {
-  name              = "/aws/ecs/containerinsights/${var.project_name}-cluster/performance"
-  retention_in_days = var.log_retention_days
-}
-
-
-resource "aws_lambda_permission" "ecs_container_insights_datadog_forwarder" {
-  statement_id  = "AllowCloudWatchLogs-${var.project_name}-container-insights"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
-  principal     = "logs.${var.aws_region}.amazonaws.com"
-  source_arn    = "${aws_cloudwatch_log_group.ecs_container_insights.arn}:*"
-}
-
-resource "aws_cloudwatch_log_subscription_filter" "ecs_container_insights_datadog_forwarder" {
-  name            = "${var.project_name}-ecs-ci-datadog-logs"
-  log_group_name  = aws_cloudwatch_log_group.ecs_container_insights.name
-  filter_pattern  = ""
-  destination_arn = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
-
-  depends_on = [
-    aws_cloudformation_stack.datadog_forwarder,
-    aws_lambda_permission.ecs_container_insights_datadog_forwarder
-  ]
-}
-
-resource "aws_cloudwatch_event_rule" "ecs_container_insights_events" {
-  name        = "${var.project_name}-ecs-container-insights-events"
-  description = "Routes ECS Container Insights CloudWatch log group events to the Datadog Forwarder Lambda via EventBridge"
-
-  event_pattern = jsonencode({
-    source = ["aws.logs"]
-    detail = {
-      requestParameters = {
-        logGroupName = [aws_cloudwatch_log_group.ecs_container_insights.name]
-      }
-    }
-  })
-}
-
-resource "aws_cloudwatch_event_target" "ecs_container_insights_datadog_forwarder" {
-  rule      = aws_cloudwatch_event_rule.ecs_container_insights_events.name
-  target_id = "${var.project_name}-ecs-ci-forwarder"
-  arn       = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
-}
-
-resource "aws_lambda_permission" "ecs_container_insights_events_datadog_forwarder" {
-  statement_id  = "AllowEventBridge-${var.project_name}-container-insights-events"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_cloudformation_stack.datadog_forwarder.outputs["DatadogForwarderArn"]
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.ecs_container_insights_events.arn
-}
-
 resource "aws_cloudwatch_event_rule" "ecs_task_events" {
   name        = "${var.project_name}-ecs-task-state-changes"
-  description = "Routes ECS task and container state change events to the Datadog Forwarder Lambda"
+  description = "Routes ECS task, service, and deployment state change events to the Datadog Forwarder Lambda"
 
   event_pattern = jsonencode({
-    source      = ["aws.ecs"]
-    detail-type = ["ECS Task State Change"]
+    source = ["aws.ecs"]
+    detail-type = [
+      "ECS Task State Change",
+      "ECS Deployment State Change",
+      "ECS Service Action"
+    ]
     detail = {
       clusterArn = [aws_ecs_cluster.main.arn]
     }
@@ -109,14 +54,12 @@ resource "aws_lambda_permission" "ecs_events_datadog_forwarder" {
   source_arn    = aws_cloudwatch_event_rule.ecs_task_events.arn
 }
 
-
-
 resource "aws_ecs_cluster" "main" {
   name = "${var.project_name}-cluster"
 
   setting {
     name  = "containerInsights"
-    value = "enabled"
+    value = "disabled"
   }
 }
 

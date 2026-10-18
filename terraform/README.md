@@ -12,13 +12,10 @@ This directory provisions a lightweight, serverless AWS ECS Fargate deployment f
 2. **Datadog AWS Account Integration & Log / Event Forwarding**:
    - Provisions `datadog_integration_aws_account` along with the `DatadogIntegrationRole` IAM role, dynamically chunked `DatadogAWSIntegrationPolicy-*` policies (sourced from `datadog_integration_aws_iam_permissions`), and AWS `SecurityAudit` managed policy attachment for full account-level cloud observability and CSPM.
    - Deploys the official Datadog Forwarder Lambda function (`aws_cloudformation_stack.datadog_forwarder`) using Datadog's official CloudFormation template (`https://datadog-cloudformation-template.s3.amazonaws.com/aws/forwarder/latest.yaml`), registered with `datadog_integration_aws_account` via `logs_config.lambda_forwarder`.
-   - Provisions CloudWatch Logs Subscription Filters with explicit Lambda resource-based permissions (`aws_lambda_permission`) for both the application container logs (`/ecs/${var.project_name}`) and cluster performance logs (`/aws/ecs/containerinsights/${var.project_name}-cluster/performance`), ensuring logs stream continuously to Datadog and appear as configured triggers in the AWS Lambda console.
-   - Provisions EventBridge rules and Lambda permissions routing AWS events to the Datadog Forwarder:
-     - **ECS Task State Changes**: Captures task and container stop/failure events on the ECS cluster.
-     - **ECS Container Insights Events**: Routes Container Insights performance log group events from CloudWatch to the Datadog Forwarder via EventBridge.
-     - **Route 53 Health Check Alarms**: Captures CloudWatch Alarm state changes for the Route 53 health check (`site_down` alarm).
-   - Subscribes the Datadog Forwarder Lambda directly to the `site_alerts` SNS topic with `aws_lambda_permission`, ensuring Route 53 health check alert state transitions trigger Datadog events alongside SMS/email notifications.
-   - Enforces a 1-day retention policy (`var.log_retention_days`) across CloudWatch log groups (`/ecs/${var.project_name}`, `/aws/ecs/containerinsights/...`, and `/aws/lambda/...`) to eliminate unnecessary AWS storage costs while archiving logs in Datadog.
+   - Application and sidecar container logs (`personal-site`, `cloudflared`, `datadog-agent`) bypass CloudWatch and stream directly to Datadog via AWS FireLens (`datadog-log-router`). AWS ECS Container Insights is disabled (`containerInsights = "disabled"`) since container and task metrics/logs are collected directly by Datadog.
+   - Provisions a CloudWatch Logs Subscription Filter with explicit Lambda resource-based permission (`aws_lambda_permission`) for the ECS FireLens router log group (`/ecs/${var.project_name}`), ensuring ECS-level log output streams to Datadog via the Lambda forwarder.
+   - Provisions an EventBridge rule (`aws_cloudwatch_event_rule.ecs_task_events`) and Lambda permission routing ECS control-plane events (`ECS Task State Change`, `ECS Deployment State Change`, and `ECS Service Action`) to the Datadog Forwarder.
+   - Enforces a 1-day retention policy (`var.log_retention_days`) across CloudWatch log groups (`/ecs/${var.project_name}` and `/aws/lambda/...`) to eliminate unnecessary AWS storage costs while archiving logs in Datadog.
 3. **Zero Inbound Ports**:
    - The ECS security group has **no inbound rules**. All external traffic enters through Cloudflare's edge and is delivered over the outbound encrypted Cloudflare Tunnel connection.
 4. **Application Auto Scaling & Multi-Replica Tunnel Routing**:
@@ -30,10 +27,10 @@ This directory provisions a lightweight, serverless AWS ECS Fargate deployment f
    - Creates a managed Cloudflare Tunnel (`cloudflare_zero_trust_tunnel_cloudflared`).
    - Configures tunnel ingress rules routing `jwhiteaker22.com` and `www.jwhiteaker22.com` to `http://localhost:3000`.
    - Provisions proxied `CNAME` DNS records pointing `@` and `www` to `<tunnel-id>.cfargotunnel.com`.
-6. **Route 53 Health Check & Downtime Alerts**:
-   - Provisions an `HTTPS` Route 53 health check querying the public endpoint (`https://${var.domain_name}/`).
-   - CloudWatch metric alarm evaluates `HealthCheckStatus < 1` in `us-east-1` (breaching if the site fails probes).
-   - Triggers an AWS SNS topic configured with optional SMS text (`alert_phone_number`) and email (`alert_email`) subscriptions, notifying immediately on downtime and recovery.
+6. **Datadog Synthetics Health Check & Downtime Alerts**:
+   - Provisions a Datadog Synthetics HTTP API test (`datadog_synthetics_test.site_health`) probing the public endpoint (`https://${var.domain_name}${var.health_check_path}`) from Datadog's managed locations (`var.health_check_locations`).
+   - Asserts HTTP `200` status code with configurable retry threshold (`var.health_check_failure_threshold`) and probe interval (`var.health_check_request_interval`).
+   - Automatically manages a Datadog monitor that alerts `@${var.alert_email}` when configured.
 7. **S3 Remote State Backend**:
    - Uses an encrypted S3 bucket with versioning and native S3 lockfiles (`use_lockfile = true`).
 

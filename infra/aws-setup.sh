@@ -16,7 +16,7 @@ by the AWS Terraform deployment workflow.
 Flags are optional when .env defines:
   AWS_PROFILE, AWS_REGION, AWS_ACCOUNT_ID, TF_STATE_BUCKET, AWS_ROLE_NAME,
   AWS_POLICY_NAME, GITHUB_REPO, DOMAIN_NAME, CLOUDFLARE_ACCOUNT_ID,
-  CLOUDFLARE_ZONE_ID, CLOUDFLARE_API_TOKEN, ALERT_EMAIL, ALERT_PHONE_NUMBER,
+  CLOUDFLARE_ZONE_ID, CLOUDFLARE_API_TOKEN, ALERT_EMAIL,
   DATADOG_API_KEY, DATADOG_APP_KEY, DATADOG_ACCESS_TOKEN, DATADOG_SITE
 
 CLI flags override values from .env.
@@ -33,7 +33,6 @@ Options:
   --cloudflare-zone-id <ZONE_ID>        Optional: sync CLOUDFLARE_ZONE_ID to GitHub repository secrets (auto-detected if token is given)
   --cloudflare-api-token <API_TOKEN>    Optional: sync CLOUDFLARE_API_TOKEN to GitHub repository secrets
   --alert-email <EMAIL>                 Optional: sync ALERT_EMAIL to GitHub repository secrets
-  --alert-phone <PHONE_NUMBER>          Optional: sync ALERT_PHONE_NUMBER to GitHub repository secrets
   --datadog-api-key <API_KEY>           Optional: sync DATADOG_API_KEY to GitHub repository secrets
   --datadog-app-key <APP_KEY>           Optional: sync DATADOG_APP_KEY to GitHub repository secrets
   --datadog-access-token <TOKEN>        Optional: sync DATADOG_ACCESS_TOKEN to GitHub repository secrets
@@ -114,7 +113,6 @@ CLOUDFLARE_ACCOUNT_ID="${CLOUDFLARE_ACCOUNT_ID:-${CF_ACCOUNT_ID:-}}"
 CLOUDFLARE_ZONE_ID="${CLOUDFLARE_ZONE_ID:-}"
 CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN:-${CF_API_TOKEN:-}}"
 ALERT_EMAIL="${ALERT_EMAIL:-}"
-ALERT_PHONE_NUMBER="${ALERT_PHONE_NUMBER:-}"
 DATADOG_API_KEY="${DATADOG_API_KEY:-${DD_API_KEY:-}}"
 DATADOG_APP_KEY="${DATADOG_APP_KEY:-${DD_APP_KEY:-}}"
 DATADOG_ACCESS_TOKEN="${DATADOG_ACCESS_TOKEN:-${DD_ACCESS_TOKEN:-}}"
@@ -134,7 +132,6 @@ while [[ "$#" -gt 0 ]]; do
     --cloudflare-zone-id) CLOUDFLARE_ZONE_ID="$2"; shift ;;
     --cloudflare-api-token) CLOUDFLARE_API_TOKEN="$2"; shift ;;
     --alert-email) ALERT_EMAIL="$2"; shift ;;
-    --alert-phone|--alert-phone-number) ALERT_PHONE_NUMBER="$2"; shift ;;
     --datadog-api-key) DATADOG_API_KEY="$2"; shift ;;
     --datadog-app-key) DATADOG_APP_KEY="$2"; shift ;;
     --datadog-access-token) DATADOG_ACCESS_TOKEN="$2"; shift ;;
@@ -335,9 +332,6 @@ if [[ "${SKIP_GH_CONFIG}" == "false" ]] && command -v gh &>/dev/null; then
     if [[ -n "${ALERT_EMAIL}" ]]; then
       gh secret set ALERT_EMAIL --body "${ALERT_EMAIL}" --repo "${GITHUB_REPO}"
     fi
-    if [[ -n "${ALERT_PHONE_NUMBER}" ]]; then
-      gh secret set ALERT_PHONE_NUMBER --body "${ALERT_PHONE_NUMBER}" --repo "${GITHUB_REPO}"
-    fi
     if [[ -n "${DATADOG_API_KEY}" ]]; then
       gh secret set DATADOG_API_KEY --body "${DATADOG_API_KEY}" --repo "${GITHUB_REPO}"
     fi
@@ -367,9 +361,6 @@ if [[ -n "${CLOUDFLARE_ZONE_ID}" ]]; then
 fi
 if [[ -n "${ALERT_EMAIL}" ]]; then
   echo "Alert Email     : ${ALERT_EMAIL}"
-fi
-if [[ -n "${ALERT_PHONE_NUMBER}" ]]; then
-  echo "Alert SMS       : ${ALERT_PHONE_NUMBER}"
 fi
 if [[ -n "${DATADOG_SITE}" ]]; then
   echo "Datadog Site    : ${DATADOG_SITE}"
