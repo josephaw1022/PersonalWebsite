@@ -108,6 +108,12 @@ describe("DatadogInit", () => {
           site: "us5.datadoghq.com",
           service: "personal-website",
           env: "production",
+          allowedTracingUrls: [
+            expect.objectContaining({
+              match: expect.any(RegExp),
+              propagatorTypes: ["datadog", "tracecontext"],
+            }),
+          ],
         }),
       );
       expect(datadogRum.startSessionReplayRecording).toHaveBeenCalledTimes(1);

@@ -55,6 +55,12 @@ export default function DatadogInit({ hostname }: { hostname?: string } = {}) {
         trackResources: true,
         trackLongTasks: true,
         defaultPrivacyLevel: "mask-user-input",
+        allowedTracingUrls: [
+          {
+            match: /^https:\/\/([a-z0-9-]+\.)?jwhiteaker22\.com(\/|$)/i,
+            propagatorTypes: ["datadog", "tracecontext"],
+          },
+        ],
       });
       datadogRum.startSessionReplayRecording();
     }

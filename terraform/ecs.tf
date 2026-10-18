@@ -204,6 +204,14 @@ resource "aws_ecs_task_definition" "personal_site" {
         {
           name  = "DD_PROFILING_ENABLED"
           value = "true"
+        },
+        {
+          name  = "DD_RUNTIME_METRICS_ENABLED"
+          value = "true"
+        },
+        {
+          name  = "DD_LOGS_INJECTION"
+          value = "true"
         }
       ]
       mountPoints = [
@@ -400,12 +408,20 @@ resource "aws_ecs_task_definition" "personal_site" {
           value = "true"
         },
         {
+          name  = "DD_DOGSTATSD_SOCKET"
+          value = "/var/run/datadog/dsd.socket"
+        },
+        {
           name  = "DD_APM_ENABLED"
           value = "true"
         },
         {
           name  = "DD_APM_NON_LOCAL_TRAFFIC"
           value = "true"
+        },
+        {
+          name  = "DD_APM_RECEIVER_SOCKET"
+          value = "/var/run/datadog/apm.socket"
         },
         {
           name  = "DD_PROCESS_AGENT_ENABLED"
