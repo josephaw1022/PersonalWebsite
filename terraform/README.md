@@ -27,10 +27,12 @@ This directory provisions a lightweight, serverless AWS ECS Fargate deployment f
    - Creates a managed Cloudflare Tunnel (`cloudflare_zero_trust_tunnel_cloudflared`).
    - Configures tunnel ingress rules routing `jwhiteaker22.com` and `www.jwhiteaker22.com` to `http://localhost:3000`.
    - Provisions proxied `CNAME` DNS records pointing `@` and `www` to `<tunnel-id>.cfargotunnel.com`.
-6. **Datadog Synthetics Health Check & Downtime Alerts**:
+6. **Datadog Synthetics Health Check, ECS Monitors & CI/CD Pipeline Alerts**:
    - Provisions a Datadog Synthetics HTTP API test (`datadog_synthetics_test.site_health`) probing the public endpoint (`https://${var.domain_name}${var.health_check_path}`) from Datadog's managed locations (`var.health_check_locations`).
    - Asserts HTTP `200` status code with configurable retry threshold (`var.health_check_failure_threshold`) and probe interval (`var.health_check_request_interval`).
-   - Automatically manages a Datadog monitor that alerts `@${var.alert_email}` when configured.
+   - Provisions the 10 recommended Datadog ECS & Fargate monitors (`terraform/monitors.tf`) covering Fargate task CPU, memory, ephemeral storage, and network error rates (`integration:ecs_fargate`), as well as ECS cluster CPU/memory reservation, running vs. desired task count, task placement failures, and task startup failures (`integration:amazon_ecs`).
+   - Provisions Datadog CI Pipeline monitors (`type = "ci-pipelines alert"`) watching the `main` branch for failures in the `Container Image - Build & Push (GHCR)` and `Deploy Personal Site - AWS (Terraform)` GitHub Actions workflows.
+   - Automatically routes alert notifications to `@${var.alert_email}` when configured.
 7. **S3 Remote State Backend**:
    - Uses an encrypted S3 bucket with versioning and native S3 lockfiles (`use_lockfile = true`).
 

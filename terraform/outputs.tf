@@ -93,3 +93,27 @@ output "ecs_task_events_rule_arn" {
   description = "ARN of the EventBridge rule routing ECS task, service, and deployment state changes to Datadog Forwarder"
   value       = aws_cloudwatch_event_rule.ecs_task_events.arn
 }
+
+output "datadog_ecs_monitor_ids" {
+  description = "Map of Datadog monitor IDs for ECS Fargate and Amazon ECS"
+  value = {
+    fargate_cpu_utilization               = datadog_monitor.ecs_fargate_cpu_utilization.id
+    fargate_memory_utilization            = datadog_monitor.ecs_fargate_memory_utilization.id
+    fargate_ephemeral_storage_utilization = datadog_monitor.ecs_fargate_ephemeral_storage_utilization.id
+    fargate_network_received_error_rate   = datadog_monitor.ecs_fargate_network_received_error_rate.id
+    fargate_network_sent_error_rate       = datadog_monitor.ecs_fargate_network_sent_error_rate.id
+    ecs_cpu_reservation                   = datadog_monitor.ecs_cpu_reservation.id
+    ecs_memory_reservation                = datadog_monitor.ecs_memory_reservation.id
+    ecs_running_task_count_differs        = datadog_monitor.ecs_running_task_count_differs_from_desired.id
+    ecs_task_placement_failed             = datadog_monitor.ecs_task_placement_failed.id
+    ecs_tasks_failed_to_start             = datadog_monitor.ecs_tasks_failed_to_start.id
+  }
+}
+
+output "datadog_ci_pipeline_monitor_ids" {
+  description = "Map of Datadog monitor IDs for GitHub Actions workflows on main"
+  value = {
+    build_and_push_ghcr  = datadog_monitor.gh_workflow_build_and_push_ghcr.id
+    deploy_aws_terraform = datadog_monitor.gh_workflow_deploy_aws_terraform.id
+  }
+}

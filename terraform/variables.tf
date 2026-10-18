@@ -253,3 +253,9 @@ variable "datadog_forwarder_template_url" {
   default     = "https://datadog-cloudformation-template.s3.amazonaws.com/aws/forwarder/latest.yaml"
 }
 
+variable "github_repository_id" {
+  description = "GitHub repository ID (v2) used in Datadog CI Visibility pipeline monitors"
+  type        = string
+  default     = "github.com/josephaw1022/personalwebsite"
+}
+
