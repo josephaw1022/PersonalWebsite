@@ -1,34 +1,27 @@
-locals {
-  dashboard_tags = [
-    "env:${local.dd_env}",
-    "service:${local.dd_service}",
-    "version:${local.dd_version}",
-    "managed_by:terraform"
-  ]
-}
-
 resource "datadog_dashboard" "personal_site" {
   title       = "${local.dd_service} - Service & Infrastructure Dashboard"
   description = "Unified Datadog dashboard for ${local.dd_service} covering APM, Next.js runtime performance, ECS Fargate infrastructure metrics, Cloudflare Tunnel connector status, and HTTP health checks."
   layout_type = "ordered"
-  tags        = local.dashboard_tags
+  tags = [
+    "team:platform"
+  ]
 
   template_variable {
-    name    = "env"
-    prefix  = "env"
-    default = local.dd_env
+    name     = "env"
+    prefix   = "env"
+    defaults = [local.dd_env]
   }
 
   template_variable {
-    name    = "service"
-    prefix  = "service"
-    default = local.dd_service
+    name     = "service"
+    prefix   = "service"
+    defaults = [local.dd_service]
   }
 
   template_variable {
-    name    = "version"
-    prefix  = "version"
-    default = local.dd_version
+    name     = "version"
+    prefix   = "version"
+    defaults = [local.dd_version]
   }
 
   # ----------------------------------------------------------------------------
