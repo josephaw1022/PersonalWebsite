@@ -15,9 +15,17 @@ data "aws_iam_policy_document" "datadog_aws_integration_assume_role" {
       ]
     }
   }
+
+  depends_on = [
+    datadog_integration_aws_account.datadog_integration
+  ]
 }
 
-data "datadog_integration_aws_iam_permissions" "datadog_permissions" {}
+data "datadog_integration_aws_iam_permissions" "datadog_permissions" {
+  depends_on = [
+    datadog_integration_aws_account.datadog_integration
+  ]
+}
 
 locals {
   extra_permissions = [

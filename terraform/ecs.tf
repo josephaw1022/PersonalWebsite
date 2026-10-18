@@ -167,6 +167,11 @@ data "aws_iam_policy_document" "ecs_ssm_access" {
       aws_ssm_parameter.datadog_api_key.arn
     ]
   }
+
+  depends_on = [
+    aws_ssm_parameter.cloudflared_tunnel_token,
+    aws_ssm_parameter.datadog_api_key
+  ]
 }
 
 resource "aws_iam_role_policy" "ecs_ssm_access" {
