@@ -376,6 +376,10 @@ resource "aws_ecs_task_definition" "personal_site" {
         {
           name  = "DD_PROCESS_AGENT_ENABLED"
           value = "true"
+        },
+        {
+          name  = "DD_ECS_TASK_COLLECTION_ENABLED"
+          value = "true"
         }
       ]
       secrets = [
