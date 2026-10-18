@@ -166,7 +166,7 @@ resource "datadog_monitor" "ecs_fargate_network_sent_error_rate" {
 resource "datadog_monitor" "ecs_cpu_reservation" {
   name                = "[AWS] ECS CPU Reservation Exceeds Threshold"
   type                = "query alert"
-  query               = "min(last_30m):avg:aws.ecs.cpureservation{*} by {clustername,aws_account,region} > 90"
+  query               = "min(last_30m):avg:aws.ecs.cpuutilization{*} by {clustername,aws_account,region} > 90"
   evaluation_delay    = 900
   include_tags        = true
   new_group_delay     = 60
@@ -197,7 +197,7 @@ resource "datadog_monitor" "ecs_cpu_reservation" {
 resource "datadog_monitor" "ecs_memory_reservation" {
   name                = "[AWS] ECS Memory Reservation Exceeds Threshold"
   type                = "query alert"
-  query               = "min(last_30m):avg:aws.ecs.memory_reservation{*} by {clustername,aws_account,region} > 90"
+  query               = "min(last_30m):avg:aws.ecs.memory_utilization{*} by {clustername,aws_account,region} > 90"
   evaluation_delay    = 900
   include_tags        = true
   new_group_delay     = 60
