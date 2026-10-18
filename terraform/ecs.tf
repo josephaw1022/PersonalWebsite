@@ -271,6 +271,7 @@ resource "aws_ecs_task_definition" "personal_site" {
                 url                   = "http://127.0.0.1:${var.container_port}/"
                 timeout               = 5
                 collect_response_time = true
+                tags                  = ["service:${local.dd_service}", "env:${local.dd_env}"]
               }
             ]
           }
