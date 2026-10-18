@@ -16,64 +16,90 @@ tasks:
     cmds:
       - task --list-all
 
+  ensure-deps:
+    internal: true
+    silent: true
+    cmds:
+      - |
+        if [ ! -d "node_modules" ]; then
+          MAIN_REPO=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)" 2>/dev/null || true)
+          if [ -n "$MAIN_REPO" ] && [ -d "$MAIN_REPO/node_modules" ] && [ "$(realpath "$MAIN_REPO")" != "$(realpath .)" ]; then
+            ln -s "$MAIN_REPO/node_modules" node_modules
+          else
+            npm ci
+          fi
+        fi
+
   dev:
     desc: Run Next.js local development server
+    deps: [ensure-deps]
     cmds:
       - npm run dev
 
   build:
     desc: Build Next.js production bundle
+    deps: [ensure-deps]
     cmds:
       - npm run build
 
   test:
     desc: Run Jest unit tests
+    deps: [ensure-deps]
     cmds:
       - npm run test
 
   test:e2e:
     desc: Run Playwright end-to-end tests
+    deps: [ensure-deps]
     cmds:
       - npm run test:e2e
 
   playwright:install:
     desc: Install Playwright browser binaries
+    deps: [ensure-deps]
     cmds:
       - npx playwright install chromium
 
   test:all:
     desc: Run all unit and E2E tests
+    deps: [ensure-deps]
     cmds:
       - npm run test
       - npm run test:e2e
 
   screenshots:
     desc: Capture UI screenshots across light and dark modes for visual inspection
+    deps: [ensure-deps]
     cmds:
       - npm run screenshots
 
   lint:
     desc: Run ESLint
+    deps: [ensure-deps]
     cmds:
       - npm run lint
 
   lint:fix:
     desc: Run ESLint with automatic fixes
+    deps: [ensure-deps]
     cmds:
       - npx eslint --fix
 
   format:
     desc: Format codebase with Prettier
+    deps: [ensure-deps]
     cmds:
       - npm run format
 
   format:check:
     desc: Check formatting with Prettier
+    deps: [ensure-deps]
     cmds:
       - npm run format:check
 
   format:all:
     desc: Format both codebase with Prettier and Terraform configurations
+    deps: [ensure-deps]
     cmds:
       - npm run format
       - task: tf:fmt
@@ -96,6 +122,7 @@ tasks:
   pr:check:
     aliases: [pr-check]
     desc: Run essential pre-PR checks (format check, lint, unit tests, Next.js build, and Terraform validate)
+    deps: [ensure-deps]
     cmds:
       - npm run format:check
       - npm run lint
@@ -106,6 +133,7 @@ tasks:
 
   check:
     desc: Run all quality checks (formatting check, lint, unit tests, Helm unit tests, Terraform validation, and E2E tests)
+    deps: [ensure-deps]
     cmds:
       - npm run format:check
       - npm run lint
@@ -122,6 +150,7 @@ tasks:
 
   build-container:
     desc: Build the Next.js production container image using Podman
+    deps: [ensure-deps]
     cmds:
       - npm run build
       - podman build -t "{{.IMAGE_NAME}}" -f Containerfile .

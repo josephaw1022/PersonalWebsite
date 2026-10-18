@@ -24,7 +24,7 @@ This repository standardizes on Node.js 26 (active LTS). Whenever the Node.js ru
 
 When updating the Node.js runtime version:
 
-- Run `npm test` and `npm run build` to confirm test suite and Next.js production builds succeed.
-- Run `npm run lint` and `npm run format:check` to ensure code styling and lint rules pass.
+- Run `task test` and `task build` to confirm test suite and Next.js production builds succeed.
+- Run `task lint` and `task format:check` to ensure code styling and lint rules pass.
 - Verify all CI workflow definitions in `.github/workflows/` match the target Node.js version.
-- Verify the `Containerfile` base image matches the target Node.js version and can be built via `task build-container` (or `podman build -t personal-site -f Containerfile .`).
+- Verify the `Containerfile` base image matches the target Node.js version and can be built via `task build-container`.

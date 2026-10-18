@@ -22,4 +22,12 @@ Container image builds, SBOM generation, and security scan attestations are full
    - **Container Scan & Attestation:** `.github/actions/container-scan-attestation/action.yml`
    - **Container SBOM & Attestation:** `.github/actions/container-sbom-attestation/action.yml`
 
+### Local Container Verification
+
+For local container build verification, always use the Taskfile targets instead of running `podman` or `npm run build` commands directly:
+
+- `task build-container`: Builds the Next.js production bundle and container image locally.
+- `task run-container`: Builds and runs the production container locally.
+- `task stop`: Stops and removes the local container.
+
 Do not attempt to build and push production container images manually from a local machine; let the GitHub Action handle it.

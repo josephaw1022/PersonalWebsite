@@ -31,8 +31,8 @@ elif [ -d ".." ] && [ -f "../package.json" ]; then
     cd ..
 fi
 
-# 6. Execute the formatting command
-if npm run format >&2 2>&1; then
+# 6. Execute the formatting command via Taskfile (auto-links node_modules in worktrees via ensure-deps)
+if task format >&2 2>&1; then
     echo "[hook:format-repo] Repository automatically formatted with Prettier." >&2
 else
     echo "[hook:format-repo] Formatting failed. Check stderr for details." >&2
