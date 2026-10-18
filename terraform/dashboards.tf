@@ -179,7 +179,7 @@ resource "datadog_dashboard" "personal_site" {
           title    = "Container HTTP Check Status"
           check    = "http.can_connect"
           grouping = "check"
-          group_by = ["instance", "env"]
+          group    = "instance:personal_site"
           tags     = ["service:${local.dd_service}"]
         }
       }
@@ -228,7 +228,7 @@ resource "datadog_dashboard" "personal_site" {
       widget {
         manage_status_definition {
           title               = "Monitors Status"
-          query               = "type:monitor (service:${local.dd_service} OR clustername:${aws_ecs_cluster.main.name})"
+          query               = "service:${local.dd_service}"
           sort                = "status,asc"
           display_format      = "countsAndList"
           color_preference    = "text"
