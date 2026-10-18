@@ -22,6 +22,18 @@ Manages temporary cloud infrastructure powering the website on AWS ECS Fargate w
 
 - `./infra/aws-setup.sh`: Bootstraps the S3 remote state bucket, GitHub Actions OIDC IAM role, and repository secrets/variables.
 
+### Local Formatting & Validation (Taskfile)
+
+Always use the Taskfile targets instead of running `terraform` CLI commands directly:
+
+- `task tf:fmt`: Format Terraform configuration files.
+- `task tf:fmt:check`: Check Terraform configuration formatting.
+- `task tf:init`: Initialize Terraform providers and backend (`-backend=false` for local validation).
+- `task tf:validate`: Validate Terraform configuration syntax and integrity.
+- `task tf:check`: Run both format check and validation (`tf:fmt:check` + `tf:validate`).
+- `task tf:plan`: Generate and show a Terraform execution plan.
+- `task format:all`: Format both the codebase with Prettier and Terraform configurations.
+
 ### Workflows
 
 - `.github/workflows/build-and-push-ghcr.yaml`: Builds and pushes Next.js container image to GHCR.

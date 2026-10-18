@@ -11,7 +11,7 @@ It is containerized using a multi-stage Node.js build (Next.js standalone).
 > - Cloud infrastructure and tunnel routing are managed via Terraform in `terraform/`, bootstrapped via `./infra/aws-setup.sh`, and deployed via `.github/workflows/deploy-aws.yml`.
 
 **Deployment (Homelab OpenShift - Primary)**:
-CI/CD runners on the cluster are configured via `./infra/arc-setup.sh`. Initial cluster workloads (deployment, service, image pull secret, dev ingress, pdb) are packaged via Helm (`charts/personal-site`) and bootstrapped via the GitHub Actions `Cluster Infrastructure - Bootstrap` workflow (`.github/workflows/bootstrap-cluster.yml`). Ongoing deployments to the dev environment (`personal-site-dev-envs`) are automated via `.github/workflows/deploy-dev.yml`, and production deployments (`personal-site`) are triggered via `.github/workflows/deploy-prod.yml`. Helm chart unit tests are executed using `helm-unittest`.
+CI/CD runners on the cluster are configured via `./infra/arc-setup.sh`. Initial cluster workloads (deployment, service, image pull secret, dev ingress, pdb) are packaged via Helm (`charts/personal-site`) and bootstrapped via the GitHub Actions `Cluster Infrastructure - Bootstrap` workflow (`.github/workflows/bootstrap-cluster.yml`). Ongoing deployments to the dev environment (`personal-site-dev-envs`) are automated via `.github/workflows/deploy-dev.yml`, and production deployments (`personal-site`) are triggered via `.github/workflows/deploy-prod.yml`. Helm chart unit tests are executed using `task helm:test` (or `task test:helm`).
 
 **Development**:
 

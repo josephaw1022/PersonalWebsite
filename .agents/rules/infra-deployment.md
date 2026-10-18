@@ -13,7 +13,7 @@ Deployments are divided into two distinct infrastructure environments:
 Responsible for the primary homelab OpenShift cluster:
 
 - Runner infrastructure configured via `./infra/arc-setup.sh`.
-- Workload infrastructure (Deployment, Service, Ingress, PodDisruptionBudget) packaged as a Helm chart in `charts/personal-site/` with unit tests executed via `helm-unittest`.
+- Workload infrastructure (Deployment, Service, Ingress, PodDisruptionBudget) packaged as a Helm chart in `charts/personal-site/` with unit tests executed via `task helm:test` (or `task test:helm`).
 - Cluster workloads bootstrapped via `.github/workflows/bootstrap-cluster.yml`.
 - Deployments automated to dev (`personal-site-dev-envs`) via `.github/workflows/deploy-dev.yml` and production (`personal-site`) via `.github/workflows/deploy-prod.yml` using `.github/actions/deploy-workload`.
 
