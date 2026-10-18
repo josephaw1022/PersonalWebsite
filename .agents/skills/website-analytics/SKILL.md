@@ -18,4 +18,4 @@ It tracks:
 - User interactions
 - bfcache views
 
-The client token and application ID are configured specifically for the `personal-website` service in the `us5.datadoghq.com` Datadog environment.
+The client token and application ID are configured specifically for the `personal-site` service in the `us5.datadoghq.com` Datadog environment.
