@@ -123,5 +123,10 @@ describe("Links Page", () => {
       name: /Enterprise Homelab/i,
     });
     expect(homelabLink).toHaveAttribute("href", "/homelab");
+
+    const cloudLink = screen.getByRole("link", {
+      name: /Cloud Infrastructure/i,
+    });
+    expect(cloudLink).toHaveAttribute("href", "/cloud");
   });
 });

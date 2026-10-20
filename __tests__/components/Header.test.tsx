@@ -27,6 +27,10 @@ describe("Header", () => {
       "href",
       "/homelab",
     );
+    expect(screen.getByRole("link", { name: "Cloud" })).toHaveAttribute(
+      "href",
+      "/cloud",
+    );
     expect(screen.getByRole("link", { name: "Links" })).toHaveAttribute(
       "href",
       "/links",

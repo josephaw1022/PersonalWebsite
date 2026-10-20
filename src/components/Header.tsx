@@ -12,6 +12,7 @@ export default function Header() {
     { name: "About", href: "/about" },
     { name: "Skills", href: "/skills" },
     { name: "Homelab", href: "/homelab" },
+    { name: "Cloud", href: "/cloud" },
     { name: "Links", href: "/links" },
   ];
 
