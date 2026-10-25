@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/hi/nodejs:26.11 AS runner
+FROM registry.access.redhat.com/hi/nodejs:26.12 AS runner
 WORKDIR /opt/app-root/src
 
 ARG DD_GIT_REPOSITORY_URL="https://github.com/josephaw1022/personalwebsite"
